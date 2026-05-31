@@ -28,6 +28,7 @@ export default function Dashboard() {
   const [news, setNews] = useState<boolean>(false);
   const [tilt, setTilt] = useState<boolean>(false);
   const [result, setResult] = useState<CheckResult | null>(null);
+  const [acctState, setAcctState] = useState<{ todayPnL: number; trailingRoom: number; daysTraded: number }>(() => SCENARIOS.topstep50);
   const [csvName, setCsvName] = useState<string>("");
 
   useEffect(() => {
@@ -36,11 +37,16 @@ export default function Dashboard() {
       if (j) { const rows = JSON.parse(j); if (Array.isArray(rows) && rows.length) { setJournal(rows); setCsvName("(your imported journal)"); } }
       const a = localStorage.getItem("fc_acct");
       if (a && FIRMS[a]) setAcct(a);
+      const st = localStorage.getItem("fc_state");
+      if (st) { const o = JSON.parse(st); if (o && typeof o.todayPnL === "number") setAcctState(o); }
     } catch {}
   }, []);
 
   const firm = FIRMS[acct];
-  const sc = SCENARIOS[acct] || { todayPnL: 0, trailingRoom: firm.trailingDD, daysTraded: 0 };
+  const sc = acctState;
+  function updState(k: "todayPnL" | "trailingRoom" | "daysTraded", v: number) {
+    setAcctState((s) => { const n = { ...s, [k]: v }; try { localStorage.setItem("fc_state", JSON.stringify(n)); } catch {} return n; });
+  }
 
   const all = useMemo(() => expectancy(journal), [journal]);
   const setups = useMemo(() => groupBy(journal, (t) => t.setup).sort((a, b) => b.exp - a.exp), [journal]);
@@ -114,6 +120,14 @@ export default function Dashboard() {
           ))}
         </div>
         <p className="mt-2 font-mono text-[10px] text-t3">Live account snapshot · firewall evaluates every trade against this state. Rule values are illustrative.</p>
+        <div className="mt-3 rounded-lg border border-bd bg-panel p-4">
+          <div className="mb-3 font-mono text-[9px] uppercase tracking-wider text-acc">Your account snapshot — edit to match your real account</div>
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+            <Field label="Today P/L ($)"><input type="number" className="fcin" value={sc.todayPnL} onChange={(e) => updState("todayPnL", +e.target.value)} /></Field>
+            <Field label="Trailing room ($)"><input type="number" className="fcin" value={sc.trailingRoom} onChange={(e) => updState("trailingRoom", +e.target.value)} /></Field>
+            <Field label="Days traded"><input type="number" className="fcin" value={sc.daysTraded} onChange={(e) => updState("daysTraded", +e.target.value)} /></Field>
+          </div>
+        </div>
 
         {/* TABS */}
         <div className="mt-8 flex flex-wrap gap-[2px] border-b border-bd">
