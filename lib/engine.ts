@@ -83,27 +83,45 @@ export function generateJournal(): Trade[] {
 // Accepts headers: date,hour,instrument,setup,dir,size,pnl   (R/risk optional)
 export function parseCSV(text: string): Trade[] {
   const lines = text.trim().split(/\r?\n/).filter((l) => l.trim());
-  if (!lines.length) return [];
-  const head = lines[0].split(",").map((h) => h.trim().toLowerCase());
-  const idx = (k: string) => head.indexOf(k);
+  if (lines.length < 2) return [];
+  const splitRow = (s: string) => {
+    const out: string[] = []; let cur = "", q = false;
+    for (let i = 0; i < s.length; i++) {
+      const ch = s[i];
+      if (ch === '"') q = !q;
+      else if (ch === "," && !q) { out.push(cur); cur = ""; }
+      else cur += ch;
+    }
+    out.push(cur);
+    return out.map((x) => x.trim().replace(/^"|"$/g, ""));
+  };
+  const head = splitRow(lines[0]).map((h) => h.toLowerCase());
+  const find = (...keys: string[]) => { for (const k of keys) { const j = head.findIndex((h) => h.includes(k)); if (j >= 0) return j; } return -1; };
+  const iDate = find("date"), iHour = find("hour", "time"),
+    iInst = find("instrument", "symbol", "ticker"),
+    iSetup = find("setup", "strategy", "playbook"), iTag = find("tag"),
+    iDir = find("side", "dir", "direction"),
+    iSize = find("size", "qty", "contract", "quantity", "lots"),
+    iPnl = find("pnl", "p&l", "p/l", "profit", "net", "realized"),
+    iR = head.findIndex((h) => h === "r"), iRisk = find("risk");
+  const cell = (c: string[], j: number) => (j >= 0 && j < c.length ? c[j] : "");
+  const numv = (s: string) => { const neg = /\(/.test(s); const n = parseFloat(String(s).replace(/[^0-9.\-]/g, "")) || 0; return neg ? -Math.abs(n) : n; };
   const out: Trade[] = [];
   for (let i = 1; i < lines.length; i++) {
-    const c = lines[i].split(",").map((x) => x.trim());
-    const get = (k: string) => { const j = idx(k); return j >= 0 ? c[j] : ""; };
-    const pnl = Math.round(parseFloat(get("pnl")) || 0);
-    const risk = Math.abs(parseFloat(get("risk"))) || 100;
-    const Rraw = get("r");
-    const R = Rraw ? parseFloat(Rraw) : +(pnl / risk).toFixed(2);
-    const dateStr = get("date") || "";
+    const c = splitRow(lines[i]);
+    const pnl = Math.round(numv(cell(c, iPnl)));
+    const risk = Math.abs(numv(cell(c, iRisk))) || 100;
+    const Rraw = cell(c, iR);
+    const R = Rraw ? (parseFloat(Rraw) || 0) : +(pnl / risk).toFixed(2);
     out.push({
-      id: i, day: i, date: dateStr,
-      hour: parseInt(get("hour")) || 10,
-      instrument: get("instrument") || "NQ",
-      setup: get("setup") || "Untagged",
-      dir: get("dir") || "Long",
-      size: parseInt(get("size")) || 1,
+      id: i, day: i, date: cell(c, iDate) || "",
+      hour: parseInt(cell(c, iHour)) || 10,
+      instrument: (cell(c, iInst) || "NQ").toUpperCase().slice(0, 6),
+      setup: cell(c, iSetup) || "Untagged",
+      dir: /sell|short/i.test(cell(c, iDir)) ? "Short" : "Long",
+      size: parseInt(cell(c, iSize)) || 1,
       risk, R: +R.toFixed(2), pnl,
-      revenge: /revenge|chase|tilt/i.test(get("setup") + get("tag")),
+      revenge: /revenge|chase|tilt/i.test(cell(c, iSetup) + " " + cell(c, iTag)),
     });
   }
   return out;
