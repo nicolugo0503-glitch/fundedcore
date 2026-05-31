@@ -91,6 +91,10 @@ export default function Dashboard() {
 
   return (
     <main className="font-body text-t1">
+      <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+        <span className="fc-orb fc-orb1" /><span className="fc-orb fc-orb2" /><span className="fc-orb fc-orb3" />
+      </div>
+      <div aria-hidden className="fc-scan" />
       <header className="sticky top-0 z-40 border-b border-bd bg-bg/85 backdrop-blur">
         <div className="mx-auto flex h-[62px] max-w-6xl items-center justify-between px-6">
           <Link href="/" className="font-sans text-[17px] font-bold tracking-wide">FUNDED<span className="text-acc">.</span>CORE<span className="ml-2 font-mono text-[8.5px] uppercase tracking-[0.22em] text-t2">Intelligence</span></Link>
@@ -106,7 +110,7 @@ export default function Dashboard() {
       <div className="mx-auto max-w-6xl px-6">
         <div className="py-10">
           <div className="mb-3 flex items-center gap-2.5 font-mono text-[9px] uppercase tracking-[0.3em] text-acc"><span className="h-px w-6 bg-acc" />Trader Operating System</div>
-          <h1 className="font-sans text-3xl font-bold leading-tight tracking-tight sm:text-4xl">Keep the account alive.<br /><span className="bg-gradient-to-r from-white to-acc bg-clip-text text-transparent">Then make it profitable.</span></h1>
+          <h1 className="font-sans text-3xl font-bold leading-tight tracking-tight sm:text-4xl">Keep the account alive.<br /><span className="fc-glow bg-gradient-to-r from-white to-acc bg-clip-text text-transparent">Then make it profitable.</span></h1>
         </div>
 
         {/* COCKPIT */}
@@ -132,7 +136,7 @@ export default function Dashboard() {
         {/* TABS */}
         <div className="mt-8 flex flex-wrap gap-[2px] border-b border-bd">
           {TABS.map(([id, label]) => (
-            <button key={id} onClick={() => setTab(id)} className={`-mb-px border-b-2 px-5 py-3.5 font-mono text-[11px] uppercase tracking-wider transition ${tab === id ? "border-acc text-white" : "border-transparent text-t2 hover:text-t1"}`}>{label}</button>
+            <button key={id} onClick={() => setTab(id)} className={`-mb-px border-b-2 px-5 py-3.5 font-mono text-[11px] uppercase tracking-wider transition ${tab === id ? "border-acc text-white tabglow" : "border-transparent text-t2 hover:text-t1"}`}>{label}</button>
           ))}
         </div>
 
@@ -274,7 +278,32 @@ export default function Dashboard() {
         </div>
       </footer>
 
-      <style>{`.fcin{width:100%;background:#00020A;color:#D8ECF5;border:1px solid rgba(140,190,210,.09);border-radius:5px;padding:11px 12px;font-family:"JetBrains Mono",monospace;font-size:13px;outline:none}.fcin:focus{border-color:#7AB8D4}`}</style>
+      <style>{`
+        .fcin{width:100%;background:rgba(0,2,10,.6);color:#D8ECF5;border:1px solid rgba(140,190,210,.14);border-radius:6px;padding:11px 12px;font-family:"JetBrains Mono",monospace;font-size:13px;outline:none;transition:border-color .2s,box-shadow .2s}
+        .fcin:focus{border-color:#7AB8D4;box-shadow:0 0 0 3px rgba(122,184,212,.12)}
+        /* glass panels */
+        .bg-panel{background:linear-gradient(180deg,rgba(15,27,46,.72),rgba(10,18,32,.6))!important;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+        .border-bd{border-color:rgba(140,190,210,.13)!important}
+        /* sticky header glass + glow */
+        header.sticky{background:rgba(0,2,10,.72)!important;box-shadow:0 1px 0 rgba(122,184,212,.1),0 10px 34px rgba(0,0,0,.45)}
+        /* card depth + hover lift */
+        .rounded-lg.border,.rounded-xl.border,.rounded-2xl.border{transition:transform .25s cubic-bezier(.4,0,.2,1),border-color .25s,box-shadow .25s}
+        .rounded-lg.border:hover,.rounded-xl.border:hover,.rounded-2xl.border:hover{border-color:rgba(122,184,212,.3)!important;box-shadow:0 22px 55px rgba(0,0,0,.45),0 0 0 1px rgba(122,184,212,.07)}
+        /* glow helpers */
+        .fc-glow{filter:drop-shadow(0 0 18px rgba(122,184,212,.4))}
+        .gauge-fill{filter:drop-shadow(0 0 6px rgba(122,184,212,.45))}
+        /* tab active underline glow */
+        .tabglow{text-shadow:0 0 12px rgba(122,184,212,.55)}
+        /* aurora orbs */
+        .fc-orb{position:absolute;border-radius:50%;filter:blur(120px)}
+        .fc-orb1{width:620px;height:620px;background:radial-gradient(circle,rgba(20,72,112,.5),transparent 70%);top:-220px;left:-140px;animation:fcFloat 24s ease-in-out infinite alternate}
+        .fc-orb2{width:540px;height:540px;background:radial-gradient(circle,rgba(12,52,92,.45),transparent 70%);bottom:-240px;right:-140px;animation:fcFloat 30s ease-in-out infinite alternate-reverse}
+        .fc-orb3{width:420px;height:420px;background:radial-gradient(circle,rgba(8,40,72,.4),transparent 70%);top:30%;left:40%;animation:fcFloat 26s ease-in-out infinite alternate}
+        @keyframes fcFloat{from{transform:translate(0,0)}to{transform:translate(50px,40px)}}
+        /* scanline sweep */
+        .fc-scan{position:fixed;left:0;right:0;height:1px;z-index:5;pointer-events:none;opacity:.5;background:linear-gradient(90deg,transparent,rgba(122,184,212,0) 8%,rgba(122,184,212,.4) 50%,rgba(190,230,248,.5) 50%,rgba(122,184,212,0) 92%,transparent);animation:fcScan 11s ease-in-out infinite}
+        @keyframes fcScan{0%{top:-2px;opacity:0}4%{opacity:.5}48%{top:100vh;opacity:.25}50%{opacity:0}100%{top:100vh;opacity:0}}
+      `}</style>
     </main>
   );
 }
