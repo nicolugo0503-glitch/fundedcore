@@ -87,7 +87,6 @@ export function generateJournal(): Trade[] {
 }
 
 // ---------- CSV import ----------
-// Accepts headers: date,hour,instrument,setup,dir,size,pnl   (R/risk optional)
 export function parseCSV(text: string): Trade[] {
   const lines = text.trim().split(/\r?\n/).filter((l) => l.trim());
   if (lines.length < 2) return [];
@@ -271,4 +270,89 @@ export function preTradeCheck(firm: Firm, acct: AcctState, trade: CheckInput): C
 
 export function fmtMoney(n: number): string {
   return (n < 0 ? "-$" : "$") + Math.abs(Math.round(n)).toLocaleString();
+}
+
+// ---------- Monte Carlo simulation ----------
+export type MonteCarloResult = {
+  blow: number;      // fraction (0–1) of paths that hit trailing DD
+  survive: number;   // fraction that avoid the DD breach
+  pass: number;      // fraction that avoid DD AND end profitable
+  paths: number[][];  // sample paths for the fan chart
+  p10: number[]; p25: number[]; p50: number[]; p75: number[]; p90: number[];
+  nTrades: number;
+};
+
+export function monteCarlo(
+  trades: Trade[],
+  trailingDD: number,
+  nSim = 500,
+  nTrades = 80,
+  nSamplePaths = 60
+): MonteCarloResult {
+  const empty = (): number[] => new Array(nTrades).fill(0);
+  if (trades.length < 3) {
+    return { blow: 0, survive: 1, pass: 0, paths: [], p10: empty(), p25: empty(), p50: empty(), p75: empty(), p90: empty(), nTrades };
+  }
+  const rnd = mulberry32(42);
+  const pnls = trades.map((t) => t.pnl);
+  const n = pnls.length;
+  const matrix: number[][] = [];
+  let blowCount = 0, passCount = 0;
+
+  for (let s = 0; s < nSim; s++) {
+    let eq = 0, peak = 0, blown = false;
+    const row: number[] = new Array(nTrades).fill(0);
+    for (let t = 0; t < nTrades; t++) {
+      eq += pnls[Math.floor(rnd() * n)];
+      if (eq > peak) peak = eq;
+      if (!blown && peak - eq >= trailingDD) blown = true;
+      row[t] = eq;
+    }
+    if (blown) blowCount++;
+    else if (eq > 0) passCount++;
+    matrix.push(row);
+  }
+
+  const blow = blowCount / nSim;
+  const pass = passCount / nSim;
+  const survive = 1 - blow;
+
+  // Percentiles at each time step
+  const p10: number[] = new Array(nTrades).fill(0);
+  const p25: number[] = new Array(nTrades).fill(0);
+  const p50: number[] = new Array(nTrades).fill(0);
+  const p75: number[] = new Array(nTrades).fill(0);
+  const p90: number[] = new Array(nTrades).fill(0);
+  for (let t = 0; t < nTrades; t++) {
+    const col = matrix.map((r) => r[t]).sort((a, b) => a - b);
+    p10[t] = col[Math.floor(nSim * 0.10)];
+    p25[t] = col[Math.floor(nSim * 0.25)];
+    p50[t] = col[Math.floor(nSim * 0.50)];
+    p75[t] = col[Math.floor(nSim * 0.75)];
+    p90[t] = col[Math.floor(nSim * 0.90)];
+  }
+
+  // Sample paths for fan chart
+  const step = Math.max(1, Math.floor(nSim / nSamplePaths));
+  const paths: number[][] = [];
+  for (let i = 0; i < nSim && paths.length < nSamplePaths; i += step) paths.push(matrix[i]);
+
+  return { blow, survive, pass, paths, p10, p25, p50, p75, p90, nTrades };
+}
+
+// ---------- FundedScore (0–100 composite) ----------
+export function fundedScore(trades: Trade[]): number {
+  if (!trades.length) return 0;
+  const stat = expectancy(trades);
+  const avgRisk = trades.reduce((a, t) => a + t.risk, 0) / trades.length || 100;
+  // Edge quality: 0–40
+  const edgeScore = Math.min(40, Math.max(0, (stat.exp / avgRisk) * 40));
+  // Win rate: 0–25  (30% floor → 65% ceiling)
+  const wrScore = Math.min(25, Math.max(0, ((stat.winRate - 0.30) / 0.35) * 25));
+  // Discipline: 0–25  (0% revenge = 25, ≥20% revenge = 0)
+  const revPct = trades.filter((t) => t.revenge).length / trades.length;
+  const discScore = Math.max(0, 25 * (1 - revPct / 0.20));
+  // Sample-size confidence: 0–10
+  const volScore = Math.min(10, (trades.length / 50) * 10);
+  return Math.round(Math.min(100, Math.max(0, edgeScore + wrScore + discScore + volScore)));
 }
