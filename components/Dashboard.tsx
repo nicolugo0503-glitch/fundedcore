@@ -16,8 +16,13 @@ const SCENARIOS: Record<string, { todayPnL: number; trailingRoom: number; daysTr
   apex100: { todayPnL: -180, trailingRoom: 1450, daysTraded: 1 },
   tpt50: { todayPnL: -90, trailingRoom: 980, daysTraded: 4 },
 };
-const VCOLOR: Record<Verdict, string> = { APPROVE: "#2ADB8A", REDUCE: "#E8B84B", WAIT: "#E8B84B", BLOCK: "#E85050" };
-const VSUB: Record<Verdict, string> = { APPROVE: "Cleared to take", REDUCE: "Cut size to stay safe", WAIT: "Hold — condition active", BLOCK: "Do not take this trade" };
+const VCOLOR: Record<Verdict, string> = {
+  APPROVE: "#2ADB8A", REDUCE: "#E8B84B", WAIT: "#E8B84B", BLOCK: "#E85050",
+};
+const VSUB: Record<Verdict, string> = {
+  APPROVE: "Cleared to take", REDUCE: "Cut size to stay safe",
+  WAIT: "Hold — condition active", BLOCK: "Do not take this trade",
+};
 const TABS = [
   ["check", "01 · Pre-Trade Firewall"],
   ["behavior", "02 · Behavioral Engine"],
@@ -26,11 +31,46 @@ const TABS = [
   ["mc", "05 · Monte Carlo"],
 ] as const;
 
-// ─── Particle Canvas ───────────────────────────────────────────────────────────
+// ─── System Status Bar ─────────────────────────────────────────────────────────
+function SystemStatusBar({ nTrades, firmName, threatLevel, threatColor }: {
+  nTrades: number; firmName: string; threatLevel: string; threatColor: string;
+}) {
+  const fmt = () =>
+    new Date().toLocaleTimeString("en-US", { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  const [clock, setClock] = useState(fmt);
+  useEffect(() => {
+    const id = setInterval(() => setClock(fmt()), 1000);
+    return () => clearInterval(id);
+  }, []);
+  return (
+    <div
+      className="sticky top-0 z-[41] flex h-[26px] items-center justify-between px-6 font-mono text-[9px] uppercase tracking-[0.18em]"
+      style={{ background: "rgba(0,2,10,.97)", borderBottom: "1px solid rgba(122,184,212,.06)" }}
+    >
+      <div className="flex items-center gap-6">
+        <span className="text-acc tabnum">{clock}</span>
+        <span className="flex items-center gap-1.5 text-grn">
+          <span className="inline-block h-1 w-1 rounded-full bg-grn pulse" />
+          SYSTEM ONLINE
+        </span>
+        <span className="hidden text-t3 md:inline">{nTrades} TRADES LOADED</span>
+      </div>
+      <div className="flex items-center gap-6">
+        <span className="hidden text-t2 md:inline">{firmName}</span>
+        <span className="font-semibold" style={{ color: threatColor }}>
+          THREAT: {threatLevel.toUpperCase()}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+// ─── Particle Canvas (with mouse repulsion) ────────────────────────────────────
 type Particle = { x: number; y: number; vx: number; vy: number; r: number };
 
 function ParticleCanvas() {
   const ref = useRef<HTMLCanvasElement>(null);
+  const mouseRef = useRef({ x: -9999, y: -9999 });
   useEffect(() => {
     const cv = ref.current;
     if (!cv) return;
@@ -43,20 +83,33 @@ function ParticleCanvas() {
     };
     resize();
     window.addEventListener("resize", resize);
+    const onMouse = (e: MouseEvent) => { mouseRef.current = { x: e.clientX, y: e.clientY }; };
+    const onLeave = () => { mouseRef.current = { x: -9999, y: -9999 }; };
+    window.addEventListener("mousemove", onMouse);
+    document.documentElement.addEventListener("mouseleave", onLeave);
     const ctx = cv.getContext("2d");
     if (!ctx) { window.removeEventListener("resize", resize); return; }
-    const N = 68;
-    const D_CONNECT = 145;
+    const N = 75, D_CONNECT = 148, MAX_SPD = 2.0, REPEL_R = 130;
     const particles: Particle[] = Array.from({ length: N }, () => ({
       x: Math.random() * w, y: Math.random() * h,
-      vx: (Math.random() - 0.5) * 0.32, vy: (Math.random() - 0.5) * 0.32,
-      r: 1.1 + Math.random() * 1.3,
+      vx: (Math.random() - 0.5) * 0.3, vy: (Math.random() - 0.5) * 0.3,
+      r: 1.0 + Math.random() * 1.5,
     }));
     let raf = 0;
     const tick = () => {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, w, h);
+      const mx = mouseRef.current.x, my = mouseRef.current.y;
       for (const p of particles) {
+        const dx = p.x - mx, dy = p.y - my;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < REPEL_R && dist > 0) {
+          const force = (1 - dist / REPEL_R) * 0.72;
+          p.vx += (dx / dist) * force;
+          p.vy += (dy / dist) * force;
+        }
+        const spd = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
+        if (spd > MAX_SPD) { p.vx = (p.vx / spd) * MAX_SPD; p.vy = (p.vy / spd) * MAX_SPD; }
         p.x += p.vx; p.y += p.vy;
         if (p.x < 0) { p.x = 0; p.vx = Math.abs(p.vx); }
         else if (p.x > w) { p.x = w; p.vx = -Math.abs(p.vx); }
@@ -81,13 +134,18 @@ function ParticleCanvas() {
       for (const p of particles) {
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(122,184,212,0.32)";
+        ctx.fillStyle = "rgba(122,184,212,0.3)";
         ctx.fill();
       }
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
-    return () => { cancelAnimationFrame(raf); window.removeEventListener("resize", resize); };
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("resize", resize);
+      window.removeEventListener("mousemove", onMouse);
+      document.documentElement.removeEventListener("mouseleave", onLeave);
+    };
   }, []);
   return <canvas ref={ref} className="pointer-events-none fixed inset-0 z-0" />;
 }
@@ -119,8 +177,10 @@ function MarketTicker() {
         {items.map((p, i) => (
           <span key={i} className="inline-flex items-center gap-1.5">
             <span className="text-t2">{p.sym}</span>
-            <span className="text-t1">{p.px.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-            <span style={{ color: p.d >= 0 ? "#2ADB8A" : "#E85050" }}>{p.d >= 0 ? "+" : ""}{p.d.toFixed(2)}</span>
+            <span className="tabnum text-t1">{p.px.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+            <span className="tabnum" style={{ color: p.d >= 0 ? "#2ADB8A" : "#E85050" }}>
+              {p.d >= 0 ? "+" : ""}{p.d.toFixed(2)}
+            </span>
           </span>
         ))}
       </div>
@@ -128,38 +188,129 @@ function MarketTicker() {
   );
 }
 
-// ─── FundedScore Radial ────────────────────────────────────────────────────────
+// ─── Circular Gauge ─────────────────────────────────────────────────────────────
+function CircularGauge({ label, value, pct, color, sub, size = 108 }: {
+  label: string; value: string; pct: number; color: string; sub: string; size?: number;
+}) {
+  const S = size, cx = S / 2, cy = S / 2, R = S * 0.365;
+  const startDeg = 215, totalDeg = 290;
+  const deg2rad = (d: number) => ((d - 90) * Math.PI) / 180;
+  const pt = (deg: number) => ({
+    x: cx + R * Math.cos(deg2rad(deg)),
+    y: cy + R * Math.sin(deg2rad(deg)),
+  });
+  const lf = (d: number) => (d > 180 ? 1 : 0);
+  const sp = pt(startDeg), ef = pt(startDeg + totalDeg);
+  const sweepDeg = Math.min(totalDeg, Math.max(0, Math.min(100, pct) / 100) * totalDeg);
+  const ea = pt(startDeg + sweepDeg);
+  const sw = S * 0.063;
+  const trackD = `M${sp.x.toFixed(2)} ${sp.y.toFixed(2)} A${R.toFixed(2)} ${R.toFixed(2)} 0 ${lf(totalDeg)} 1 ${ef.x.toFixed(2)} ${ef.y.toFixed(2)}`;
+  const activeD = sweepDeg > 2
+    ? `M${sp.x.toFixed(2)} ${sp.y.toFixed(2)} A${R.toFixed(2)} ${R.toFixed(2)} 0 ${lf(sweepDeg)} 1 ${ea.x.toFixed(2)} ${ea.y.toFixed(2)}`
+    : "";
+  const fs = value.length > 6 ? S * 0.1 : value.length > 4 ? S * 0.12 : S * 0.145;
+  return (
+    <div className="flex flex-col items-center justify-center gap-0.5 bg-panel p-4">
+      <svg width={S} height={S} viewBox={`0 0 ${S} ${S}`}>
+        {/* Outer glow ring */}
+        <circle cx={cx} cy={cy} r={R + sw + 3} fill="none" stroke="rgba(122,184,212,.04)" strokeWidth="1.5" />
+        {/* Track */}
+        <path d={trackD} fill="none" stroke="rgba(122,184,212,.09)" strokeWidth={sw} strokeLinecap="round" />
+        {/* Active arc */}
+        {activeD && (
+          <path d={activeD} fill="none" stroke={color} strokeWidth={sw} strokeLinecap="round"
+            style={{ filter: `drop-shadow(0 0 6px ${color}aa)` }} />
+        )}
+        {/* Value */}
+        <text x={cx} y={cy + 5} textAnchor="middle" fill={color}
+          fontSize={fs.toFixed(1)} fontWeight="700"
+          fontFamily='"JetBrains Mono", monospace'>{value}</text>
+      </svg>
+      <div className="text-center font-mono text-[7.5px] uppercase tracking-wider text-t2 leading-tight">{label}</div>
+      <div className="font-mono text-[7px] text-t3">{sub}</div>
+    </div>
+  );
+}
+
+// ─── FundedScore Radial (160 px with tick marks) ───────────────────────────────
 function ScoreRadial({ score }: { score: number }) {
-  const R = 40, cx = 50, cy = 50;
-  const totalDeg = 270;
-  const startDeg = 225; // clock-face: 0° at top
+  const S = 160, cx = 80, cy = 82, R = 58;
+  const totalDeg = 270, startDeg = 225;
   const pct = Math.min(1, Math.max(0, score / 100));
   const sweepDeg = pct * totalDeg;
   const deg2rad = (d: number) => ((d - 90) * Math.PI) / 180;
-  const arc = (deg: number) => ({ x: cx + R * Math.cos(deg2rad(deg)), y: cy + R * Math.sin(deg2rad(deg)) });
+  const pt = (deg: number) => ({ x: cx + R * Math.cos(deg2rad(deg)), y: cy + R * Math.sin(deg2rad(deg)) });
   const lf = (d: number) => (d > 180 ? 1 : 0);
-  const endFull = arc(startDeg + totalDeg);
-  const endActive = arc(startDeg + sweepDeg);
-  const startPt = arc(startDeg);
-  const trackD = `M${startPt.x} ${startPt.y} A${R} ${R} 0 ${lf(totalDeg)} 1 ${endFull.x} ${endFull.y}`;
+  const sp = pt(startDeg), ef = pt(startDeg + totalDeg), ea = pt(startDeg + sweepDeg);
+  const trackD = `M${sp.x.toFixed(2)} ${sp.y.toFixed(2)} A${R} ${R} 0 ${lf(totalDeg)} 1 ${ef.x.toFixed(2)} ${ef.y.toFixed(2)}`;
   const activeD = sweepDeg > 2
-    ? `M${startPt.x} ${startPt.y} A${R} ${R} 0 ${lf(sweepDeg)} 1 ${endActive.x} ${endActive.y}`
+    ? `M${sp.x.toFixed(2)} ${sp.y.toFixed(2)} A${R} ${R} 0 ${lf(sweepDeg)} 1 ${ea.x.toFixed(2)} ${ea.y.toFixed(2)}`
     : "";
   const col = score >= 70 ? "#2ADB8A" : score >= 42 ? "#E8B84B" : "#E85050";
-  const label = score >= 70 ? "STRONG" : score >= 42 ? "BUILDING" : "NEEDS WORK";
+  const label = score >= 70 ? "STRONG EDGE" : score >= 42 ? "BUILDING" : "NEEDS WORK";
+  const tickPcts = [0, 0.25, 0.5, 0.75, 1.0];
+  const RI = R - 8, RO = R + 2, RL = R + 17;
   return (
     <div className="flex flex-col items-center gap-1">
-      <svg width="100" height="100" viewBox="0 0 100 100">
-        <path d={trackD} fill="none" stroke="rgba(122,184,212,.1)" strokeWidth="7" strokeLinecap="round" />
+      <svg width={S} height={S} viewBox={`0 0 ${S} ${S}`}>
+        {/* Outer decorative rings */}
+        <circle cx={cx} cy={cy} r={R + 14} fill="none" stroke="rgba(122,184,212,.05)" strokeWidth="1" />
+        <circle cx={cx} cy={cy} r={R + 11} fill="none" stroke="rgba(122,184,212,.03)" strokeWidth="0.5" />
+        {/* Track */}
+        <path d={trackD} fill="none" stroke="rgba(122,184,212,.1)" strokeWidth="8" strokeLinecap="round" />
+        {/* Active */}
         {activeD && (
-          <path d={activeD} fill="none" stroke={col} strokeWidth="7" strokeLinecap="round"
-            style={{ filter: `drop-shadow(0 0 5px ${col}99)` }} />
+          <path d={activeD} fill="none" stroke={col} strokeWidth="8" strokeLinecap="round"
+            style={{ filter: `drop-shadow(0 0 9px ${col}aa)` }} />
         )}
-        <text x={cx} y={cy + 5} textAnchor="middle" fill={col} fontSize="24" fontWeight="700"
+        {/* Tick marks */}
+        {tickPcts.map((tp, i) => {
+          const deg = startDeg + tp * totalDeg;
+          const inner = { x: cx + RI * Math.cos(deg2rad(deg)), y: cy + RI * Math.sin(deg2rad(deg)) };
+          const outer = { x: cx + RO * Math.cos(deg2rad(deg)), y: cy + RO * Math.sin(deg2rad(deg)) };
+          const lbl = { x: cx + RL * Math.cos(deg2rad(deg)), y: cy + RL * Math.sin(deg2rad(deg)) };
+          return (
+            <g key={i}>
+              <line x1={inner.x.toFixed(1)} y1={inner.y.toFixed(1)}
+                x2={outer.x.toFixed(1)} y2={outer.y.toFixed(1)}
+                stroke="rgba(122,184,212,.35)" strokeWidth="1.5" />
+              <text x={lbl.x.toFixed(1)} y={lbl.y.toFixed(1)}
+                textAnchor="middle" dominantBaseline="central"
+                fill="rgba(126,157,181,.4)" fontSize="6.5"
+                fontFamily='"JetBrains Mono", monospace'>{Math.round(tp * 100)}</text>
+            </g>
+          );
+        })}
+        {/* Score number */}
+        <text x={cx} y={cy + 6} textAnchor="middle" fill={col} fontSize="36" fontWeight="700"
           fontFamily='"JetBrains Mono", monospace'>{score}</text>
+        <text x={cx} y={cy + 22} textAnchor="middle" fill="rgba(126,157,181,.3)" fontSize="7.5"
+          fontFamily='"JetBrains Mono", monospace' letterSpacing="3">SCORE</text>
       </svg>
       <div className="font-mono text-[8px] uppercase tracking-[0.18em]" style={{ color: col }}>{label}</div>
-      <div className="font-mono text-[7.5px] tracking-wide text-t3">FUNDED SCORE</div>
+      <div className="font-mono text-[7px] tracking-wide text-t3">FUNDED SCORE</div>
+    </div>
+  );
+}
+
+// ─── Kill Zone Alert ───────────────────────────────────────────────────────────
+function KillZoneAlert({ level, color, msg }: { level: string; color: string; msg: string }) {
+  if (level === "nominal") return null;
+  return (
+    <div
+      className="mb-5 rounded-lg px-5 py-3 dangerpulse"
+      style={{
+        background: `repeating-linear-gradient(45deg,${color}12,${color}12 5px,transparent 5px,transparent 14px)`,
+        border: `1px solid ${color}55`,
+        color,
+      }}
+    >
+      <div className="flex items-center gap-3 font-mono text-[10px] uppercase tracking-wider">
+        <span className="text-[16px]">⚠</span>
+        <span className="font-semibold">Threat Level {level.toUpperCase()}</span>
+        <span className="opacity-40 mx-1">|</span>
+        <span className="opacity-75 normal-case tracking-normal text-[11px]">{msg}</span>
+      </div>
     </div>
   );
 }
@@ -175,7 +326,6 @@ function CommandPalette({
   const [q, setQ] = useState("");
   const [sel, setSel] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
-
   const cmds: Cmd[] = useMemo(() => [
     { label: "→ Pre-Trade Firewall", hint: "firewall check", action: () => { setTab("check"); close(); } },
     { label: "→ Behavioral Engine", hint: "behavior patterns", action: () => { setTab("behavior"); close(); } },
@@ -187,14 +337,11 @@ function CommandPalette({
     })),
     { label: "Reset to sample journal", hint: "reset sample clear", action: () => { resetJournal(); close(); } },
   ], [close, setTab, setAcct, resetJournal]);
-
   const filtered = q ? cmds.filter((c) => (c.label + " " + c.hint).toLowerCase().includes(q.toLowerCase())) : cmds;
-
   useEffect(() => {
     if (open) { setQ(""); setSel(0); setTimeout(() => inputRef.current?.focus(), 40); }
   }, [open]);
   useEffect(() => { setSel(0); }, [q]);
-
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-[14vh] px-4"
@@ -205,8 +352,7 @@ function CommandPalette({
         onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center gap-3 border-b px-4 py-3" style={{ borderColor: "rgba(122,184,212,.12)" }}>
           <span className="font-mono text-xs text-t2">⌘</span>
-          <input ref={inputRef} value={q}
-            onChange={(e) => setQ(e.target.value)}
+          <input ref={inputRef} value={q} onChange={(e) => setQ(e.target.value)}
             placeholder="Type a command or search…"
             className="flex-1 bg-transparent font-mono text-sm text-t1 outline-none placeholder-t3"
             onKeyDown={(e) => {
@@ -257,8 +403,10 @@ function Toggle({ on, set, children }: { on: boolean; set: (v: boolean) => void;
   );
 }
 function EdgeTable({ title, rows, actOf, actCls }: {
-  title: string; rows: { key: string; n: number; winRate: number; exp: number }[];
-  actOf: (e: number) => string; actCls: Record<string, string>;
+  title: string;
+  rows: { key: string; n: number; winRate: number; exp: number }[];
+  actOf: (e: number) => string;
+  actCls: Record<string, string>;
 }) {
   return (
     <div className="rounded-lg border border-bd bg-panel">
@@ -314,6 +462,7 @@ export default function Dashboard() {
   const [csvName, setCsvName] = useState<string>("");
   const [kOpen, setKOpen] = useState(false);
   const [mouse, setMouse] = useState({ x: 0, y: 0 });
+  const [flash, setFlash] = useState<string | null>(null);
 
   // ── persistence ──
   useEffect(() => {
@@ -366,31 +515,28 @@ export default function Dashboard() {
   }, [journal, setups]);
   const mcDisc = useMemo(() => monteCarlo(discJournal, firm.trailingDD), [discJournal, firm.trailingDD]);
 
-  function runCheck() {
-    setResult(preTradeCheck(firm, sc, { instrument: inst, size: Math.max(1, size || 1), stop: Math.max(1, stop || 1), news, tilt }));
-  }
-  function onCSV(e: React.ChangeEvent<HTMLInputElement>) {
-    const f = e.target.files?.[0]; if (!f) return;
-    const r = new FileReader();
-    r.onload = () => {
-      const rows = parseCSV(String(r.result || ""));
-      if (rows.length) { setJournal(rows); setCsvName(f.name); try { localStorage.setItem("fc_journal", JSON.stringify(rows)); } catch {} }
-    };
-    r.readAsText(f);
-  }
-
-  // ── cockpit gauges ──
+  // ── account limits ──
   const dailyRoom = firm.dailyLoss == null ? null : Math.max(0, firm.dailyLoss - Math.max(0, -sc.todayPnL));
   const dailyPct = firm.dailyLoss == null ? 100 : (dailyRoom! / firm.dailyLoss) * 100;
   const trailPct = (sc.trailingRoom / firm.trailingDD) * 100;
   const minPct = firm.minDays === 0 ? 100 : Math.min(100, (sc.daysTraded / firm.minDays) * 100);
   const col = (p: number) => (p > 50 ? "#2ADB8A" : p > 25 ? "#E8B84B" : "#E85050");
+
+  // ── threat level ──
+  const threatLevel = useMemo(() => {
+    const p = Math.min(dailyPct, trailPct);
+    if (p < 15) return { level: "critical", color: "#E85050", msg: "BREACH IMMINENT — reduce exposure immediately" };
+    if (p < 30) return { level: "critical", color: "#E85050", msg: "CRITICAL RISK — drawdown limit approaching fast" };
+    if (p < 50) return { level: "elevated", color: "#E8B84B", msg: "Elevated risk — monitor drawdown closely" };
+    return { level: "nominal", color: "#2ADB8A", msg: "All limits healthy" };
+  }, [dailyPct, trailPct]);
+
   const gauges = [
-    { l: "Daily loss room", v: firm.dailyLoss == null ? "n/a" : "$" + dailyRoom, p: dailyPct, c: col(dailyPct), s: firm.dailyLoss == null ? "no daily limit" : "of $" + firm.dailyLoss },
-    { l: "Trailing drawdown", v: "$" + sc.trailingRoom, p: trailPct, c: col(trailPct), s: "away from breach" },
+    { l: "Daily Loss Room", v: firm.dailyLoss == null ? "N/A" : "$" + dailyRoom, p: dailyPct, c: col(dailyPct), s: firm.dailyLoss == null ? "no daily limit" : "of $" + firm.dailyLoss },
+    { l: "Trailing DD", v: "$" + sc.trailingRoom, p: trailPct, c: col(trailPct), s: "away from breach" },
     { l: "Today P&L", v: (sc.todayPnL >= 0 ? "+" : "") + "$" + sc.todayPnL, p: 50, c: sc.todayPnL >= 0 ? "#2ADB8A" : "#E85050", s: "realized" },
-    { l: "Min trading days", v: sc.daysTraded + " / " + firm.minDays, p: minPct, c: minPct >= 100 ? "#2ADB8A" : "#7AB8D4", s: firm.minDays === 0 ? "no minimum" : Math.max(0, firm.minDays - sc.daysTraded) + " left" },
-    { l: "Account status", v: "ALIVE", p: 100, c: "#2ADB8A", s: firm.name.split(" ")[0] + " · funded" },
+    { l: "Min Days", v: sc.daysTraded + "/" + firm.minDays, p: minPct, c: minPct >= 100 ? "#2ADB8A" : "#7AB8D4", s: firm.minDays === 0 ? "no minimum" : Math.max(0, firm.minDays - sc.daysTraded) + " left" },
+    { l: "Account", v: "ALIVE", p: 100, c: "#2ADB8A", s: firm.name.split(" ")[0] + " · funded" },
   ];
 
   // ── edge verdict ──
@@ -404,6 +550,27 @@ export default function Dashboard() {
   const actOf = (e: number) => (e > 10 ? "scale" : e < 0 ? "cut" : "hold");
   const actCls: Record<string, string> = { scale: "text-grn bg-grn/10", cut: "text-red bg-red/10", hold: "text-t2 bg-white/5" };
 
+  function runCheck() {
+    const r = preTradeCheck(firm, sc, {
+      instrument: inst, size: Math.max(1, size || 1), stop: Math.max(1, stop || 1), news, tilt,
+    });
+    setResult(r);
+    setFlash(VCOLOR[r.verdict]);
+    setTimeout(() => setFlash(null), 860);
+  }
+  function onCSV(e: React.ChangeEvent<HTMLInputElement>) {
+    const f = e.target.files?.[0]; if (!f) return;
+    const r = new FileReader();
+    r.onload = () => {
+      const rows = parseCSV(String(r.result || ""));
+      if (rows.length) {
+        setJournal(rows); setCsvName(f.name);
+        try { localStorage.setItem("fc_journal", JSON.stringify(rows)); } catch {}
+      }
+    };
+    r.readAsText(f);
+  }
+
   return (
     <>
       <ParticleCanvas />
@@ -413,12 +580,34 @@ export default function Dashboard() {
         setAcct={(a) => { setAcct(a); setResult(null); try { localStorage.setItem("fc_acct", a); } catch {} }}
         resetJournal={resetJournal}
       />
+
+      {/* ── VERDICT FLASH ── */}
+      {flash && (
+        <div
+          className="pointer-events-none fixed inset-0 z-40"
+          style={{ background: flash, animation: "verdictFlash 0.86s ease-out forwards" }}
+        />
+      )}
+
+      {/* ── CRT SCANLINES ── */}
+      <div aria-hidden className="fc-scanlines pointer-events-none fixed inset-0 z-[2]" />
+      {/* ── VIGNETTE ── */}
+      <div aria-hidden className="fc-vignette pointer-events-none fixed inset-0 z-[2]" />
+
       <main className="relative z-10 font-body text-t1">
-        {/* ── SCAN LINE ── */}
+        {/* ── SCAN BEAM ── */}
         <div aria-hidden className="fc-scan" />
 
+        {/* ── SYSTEM STATUS BAR ── */}
+        <SystemStatusBar
+          nTrades={journal.length}
+          firmName={firm.name}
+          threatLevel={threatLevel.level}
+          threatColor={threatLevel.color}
+        />
+
         {/* ── HEADER ── */}
-        <header className="sticky top-0 z-40 border-b border-bd bg-bg/85 backdrop-blur">
+        <header className="sticky top-[26px] z-40 border-b border-bd bg-bg/85 backdrop-blur">
           <div className="mx-auto flex h-[62px] max-w-6xl items-center justify-between px-6">
             <Link href="/" className="font-sans text-[17px] font-bold tracking-wide">
               FUNDED<span className="text-acc">.</span>CORE
@@ -455,15 +644,33 @@ export default function Dashboard() {
             }}
             onMouseLeave={() => setMouse({ x: 0, y: 0 })}>
             <div className="flex items-start justify-between gap-6">
+              {/* Left: headline + quick stats */}
               <div style={{ transform: `translate(${mouse.x * -9}px,${mouse.y * -7}px)`, transition: "transform .15s ease-out" }}>
                 <div className="mb-3 flex items-center gap-2.5 font-mono text-[9px] uppercase tracking-[0.3em] text-acc">
                   <span className="h-px w-6 bg-acc" />Trader Operating System
                 </div>
                 <h1 className="font-sans text-3xl font-bold leading-tight tracking-tight sm:text-4xl">
                   Keep the account alive.<br />
-                  <span className="fc-glow bg-gradient-to-r from-white to-acc bg-clip-text text-transparent">Then make it profitable.</span>
+                  <span className="fc-glow bg-gradient-to-r from-white to-acc bg-clip-text text-transparent">
+                    Then make it profitable.
+                  </span>
                 </h1>
+                {/* Quick stats row */}
+                <div className="mt-6 flex flex-wrap items-end gap-x-7 gap-y-3">
+                  {[
+                    { l: "TRADES", v: String(all.n), c: "#D8ECF5" },
+                    { l: "NET P&L", v: fmtMoney(all.sum), c: all.sum >= 0 ? "#2ADB8A" : "#E85050" },
+                    { l: "WIN RATE", v: (all.winRate * 100).toFixed(0) + "%", c: all.winRate >= 0.5 ? "#2ADB8A" : "#E8B84B" },
+                    { l: "EXP / TRADE", v: fmtMoney(all.exp), c: all.exp >= 0 ? "#2ADB8A" : "#E85050" },
+                  ].map((s) => (
+                    <div key={s.l} className="flex flex-col">
+                      <span className="tabnum font-mono text-[22px] font-semibold leading-none" style={{ color: s.c }}>{s.v}</span>
+                      <span className="mt-1 font-mono text-[7.5px] uppercase tracking-[0.22em] text-t3">{s.l}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
+              {/* Right: score radial */}
               <div className="hidden flex-shrink-0 md:block"
                 style={{ transform: `translate(${mouse.x * 13}px,${mouse.y * 10}px)`, transition: "transform .15s ease-out" }}>
                 <ScoreRadial score={score} />
@@ -471,25 +678,19 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* ── COCKPIT ── */}
+          {/* ── KILL ZONE ALERT ── */}
+          <KillZoneAlert level={threatLevel.level} color={threatLevel.color} msg={threatLevel.msg} />
+
+          {/* ── COCKPIT — circular gauges ── */}
           <div className="grid grid-cols-2 gap-[2px] border border-bd bg-bd md:grid-cols-5">
             {gauges.map((g) => (
-              <div key={g.l} className="bg-panel p-4">
-                <div className="mb-2 flex items-baseline justify-between">
-                  <span className="font-mono text-[8px] uppercase tracking-wider text-t2">{g.l}</span>
-                  <span className="font-mono text-[13px] font-medium" style={{ color: g.c }}>{g.v}</span>
-                </div>
-                <div className="h-1 overflow-hidden rounded bg-white/10">
-                  <div className="h-full rounded transition-all duration-500"
-                    style={{ width: Math.max(2, Math.min(100, g.p)) + "%", background: g.c }} />
-                </div>
-                <div className="mt-2 font-mono text-[7.5px] uppercase tracking-wide text-t3">{g.s}</div>
-              </div>
+              <CircularGauge key={g.l} label={g.l} value={String(g.v)} pct={g.p} color={g.c} sub={g.s} />
             ))}
           </div>
           <p className="mt-2 font-mono text-[10px] text-t3">
             Live account snapshot · firewall evaluates every trade against this state. Rule values are illustrative.
           </p>
+
           <div className="mt-3 rounded-lg border border-bd bg-panel p-4">
             <div className="mb-3 font-mono text-[9px] uppercase tracking-wider text-acc">
               Your account snapshot — edit to match your real account
@@ -638,7 +839,7 @@ export default function Dashboard() {
                   ["Net P&L", fmtMoney(all.sum), all.sum >= 0 ? "#2ADB8A" : "#E85050"],
                 ].map((b) => (
                   <div key={b[0]} className="bg-panel p-4">
-                    <div className="font-mono text-2xl font-medium" style={{ color: b[2] }}>{b[1]}</div>
+                    <div className="tabnum font-mono text-2xl font-medium" style={{ color: b[2] }}>{b[1]}</div>
                     <div className="mt-1 font-mono text-[8px] uppercase tracking-wider text-t2">{b[0]}</div>
                   </div>
                 ))}
@@ -703,10 +904,10 @@ export default function Dashboard() {
                         </td>
                         <td className="border-b border-white/5 px-3 py-2.5 text-t2">{t.dir}</td>
                         <td className="border-b border-white/5 px-3 py-2.5 text-right text-t2">{t.size}</td>
-                        <td className={`border-b border-white/5 px-3 py-2.5 text-right ${t.R >= 0 ? "text-grn" : "text-red"}`}>
+                        <td className={`border-b border-white/5 px-3 py-2.5 text-right tabnum ${t.R >= 0 ? "text-grn" : "text-red"}`}>
                           {t.R > 0 ? "+" : ""}{t.R}R
                         </td>
-                        <td className={`border-b border-white/5 px-3 py-2.5 text-right ${t.pnl >= 0 ? "text-grn" : "text-red"}`}>
+                        <td className={`border-b border-white/5 px-3 py-2.5 text-right tabnum ${t.pnl >= 0 ? "text-grn" : "text-red"}`}>
                           {fmtMoney(t.pnl)}
                         </td>
                       </tr>
@@ -723,7 +924,6 @@ export default function Dashboard() {
               <p className="mb-6 max-w-2xl text-sm leading-relaxed text-t2">
                 Bootstrap resampling from your journal — 500 simulated 80-trade account runs. Each translucent line is a possible future. Shaded bands show P10–P90 and P25–P75. The red line is your trailing drawdown limit.
               </p>
-              {/* Stat grid */}
               <div className="mb-6 grid grid-cols-2 gap-[2px] border border-bd bg-bd md:grid-cols-3">
                 {[
                   { l: "Blow rate · base", v: (mc.blow * 100).toFixed(0) + "%", c: mc.blow > 0.5 ? "#E85050" : "#E8B84B", s: "hit trailing DD at some point" },
@@ -734,13 +934,12 @@ export default function Dashboard() {
                   { l: "Pass rate · disciplined", v: (mcDisc.pass * 100).toFixed(0) + "%", c: mcDisc.pass > mc.pass ? "#2ADB8A" : "#E8B84B", s: "after cutting leak setups" },
                 ].map((s) => (
                   <div key={s.l} className="bg-panel p-5">
-                    <div className="font-mono text-2xl font-medium" style={{ color: s.c }}>{s.v}</div>
+                    <div className="tabnum font-mono text-2xl font-medium" style={{ color: s.c }}>{s.v}</div>
                     <div className="mt-1 font-mono text-[8px] uppercase tracking-wider text-t2">{s.l}</div>
                     <div className="mt-0.5 font-mono text-[8px] text-t3">{s.s}</div>
                   </div>
                 ))}
               </div>
-              {/* Fan chart: base journal */}
               <div className="mb-5 rounded-lg border border-bd bg-panel">
                 <div className="flex items-center justify-between border-b border-white/5 px-5 py-4">
                   <h3 className="font-sans text-[15px] font-semibold">Account Path Fan Chart — Base Journal</h3>
@@ -750,14 +949,13 @@ export default function Dashboard() {
                   <MonteCarloChart key={"base-" + acct + journal.length} result={mc} trailingDD={firm.trailingDD} />
                   <div className="mt-3.5 flex flex-wrap gap-5 font-mono text-[10px] text-t2">
                     <span className="flex items-center gap-1.5"><i className="inline-block h-[2px] w-4 rounded" style={{ background: "rgba(122,184,212,.35)" }} />Individual paths</span>
-                    <span className="flex items-center gap-1.5"><i className="inline-block h-3 w-3 rounded opacity-20" style={{ background: "#7AB8D4" }} />P10–P90</span>
-                    <span className="flex items-center gap-1.5"><i className="inline-block h-3 w-3 rounded opacity-50" style={{ background: "#7AB8D4" }} />P25–P75</span>
+                    <span className="flex items-center gap-1.5"><i className="inline-block h-3 w-3 rounded opacity-20" style={{ background: "#7AB8D4" }} />P10-P90</span>
+                    <span className="flex items-center gap-1.5"><i className="inline-block h-3 w-3 rounded opacity-50" style={{ background: "#7AB8D4" }} />P25-P75</span>
                     <span className="flex items-center gap-1.5"><i className="inline-block h-[2px] w-4 rounded" style={{ background: "#7AB8D4" }} />Median (P50)</span>
                     <span className="flex items-center gap-1.5"><i className="inline-block h-[2px] w-4 rounded" style={{ background: "#E85050" }} />Blow threshold</span>
                   </div>
                 </div>
               </div>
-              {/* Fan chart: disciplined */}
               <div className="rounded-lg border border-bd bg-panel">
                 <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/5 px-5 py-4">
                   <h3 className="font-sans text-[15px] font-semibold">Account Path Fan Chart — After Discipline</h3>
@@ -783,31 +981,27 @@ export default function Dashboard() {
         </footer>
 
         <style>{`
-          /* ticker scroll */
-          .ticker-scroll { animation: tickerMove 28s linear infinite; }
-          @keyframes tickerMove { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-          /* inputs */
+          .ticker-scroll{animation:tickerMove 28s linear infinite}
+          @keyframes tickerMove{from{transform:translateX(0)}to{transform:translateX(-50%)}}
           .fcin{width:100%;background:rgba(0,2,10,.6);color:#D8ECF5;border:1px solid rgba(140,190,210,.14);border-radius:6px;padding:11px 12px;font-family:"JetBrains Mono",monospace;font-size:13px;outline:none;transition:border-color .2s,box-shadow .2s}
           .fcin:focus{border-color:#7AB8D4;box-shadow:0 0 0 3px rgba(122,184,212,.12)}
-          /* glass panels */
-          .bg-panel{background:linear-gradient(180deg,rgba(15,27,46,.72),rgba(10,18,32,.6))!important;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+          .bg-panel{background:linear-gradient(180deg,rgba(15,27,46,.75),rgba(10,18,32,.62))!important;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
           .border-bd{border-color:rgba(140,190,210,.13)!important}
-          /* header */
           header.sticky{background:rgba(0,2,10,.72)!important;box-shadow:0 1px 0 rgba(122,184,212,.1),0 10px 34px rgba(0,0,0,.45)}
-          /* card hover lift */
           .rounded-lg.border,.rounded-xl.border{transition:transform .25s cubic-bezier(.4,0,.2,1),border-color .25s,box-shadow .25s}
           .rounded-lg.border:hover,.rounded-xl.border:hover{border-color:rgba(122,184,212,.28)!important;box-shadow:0 20px 50px rgba(0,0,0,.45),0 0 0 1px rgba(122,184,212,.07)}
-          /* text glow */
           .fc-glow{filter:drop-shadow(0 0 18px rgba(122,184,212,.4))}
-          /* tab active glow */
           .tabglow{text-shadow:0 0 12px rgba(122,184,212,.55)}
-          /* scanline */
+          .tabnum{font-variant-numeric:tabular-nums}
           .fc-scan{position:fixed;left:0;right:0;height:1px;z-index:5;pointer-events:none;opacity:.45;background:linear-gradient(90deg,transparent,rgba(122,184,212,0) 8%,rgba(122,184,212,.4) 50%,rgba(190,230,248,.5) 50%,rgba(122,184,212,0) 92%,transparent);animation:fcScan 11s ease-in-out infinite}
           @keyframes fcScan{0%{top:-2px;opacity:0}4%{opacity:.45}48%{top:100vh;opacity:.22}50%{opacity:0}100%{top:100vh;opacity:0}}
-          /* tab fade */
+          .fc-scanlines{background:repeating-linear-gradient(0deg,transparent,transparent 1px,rgba(0,0,0,.018) 1px,rgba(0,0,0,.018) 2px)}
+          .fc-vignette{background:radial-gradient(ellipse at 50% 50%,transparent 55%,rgba(0,2,18,.5) 100%)}
+          @keyframes verdictFlash{0%{opacity:.6}100%{opacity:0}}
+          @keyframes dangerpulse{0%,100%{box-shadow:0 0 0 0 transparent}50%{box-shadow:0 0 24px 3px rgba(232,80,80,.2)}}
+          .dangerpulse{animation:dangerpulse 2.5s ease-in-out infinite}
           @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
           .fade{animation:fade .35s ease}
-          /* live pulse */
           @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
           .pulse{animation:pulse 2s infinite}
         `}</style>
