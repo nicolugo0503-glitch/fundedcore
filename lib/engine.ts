@@ -18,8 +18,15 @@ export type Firm = {
 // Illustrative, simplified rule packs — NOT official firm terms.
 export const FIRMS: Record<string, Firm> = {
   topstep50: { key: "topstep50", name: "Topstep 50K (illustrative)", start: 50000, dailyLoss: 1000, trailingDD: 2000, contractCap: 5, consistency: 0.5, minDays: 2, restricted: [] },
+  topstep100: { key: "topstep100", name: "Topstep 100K (illustrative)", start: 100000, dailyLoss: 2000, trailingDD: 3000, contractCap: 10, consistency: 0.5, minDays: 2, restricted: [] },
+  topstep150: { key: "topstep150", name: "Topstep 150K (illustrative)", start: 150000, dailyLoss: 3000, trailingDD: 4500, contractCap: 15, consistency: 0.5, minDays: 2, restricted: [] },
+  apex50: { key: "apex50", name: "Apex 50K (illustrative)", start: 50000, dailyLoss: null, trailingDD: 2500, contractCap: 10, consistency: 0.3, minDays: 0, restricted: [] },
   apex100: { key: "apex100", name: "Apex 100K (illustrative)", start: 100000, dailyLoss: null, trailingDD: 3000, contractCap: 14, consistency: 0.3, minDays: 0, restricted: [] },
-  tpt50: { key: "tpt50", name: "TPT 50K (illustrative)", start: 50000, dailyLoss: 1100, trailingDD: 2000, contractCap: 5, consistency: 0.4, minDays: 5, restricted: [] },
+  apex250: { key: "apex250", name: "Apex 250K (illustrative)", start: 250000, dailyLoss: null, trailingDD: 6500, contractCap: 27, consistency: 0.3, minDays: 0, restricted: [] },
+  tpt50: { key: "tpt50", name: "Take Profit Trader 50K (illustrative)", start: 50000, dailyLoss: 1100, trailingDD: 2000, contractCap: 5, consistency: 0.4, minDays: 5, restricted: [] },
+  tpt100: { key: "tpt100", name: "Take Profit Trader 100K (illustrative)", start: 100000, dailyLoss: 2200, trailingDD: 3000, contractCap: 10, consistency: 0.4, minDays: 5, restricted: [] },
+  mff50: { key: "mff50", name: "MyFundedFutures 50K (illustrative)", start: 50000, dailyLoss: 1200, trailingDD: 2000, contractCap: 5, consistency: 0.4, minDays: 1, restricted: [] },
+  mff100: { key: "mff100", name: "MyFundedFutures 100K (illustrative)", start: 100000, dailyLoss: 2400, trailingDD: 3000, contractCap: 10, consistency: 0.4, minDays: 1, restricted: [] },
 };
 
 export type Trade = {
