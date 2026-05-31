@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
 import EquityChart from "@/components/EquityChart";
 import {
@@ -30,6 +30,15 @@ export default function Dashboard() {
   const [result, setResult] = useState<CheckResult | null>(null);
   const [csvName, setCsvName] = useState<string>("");
 
+  useEffect(() => {
+    try {
+      const j = localStorage.getItem("fc_journal");
+      if (j) { const rows = JSON.parse(j); if (Array.isArray(rows) && rows.length) { setJournal(rows); setCsvName("(your imported journal)"); } }
+      const a = localStorage.getItem("fc_acct");
+      if (a && FIRMS[a]) setAcct(a);
+    } catch {}
+  }, []);
+
   const firm = FIRMS[acct];
   const sc = SCENARIOS[acct] || { todayPnL: 0, trailingRoom: firm.trailingDD, daysTraded: 0 };
 
@@ -45,7 +54,7 @@ export default function Dashboard() {
   function onCSV(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0]; if (!f) return;
     const r = new FileReader();
-    r.onload = () => { const rows = parseCSV(String(r.result || "")); if (rows.length) { setJournal(rows); setCsvName(f.name); } };
+    r.onload = () => { const rows = parseCSV(String(r.result || "")); if (rows.length) { setJournal(rows); setCsvName(f.name); try { localStorage.setItem("fc_journal", JSON.stringify(rows)); } catch {} } };
     r.readAsText(f);
   }
 
@@ -81,7 +90,7 @@ export default function Dashboard() {
           <Link href="/" className="font-sans text-[17px] font-bold tracking-wide">FUNDED<span className="text-acc">.</span>CORE<span className="ml-2 font-mono text-[8.5px] uppercase tracking-[0.22em] text-t2">Intelligence</span></Link>
           <div className="flex items-center gap-3 font-mono text-[11px]">
             <span className="flex items-center gap-1.5 uppercase tracking-[0.16em] text-grn"><span className="h-1.5 w-1.5 rounded-full bg-grn pulse" />Live</span>
-            <select value={acct} onChange={(e) => { setAcct(e.target.value); setResult(null); }} className="rounded border border-bd bg-panel px-3 py-2 font-mono text-[11px] text-t1 outline-none">
+            <select value={acct} onChange={(e) => { setAcct(e.target.value); setResult(null); try { localStorage.setItem("fc_acct", e.target.value); } catch {} }} className="rounded border border-bd bg-panel px-3 py-2 font-mono text-[11px] text-t1 outline-none">
               {Object.keys(FIRMS).map((k) => (<option key={k} value={k}>{FIRMS[k].name}</option>))}
             </select>
           </div>
@@ -216,7 +225,7 @@ export default function Dashboard() {
                   Import CSV<input type="file" accept=".csv" className="hidden" onChange={onCSV} />
                 </label>
                 {csvName && <span className="font-mono text-[10px] text-grn">✓ {csvName}</span>}
-                {csvName && <button onClick={() => { setJournal(generateJournal()); setCsvName(""); }} className="font-mono text-[10px] text-t2 hover:text-t1">reset sample</button>}
+                {csvName && <button onClick={() => { setJournal(generateJournal()); setCsvName(""); try { localStorage.removeItem("fc_journal"); } catch {} }} className="font-mono text-[10px] text-t2 hover:text-t1">reset sample</button>}
               </div>
             </div>
             <div className="max-h-[560px] overflow-auto rounded-lg border border-bd bg-panel">
