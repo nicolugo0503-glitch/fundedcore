@@ -77,11 +77,14 @@ function BootLine({ text, delay }: { text: string; delay: number }) {
 }
 function BootScreen({ onDone }: { onDone: () => void }) {
   const [sweep, setSweep] = useState(false);
+  const onDoneRef = useRef(onDone);
+  onDoneRef.current = onDone;
   useEffect(() => {
     const t1 = setTimeout(() => setSweep(true), 1400);
-    const t2 = setTimeout(() => onDone(), 1850);
+    const t2 = setTimeout(() => onDoneRef.current(), 1850);
     return () => { clearTimeout(t1); clearTimeout(t2); };
-  }, [onDone]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   return (
     <div className="fixed inset-0 z-[70] flex flex-col items-center justify-center"
       style={{ background: "rgba(0,2,10,.98)", transition: "opacity .5s ease-out,transform .5s ease-out",
@@ -606,6 +609,22 @@ function EdgeTable({ title, rows, actOf, actCls }: {
   );
 }
 
+// ─── CursorGlow — isolated so mousemove doesn't re-render Dashboard ────────────
+function CursorGlow() {
+  const [pos, setPos] = useState({ x: -999, y: -999 });
+  useEffect(() => {
+    const h = (e: MouseEvent) => setPos({ x: e.clientX, y: e.clientY });
+    window.addEventListener("mousemove", h);
+    return () => window.removeEventListener("mousemove", h);
+  }, []);
+  return (
+    <div aria-hidden className="pointer-events-none fixed z-[4]"
+      style={{ left: pos.x - 180, top: pos.y - 180, width: 360, height: 360,
+        background: "radial-gradient(circle, rgba(122,184,212,.042) 0%, transparent 70%)",
+        borderRadius: "50%", transition: "left .1s linear,top .1s linear" }} />
+  );
+}
+
 // ─── Dashboard ─────────────────────────────────────────────────────────────────
 export default function Dashboard() {
   const [journal, setJournal] = useState<Trade[]>(() => generateJournal());
@@ -625,7 +644,6 @@ export default function Dashboard() {
   const [kOpen, setKOpen] = useState(false);
   const [mouse, setMouse] = useState({ x: 0, y: 0 });
   const [flash, setFlash] = useState<string | null>(null);
-  const [cursor, setCursor] = useState({ x: -999, y: -999 });
   const [confettiKey, setConfettiKey] = useState(0);
   const confettiRef = useRef<HTMLCanvasElement>(null);
   const [booting, setBooting] = useState(() => {
@@ -654,12 +672,6 @@ export default function Dashboard() {
     return () => window.removeEventListener("keydown", handler);
   }, []);
 
-  // cursor glow
-  useEffect(() => {
-    const h = (e: MouseEvent) => setCursor({ x: e.clientX, y: e.clientY });
-    window.addEventListener("mousemove", h);
-    return () => window.removeEventListener("mousemove", h);
-  }, []);
 
   // confetti burst on APPROVE
   useEffect(() => {
@@ -821,11 +833,8 @@ export default function Dashboard() {
       {/* confetti canvas */}
       <canvas ref={confettiRef} className="pointer-events-none fixed inset-0 z-[45]" />
 
-      {/* cursor glow */}
-      <div aria-hidden className="pointer-events-none fixed z-[4]"
-        style={{ left: cursor.x - 180, top: cursor.y - 180, width: 360, height: 360,
-          background: "radial-gradient(circle, rgba(122,184,212,.042) 0%, transparent 70%)",
-          borderRadius: "50%", transition: "left .1s linear,top .1s linear" }} />
+      {/* cursor glow — isolated component so mousemove state doesn't re-render Dashboard */}
+      <CursorGlow />
 
       {/* atmospheric glow */}
       <div aria-hidden className="pointer-events-none fixed inset-0 z-[1]"
