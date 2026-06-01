@@ -1295,4 +1295,13 @@ export default function Dashboard() {
           @keyframes dangerpulse{0%,100%{box-shadow:0 0 0 0 transparent}50%{box-shadow:0 0 24px 3px rgba(220,38,38,.15)}}
           .dangerpulse{animation:dangerpulse 2.5s ease-in-out infinite}
           @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-          .fade{animation:fade .
+          .fade{animation:fade .35s ease}
+          @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+          .pulse{animation:pulse 2s infinite}
+          @keyframes typeVerdict{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0% 0 0)}}
+          .verdict-type{animation:typeVerdict .45s steps(8,end) forwards}
+        `}</style>
+      </main>
+    </>
+  );
+}
