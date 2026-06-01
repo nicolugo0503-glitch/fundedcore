@@ -55,38 +55,48 @@ const TABS = [
   ["mc", "05 · Monte Carlo"],
 ] as const;
 
-// ─── SystemStatusBar (with session elapsed timer) ──────────────────────────────
-function SystemStatusBar({ nTrades, firmName, threatLevel, threatColor }: {
-  nTrades: number; firmName: string; threatLevel: string; threatColor: string;
-}) {
-  const fmt = () =>
-    new Date().toLocaleTimeString("en-US", { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit" });
-  const [clock, setClock] = useState(fmt);
-  const [elapsed, setElapsed] = useState(0);
+// ─── Boot Screen ──────────────────────────────────────────────────────────────
+function BootLine({ text, delay }: { text: string; delay: number }) {
+  const [done, setDone] = useState(false);
   useEffect(() => {
-    const id = setInterval(() => { setClock(fmt()); setElapsed((e) => e + 1); }, 1000);
-    return () => clearInterval(id);
-  }, []);
-  const hh = String(Math.floor(elapsed / 3600)).padStart(2, "0");
-  const mm = String(Math.floor((elapsed % 3600) / 60)).padStart(2, "0");
-  const ss = String(elapsed % 60).padStart(2, "0");
+    const t = setTimeout(() => setDone(true), delay);
+    return () => clearTimeout(t);
+  }, [delay]);
   return (
-    <div
-      className="sticky top-0 z-[41] flex h-[26px] items-center justify-between px-6 font-mono text-[9px] uppercase tracking-[0.18em]"
-      style={{ background: "rgba(0,2,10,.97)", borderBottom: "1px solid rgba(122,184,212,.06)" }}
-    >
-      <div className="flex items-center gap-6">
-        <span className="text-acc tabnum">{clock}</span>
-        <span className="flex items-center gap-1.5 text-grn">
-          <span className="inline-block h-1 w-1 rounded-full bg-grn pulse" />
-          SYSTEM ONLINE
-        </span>
-        <span className="hidden text-t3 md:inline">{nTrades} TRADES LOADED</span>
-        <span className="hidden tabnum text-t3 lg:inline">SESSION {hh}:{mm}:{ss}</span>
-      </div>
-      <div className="flex items-center gap-6">
-        <span className="hidden text-t2 md:inline">{firmName}</span>
-        <span className="font-semibold" style={{ color: threatColor }}>THREAT: {threatLevel.toUpperCase()}</span>
+    <div className="flex items-center gap-4 font-mono text-[9px] tracking-widest">
+      <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full"
+        style={{ background: done ? "#2ADB8A" : "rgba(122,184,212,.18)", boxShadow: done ? "0 0 8px #2ADB8A" : "none", transition: "all .3s" }} />
+      <span style={{ color: done ? "rgba(216,236,245,.75)" : "rgba(126,157,181,.3)", transition: "color .3s" }}>
+        LOADING {text}
+      </span>
+      <span className="ml-auto font-semibold" style={{ color: done ? "#2ADB8A" : "rgba(126,157,181,.18)", transition: "color .3s" }}>
+        {done ? "OK" : "—"}
+      </span>
+    </div>
+  );
+}
+function BootScreen({ onDone }: { onDone: () => void }) {
+  const [sweep, setSweep] = useState(false);
+  useEffect(() => {
+    const t1 = setTimeout(() => setSweep(true), 1400);
+    const t2 = setTimeout(() => onDone(), 1850);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, [onDone]);
+  return (
+    <div className="fixed inset-0 z-[70] flex flex-col items-center justify-center"
+      style={{ background: "rgba(0,2,10,.98)", transition: "opacity .5s ease-out,transform .5s ease-out",
+        opacity: sweep ? 0 : 1, transform: sweep ? "scale(1.04)" : "scale(1)", pointerEvents: sweep ? "none" : "all" }}>
+      <div aria-hidden className="fc-scanlines pointer-events-none absolute inset-0 z-10" />
+      <div className="relative z-20 text-center w-full max-w-xs px-8">
+        <div className="mb-1 font-mono text-[7.5px] uppercase tracking-[0.45em] text-t3">FUNDED.CORE INTELLIGENCE</div>
+        <div className="mb-8 font-sans text-[56px] font-bold leading-none tracking-tight text-acc fc-glow">v2.0</div>
+        <div className="space-y-3 text-left">
+          <BootLine text="RISK ENGINE" delay={120} />
+          <BootLine text="BEHAVIORAL PROFILES" delay={420} />
+          <BootLine text="MONTE CARLO ENGINE" delay={720} />
+          <BootLine text="SYSTEM READY" delay={1020} />
+        </div>
+        <div className="mt-8 font-mono text-[7px] tracking-[0.3em] text-t3 opacity-40">PRESS ⌘K FOR COMMAND PALETTE</div>
       </div>
     </div>
   );
@@ -157,13 +167,54 @@ function ParticleCanvas() {
     };
     raf = requestAnimationFrame(tick);
     return () => {
-      cancelAnimationFrame(raf);
-      window.removeEventListener("resize", resize);
+      cancelAnimationFrame(raf); window.removeEventListener("resize", resize);
       window.removeEventListener("mousemove", onMouse);
       document.documentElement.removeEventListener("mouseleave", onLeave);
     };
   }, []);
   return <canvas ref={ref} className="pointer-events-none fixed inset-0 z-0" />;
+}
+
+// ─── Data Rain ────────────────────────────────────────────────────────────────
+function DataRain() {
+  const ref = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    const cv = ref.current;
+    if (!cv) return;
+    const dpr = window.devicePixelRatio || 1;
+    let w = window.innerWidth, h = window.innerHeight;
+    const resize = () => {
+      w = window.innerWidth; h = window.innerHeight;
+      cv.width = w * dpr; cv.height = h * dpr;
+      cv.style.width = w + "px"; cv.style.height = h + "px";
+    };
+    resize();
+    window.addEventListener("resize", resize);
+    const ctx = cv.getContext("2d");
+    if (!ctx) { window.removeEventListener("resize", resize); return; }
+    const CHARS = "0123456789.+-$ESNQGCR";
+    const COL = 22;
+    let cols = Math.floor(w / COL);
+    let drops = Array.from({ length: cols }, () => -(Math.random() * h));
+    let raf = 0;
+    const tick = () => {
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.fillStyle = "rgba(0,2,10,.1)";
+      ctx.fillRect(0, 0, w, h);
+      ctx.font = '10px "JetBrains Mono",monospace';
+      for (let i = 0; i < cols; i++) {
+        const bright = Math.random() > 0.94;
+        ctx.fillStyle = bright ? "rgba(122,184,212,.28)" : "rgba(122,184,212,.085)";
+        ctx.fillText(CHARS[Math.floor(Math.random() * CHARS.length)], i * COL, drops[i]);
+        drops[i] += 15;
+        if (drops[i] > h && Math.random() > 0.975) drops[i] = -30;
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => { cancelAnimationFrame(raf); window.removeEventListener("resize", resize); };
+  }, []);
+  return <canvas ref={ref} className="pointer-events-none fixed inset-0" style={{ zIndex: 0 }} />;
 }
 
 // ─── Market Ticker ─────────────────────────────────────────────────────────────
@@ -268,9 +319,9 @@ function TiltCard({ children, className, style }: {
   };
   return (
     <div ref={ref} className={`relative ${className || ""}`}
-      style={{ ...style, transform: `perspective(900px) rotateX(${tilt.rx}deg) rotateY(${tilt.ry}deg)`, transition: active ? "transform 0.1s linear" : "transform 0.5s ease", transformStyle: "preserve-3d" }}
-      onMouseMove={onMove}
-      onMouseLeave={() => setTilt({ rx: 0, ry: 0, mx: 50, my: 50 })}>
+      style={{ ...style, transform: `perspective(900px) rotateX(${tilt.rx}deg) rotateY(${tilt.ry}deg)`,
+        transition: active ? "transform 0.1s linear" : "transform 0.5s ease", transformStyle: "preserve-3d" }}
+      onMouseMove={onMove} onMouseLeave={() => setTilt({ rx: 0, ry: 0, mx: 50, my: 50 })}>
       {active && (
         <div className="pointer-events-none absolute inset-0 rounded-lg z-[1]"
           style={{ background: `radial-gradient(circle at ${tilt.mx}% ${tilt.my}%, rgba(122,184,212,.08) 0%, transparent 65%)` }} />
@@ -280,7 +331,7 @@ function TiltCard({ children, className, style }: {
   );
 }
 
-// ─── Circular Gauge ─────────────────────────────────────────────────────────────
+// ─── Circular Gauge ───────────────────────────────────────────────────────────
 function CircularGauge({ label, value, pct, color, sub, size = 108 }: {
   label: string; value: string; pct: number; color: string; sub: string; size?: number;
 }) {
@@ -307,8 +358,7 @@ function CircularGauge({ label, value, pct, color, sub, size = 108 }: {
           <path d={activeD} fill="none" stroke={color} strokeWidth={sw} strokeLinecap="round"
             style={{ filter: `drop-shadow(0 0 6px ${color}aa)` }} />
         )}
-        <text x={cx} y={cy + 5} textAnchor="middle" fill={color}
-          fontSize={fs.toFixed(1)} fontWeight="700"
+        <text x={cx} y={cy + 5} textAnchor="middle" fill={color} fontSize={fs.toFixed(1)} fontWeight="700"
           fontFamily='"JetBrains Mono", monospace'>{value}</text>
       </svg>
       <div className="text-center font-mono text-[7.5px] uppercase tracking-wider text-t2 leading-tight">{label}</div>
@@ -328,9 +378,7 @@ function ScoreRadial({ score }: { score: number }) {
   const lf = (d: number) => (d > 180 ? 1 : 0);
   const sp = pt(startDeg), ef = pt(startDeg + totalDeg), ea = pt(startDeg + sweepDeg);
   const trackD = `M${sp.x.toFixed(2)} ${sp.y.toFixed(2)} A${R} ${R} 0 ${lf(totalDeg)} 1 ${ef.x.toFixed(2)} ${ef.y.toFixed(2)}`;
-  const activeD = sweepDeg > 2
-    ? `M${sp.x.toFixed(2)} ${sp.y.toFixed(2)} A${R} ${R} 0 ${lf(sweepDeg)} 1 ${ea.x.toFixed(2)} ${ea.y.toFixed(2)}`
-    : "";
+  const activeD = sweepDeg > 2 ? `M${sp.x.toFixed(2)} ${sp.y.toFixed(2)} A${R} ${R} 0 ${lf(sweepDeg)} 1 ${ea.x.toFixed(2)} ${ea.y.toFixed(2)}` : "";
   const col = score >= 70 ? "#2ADB8A" : score >= 42 ? "#E8B84B" : "#E85050";
   const label = score >= 70 ? "STRONG EDGE" : score >= 42 ? "BUILDING" : "NEEDS WORK";
   const tickPcts = [0, 0.25, 0.5, 0.75, 1.0];
@@ -370,12 +418,64 @@ function ScoreRadial({ score }: { score: number }) {
   );
 }
 
+// ─── Radar Chart ──────────────────────────────────────────────────────────────
+function RadarChart({ edgePts, winPts, discPts, samplePts, total }: {
+  edgePts: number; winPts: number; discPts: number; samplePts: number; total: number;
+}) {
+  const S = 170, cx = 85, cy = 88, R = 55;
+  const axes = [
+    { label: "EDGE", max: 40, val: edgePts },
+    { label: "WIN RATE", max: 25, val: winPts },
+    { label: "DISCIPLINE", max: 25, val: discPts },
+    { label: "SAMPLE", max: 10, val: samplePts },
+  ];
+  const N = 4;
+  const ang = (i: number) => (i / N) * 2 * Math.PI - Math.PI / 2;
+  const px = (i: number, r: number) => cx + r * Math.cos(ang(i));
+  const py = (i: number, r: number) => cy + r * Math.sin(ang(i));
+  const grids = [0.25, 0.5, 0.75, 1.0];
+  const col = total >= 70 ? "#2ADB8A" : total >= 42 ? "#E8B84B" : "#E85050";
+  const valPath = axes.map((a, i) => {
+    const r = R * Math.max(0.04, a.val / a.max);
+    return `${i === 0 ? "M" : "L"}${px(i, r).toFixed(1)},${py(i, r).toFixed(1)}`;
+  }).join(" ") + " Z";
+  const LR = R + 24;
+  return (
+    <svg width={S} height={S} viewBox={`0 0 ${S} ${S}`} className="flex-shrink-0">
+      {grids.map((g, gi) => {
+        const d = axes.map((_, i) => `${i === 0 ? "M" : "L"}${px(i, R * g).toFixed(1)},${py(i, R * g).toFixed(1)}`).join(" ") + " Z";
+        return <path key={gi} d={d} fill="none"
+          stroke={gi === 3 ? "rgba(122,184,212,.22)" : "rgba(122,184,212,.07)"}
+          strokeWidth={gi === 3 ? "0.8" : "0.5"} />;
+      })}
+      {axes.map((_, i) => (
+        <line key={i} x1={cx} y1={cy} x2={px(i, R).toFixed(1)} y2={py(i, R).toFixed(1)}
+          stroke="rgba(122,184,212,.14)" strokeWidth="0.6" />
+      ))}
+      <path d={valPath} fill={col} fillOpacity="0.14" stroke={col} strokeWidth="1.5"
+        style={{ filter: `drop-shadow(0 0 6px ${col}88)` }} />
+      {axes.map((a, i) => {
+        const r = R * Math.max(0.04, a.val / a.max);
+        return <circle key={i} cx={px(i, r).toFixed(1)} cy={py(i, r).toFixed(1)} r="2.5"
+          fill={col} style={{ filter: `drop-shadow(0 0 4px ${col})` }} />;
+      })}
+      {axes.map((a, i) => (
+        <text key={i} x={px(i, LR).toFixed(1)} y={py(i, LR).toFixed(1)}
+          textAnchor="middle" dominantBaseline="central"
+          fill="rgba(126,157,181,.5)" fontSize="6.5"
+          fontFamily='"JetBrains Mono", monospace'>{a.label}</text>
+      ))}
+    </svg>
+  );
+}
+
 // ─── Kill Zone Alert ──────────────────────────────────────────────────────────
 function KillZoneAlert({ level, color, msg }: { level: string; color: string; msg: string }) {
   if (level === "nominal") return null;
   return (
     <div className="mb-5 rounded-lg px-5 py-3 dangerpulse"
-      style={{ background: `repeating-linear-gradient(45deg,${color}12,${color}12 5px,transparent 5px,transparent 14px)`, border: `1px solid ${color}55`, color }}>
+      style={{ background: `repeating-linear-gradient(45deg,${color}12,${color}12 5px,transparent 5px,transparent 14px)`,
+        border: `1px solid ${color}55`, color }}>
       <div className="flex items-center gap-3 font-mono text-[10px] uppercase tracking-wider">
         <span className="text-[16px]">&#9888;</span>
         <span className="font-semibold">Threat Level {level.toUpperCase()}</span>
@@ -417,9 +517,9 @@ function CommandPalette({ open, close, setTab, setAcct, resetJournal }: {
         style={{ borderColor: "rgba(122,184,212,.25)", background: "rgba(5,14,28,.96)" }}
         onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center gap-3 border-b px-4 py-3" style={{ borderColor: "rgba(122,184,212,.12)" }}>
-          <span className="font-mono text-xs text-t2">&#8984;</span>
+          <span className="font-mono text-xs text-t2">⌘</span>
           <input ref={inputRef} value={q} onChange={(e) => setQ(e.target.value)}
-            placeholder="Type a command or search&#8230;"
+            placeholder="Type a command or search…"
             className="flex-1 bg-transparent font-mono text-sm text-t1 outline-none placeholder-t3"
             onKeyDown={(e) => {
               if (e.key === "Escape") close();
@@ -441,7 +541,7 @@ function CommandPalette({ open, close, setTab, setAcct, resetJournal }: {
           {!filtered.length && <p className="px-4 py-5 text-center font-mono text-xs text-t3">No commands match.</p>}
         </div>
         <div className="border-t px-4 py-2 font-mono text-[9px] text-t3" style={{ borderColor: "rgba(122,184,212,.08)" }}>
-          &#8593;&#8595; navigate &#183; &#9166; run &#183; ESC dismiss
+          ↑↓ navigate · ⏎ run · ESC dismiss
         </div>
       </div>
     </div>
@@ -525,7 +625,14 @@ export default function Dashboard() {
   const [kOpen, setKOpen] = useState(false);
   const [mouse, setMouse] = useState({ x: 0, y: 0 });
   const [flash, setFlash] = useState<string | null>(null);
+  const [cursor, setCursor] = useState({ x: -999, y: -999 });
+  const [confettiKey, setConfettiKey] = useState(0);
+  const confettiRef = useRef<HTMLCanvasElement>(null);
+  const [booting, setBooting] = useState(() => {
+    try { return !sessionStorage.getItem("fc_booted"); } catch { return false; }
+  });
 
+  // persistence
   useEffect(() => {
     try {
       const j = localStorage.getItem("fc_journal");
@@ -537,6 +644,7 @@ export default function Dashboard() {
     } catch {}
   }, []);
 
+  // ⌘K
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") { e.preventDefault(); setKOpen((o) => !o); }
@@ -545,6 +653,54 @@ export default function Dashboard() {
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, []);
+
+  // cursor glow
+  useEffect(() => {
+    const h = (e: MouseEvent) => setCursor({ x: e.clientX, y: e.clientY });
+    window.addEventListener("mousemove", h);
+    return () => window.removeEventListener("mousemove", h);
+  }, []);
+
+  // confetti burst on APPROVE
+  useEffect(() => {
+    if (confettiKey === 0) return;
+    const cv = confettiRef.current;
+    if (!cv) return;
+    cv.width = window.innerWidth; cv.height = window.innerHeight;
+    const ctx = cv.getContext("2d");
+    if (!ctx) return;
+    const COLS = ["#2ADB8A", "#7AB8D4", "#E8B84B", "#D8ECF5", "#2ADB8A", "#7AB8D4"];
+    const pts = Array.from({ length: 90 }, () => ({
+      x: window.innerWidth / 2 + (Math.random() - 0.5) * 300,
+      y: window.innerHeight * 0.38,
+      vx: (Math.random() - 0.5) * 18, vy: -(Math.random() * 22 + 8),
+      col: COLS[Math.floor(Math.random() * COLS.length)],
+      w: 5 + Math.random() * 9, h: 3 + Math.random() * 5,
+      rot: Math.random() * Math.PI * 2, rv: (Math.random() - 0.5) * 0.25,
+      life: 1,
+    }));
+    let raf = 0;
+    const tick = () => {
+      ctx.clearRect(0, 0, cv.width, cv.height);
+      let alive = false;
+      for (const p of pts) {
+        p.x += p.vx; p.y += p.vy; p.vy += 0.65; p.vx *= 0.985;
+        p.rot += p.rv; p.life -= 0.015;
+        if (p.life <= 0) continue;
+        alive = true;
+        ctx.save();
+        ctx.globalAlpha = Math.min(1, p.life * 1.5);
+        ctx.translate(p.x, p.y); ctx.rotate(p.rot);
+        ctx.fillStyle = p.col;
+        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+        ctx.restore();
+      }
+      if (alive) raf = requestAnimationFrame(tick);
+      else ctx.clearRect(0, 0, cv.width, cv.height);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [confettiKey]);
 
   const firm = FIRMS[acct];
   const sc = acctState;
@@ -574,6 +730,15 @@ export default function Dashboard() {
   }, [journal, setups]);
   const mcDisc = useMemo(() => monteCarlo(discJournal, firm.trailingDD), [discJournal, firm.trailingDD]);
 
+  const scoreBreakdown = useMemo(() => {
+    const edgePts = Math.min(40, Math.max(0, (all.exp / 50) * 40));
+    const winPts = Math.min(25, all.winRate * 25);
+    const negCount = setups.filter((s) => s.exp < 0).length;
+    const discPts = Math.min(25, Math.max(0, 25 - negCount * 6));
+    const samplePts = Math.min(10, (journal.length / 100) * 10);
+    return { edgePts: +edgePts.toFixed(1), winPts: +winPts.toFixed(1), discPts: +discPts.toFixed(1), samplePts: +samplePts.toFixed(1) };
+  }, [all, setups, journal.length]);
+
   const dailyRoom = firm.dailyLoss == null ? null : Math.max(0, firm.dailyLoss - Math.max(0, -sc.todayPnL));
   const dailyPct = firm.dailyLoss == null ? 100 : (dailyRoom! / firm.dailyLoss) * 100;
   const trailPct = (sc.trailingRoom / firm.trailingDD) * 100;
@@ -588,6 +753,18 @@ export default function Dashboard() {
     return { level: "nominal", color: "#2ADB8A", msg: "All limits healthy" };
   }, [dailyPct, trailPct]);
 
+  // SystemStatusBar (with session timer)
+  const fmtClock = () => new Date().toLocaleTimeString("en-US", { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  const [clock, setClock] = useState(fmtClock);
+  const [elapsed, setElapsed] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => { setClock(fmtClock()); setElapsed((e) => e + 1); }, 1000);
+    return () => clearInterval(id);
+  }, []);
+  const hh = String(Math.floor(elapsed / 3600)).padStart(2, "0");
+  const mm = String(Math.floor((elapsed % 3600) / 60)).padStart(2, "0");
+  const ss = String(elapsed % 60).padStart(2, "0");
+
   // animated hero counters
   const animTrades = useCountUp(all.n);
   const animNetRaw = useCountUp(Math.round(all.sum));
@@ -597,15 +774,15 @@ export default function Dashboard() {
   const smallGauges = [
     { l: "Today P&L", v: (sc.todayPnL >= 0 ? "+" : "") + "$" + sc.todayPnL, p: 50, c: sc.todayPnL >= 0 ? "#2ADB8A" : "#E85050", s: "realized" },
     { l: "Min Days", v: sc.daysTraded + "/" + firm.minDays, p: minPct, c: minPct >= 100 ? "#2ADB8A" : "#7AB8D4", s: firm.minDays === 0 ? "no minimum" : Math.max(0, firm.minDays - sc.daysTraded) + " left" },
-    { l: "Account", v: "ALIVE", p: 100, c: "#2ADB8A", s: firm.name.split(" ")[0] + " &#183; funded" },
+    { l: "Account", v: "ALIVE", p: 100, c: "#2ADB8A", s: firm.name.split(" ")[0] + " · funded" },
   ];
 
   const disciplined = eq.B[eq.B.length - 1] || 0;
   let edge: { icon: string; col: string; bg: string; title: string; msg: string };
-  if (all.exp > 15) edge = { icon: "&#10003;", col: "#2ADB8A", bg: "rgba(42,219,138,.14)", title: "Demonstrated edge: YES", msg: `Across ${all.n} trades your overall expectancy is <b style="color:#2ADB8A">${fmtMoney(all.exp)}/trade</b>. The edge is real.` };
-  else if (all.exp > 0) edge = { icon: "&#8776;", col: "#E8B84B", bg: "rgba(232,184,75,.14)", title: "Demonstrated edge: MARGINAL", msg: `Overall expectancy is only <b style="color:#E8B84B">${fmtMoney(all.exp)}/trade</b> across ${all.n} trades.` };
-  else if (disciplined > 0) edge = { icon: "!", col: "#E8B84B", bg: "rgba(232,184,75,.14)", title: "Demonstrated edge: BURIED", msg: `Net <b style="color:#E85050">${fmtMoney(all.sum)}</b> but your positive setups are real. Cut <b>${eq.negSetups.join(" &amp; ")}</b> to flip to <b style="color:#2ADB8A">${fmtMoney(disciplined)}</b>.` };
-  else edge = { icon: "&#10005;", col: "#E85050", bg: "rgba(232,80,80,.14)", title: "Demonstrated edge: NONE YET", msg: `Overall expectancy is <b style="color:#E85050">${fmtMoney(all.exp)}/trade</b>. Priority: find one positive-expectancy setup.` };
+  if (all.exp > 15) edge = { icon: "✓", col: "#2ADB8A", bg: "rgba(42,219,138,.14)", title: "Demonstrated edge: YES", msg: `Across ${all.n} trades your overall expectancy is <b style="color:#2ADB8A">${fmtMoney(all.exp)}/trade</b>. The edge is real — protect it by cutting the red rows below.` };
+  else if (all.exp > 0) edge = { icon: "≈", col: "#E8B84B", bg: "rgba(232,184,75,.14)", title: "Demonstrated edge: MARGINAL", msg: `Overall expectancy is only <b style="color:#E8B84B">${fmtMoney(all.exp)}/trade</b> across ${all.n} trades.` };
+  else if (disciplined > 0) edge = { icon: "!", col: "#E8B84B", bg: "rgba(232,184,75,.14)", title: "Demonstrated edge: BURIED", msg: `Net <b style="color:#E85050">${fmtMoney(all.sum)}</b> — but cutting <b>${eq.negSetups.join(" &amp; ")}</b> flips it to <b style="color:#2ADB8A">${fmtMoney(disciplined)}</b>.` };
+  else edge = { icon: "✗", col: "#E85050", bg: "rgba(232,80,80,.14)", title: "Demonstrated edge: NONE YET", msg: `Overall expectancy is <b style="color:#E85050">${fmtMoney(all.exp)}/trade</b>. Priority: find one positive-expectancy setup.` };
 
   const actOf = (e: number) => (e > 10 ? "scale" : e < 0 ? "cut" : "hold");
   const actCls: Record<string, string> = { scale: "text-grn bg-grn/10", cut: "text-red bg-red/10", hold: "text-t2 bg-white/5" };
@@ -615,6 +792,7 @@ export default function Dashboard() {
     setResult(r);
     setFlash(VCOLOR[r.verdict]);
     setTimeout(() => setFlash(null), 860);
+    if (r.verdict === "APPROVE") setConfettiKey((k) => k + 1);
   }
   function onCSV(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0]; if (!f) return;
@@ -628,14 +806,28 @@ export default function Dashboard() {
 
   return (
     <>
+      {booting && <BootScreen onDone={() => { setBooting(false); try { sessionStorage.setItem("fc_booted", "1"); } catch {} }} />}
+
       <ParticleCanvas />
+      <DataRain />
+
       <CommandPalette open={kOpen} close={() => setKOpen(false)} setTab={setTab}
         setAcct={(a) => { setAcct(a); setResult(null); try { localStorage.setItem("fc_acct", a); } catch {} }}
         resetJournal={resetJournal} />
 
+      {/* verdict flash */}
       {flash && <div className="pointer-events-none fixed inset-0 z-40" style={{ background: flash, animation: "verdictFlash 0.86s ease-out forwards" }} />}
 
-      {/* atmospheric threat glow */}
+      {/* confetti canvas */}
+      <canvas ref={confettiRef} className="pointer-events-none fixed inset-0 z-[45]" />
+
+      {/* cursor glow */}
+      <div aria-hidden className="pointer-events-none fixed z-[4]"
+        style={{ left: cursor.x - 180, top: cursor.y - 180, width: 360, height: 360,
+          background: "radial-gradient(circle, rgba(122,184,212,.042) 0%, transparent 70%)",
+          borderRadius: "50%", transition: "left .1s linear,top .1s linear" }} />
+
+      {/* atmospheric glow */}
       <div aria-hidden className="pointer-events-none fixed inset-0 z-[1]"
         style={{
           background: threatLevel.level === "critical"
@@ -651,7 +843,23 @@ export default function Dashboard() {
 
       <main className="relative z-10 font-body text-t1">
         <div aria-hidden className="fc-scan" />
-        <SystemStatusBar nTrades={journal.length} firmName={firm.name} threatLevel={threatLevel.level} threatColor={threatLevel.color} />
+
+        {/* system status bar */}
+        <div className="sticky top-0 z-[41] flex h-[26px] items-center justify-between px-6 font-mono text-[9px] uppercase tracking-[0.18em]"
+          style={{ background: "rgba(0,2,10,.97)", borderBottom: "1px solid rgba(122,184,212,.06)" }}>
+          <div className="flex items-center gap-6">
+            <span className="text-acc tabnum">{clock}</span>
+            <span className="flex items-center gap-1.5 text-grn">
+              <span className="inline-block h-1 w-1 rounded-full bg-grn pulse" />SYSTEM ONLINE
+            </span>
+            <span className="hidden text-t3 md:inline">{journal.length} TRADES LOADED</span>
+            <span className="hidden tabnum text-t3 lg:inline">SESSION {hh}:{mm}:{ss}</span>
+          </div>
+          <div className="flex items-center gap-6">
+            <span className="hidden text-t2 md:inline">{firm.name}</span>
+            <span className="font-semibold" style={{ color: threatLevel.color }}>THREAT: {threatLevel.level.toUpperCase()}</span>
+          </div>
+        </div>
 
         {/* header */}
         <header className="sticky top-[26px] z-40 border-b border-bd bg-bg/85 backdrop-blur">
@@ -666,7 +874,7 @@ export default function Dashboard() {
             <div className="flex items-center gap-3 font-mono text-[11px]">
               <button onClick={() => setKOpen(true)}
                 className="hidden items-center gap-1.5 rounded border border-bd px-2.5 py-1.5 font-mono text-[10px] text-t2 transition hover:border-acc/50 hover:text-t1 md:flex">
-                &#8984;K
+                ⌘K
               </button>
               <span className="flex items-center gap-1.5 uppercase tracking-[0.16em] text-grn">
                 <span className="h-1.5 w-1.5 rounded-full bg-grn pulse" />Live
@@ -700,7 +908,6 @@ export default function Dashboard() {
                     Then make it profitable.
                   </span>
                 </h1>
-                {/* animated hero counters */}
                 <div className="mt-6 flex flex-wrap items-end gap-x-7 gap-y-3">
                   {[
                     { l: "TRADES", v: String(animTrades), c: "#D8ECF5" },
@@ -714,7 +921,6 @@ export default function Dashboard() {
                     </div>
                   ))}
                 </div>
-                {/* mini sparkline */}
                 <div className="mt-4 w-48 opacity-60">
                   <MiniSparkline data={eq.A} />
                 </div>
@@ -730,33 +936,25 @@ export default function Dashboard() {
 
           {/* cockpit: BigGauge top 2 */}
           <div className="mb-[2px] grid grid-cols-1 gap-[2px] border border-b-0 border-bd bg-bd md:grid-cols-2">
-            <BigGauge
-              label="Trailing Drawdown Room"
-              value={firm.dailyLoss == null ? "N/A" : "$" + sc.trailingRoom.toLocaleString()}
-              pct={trailPct}
-              color={col(trailPct)}
+            <BigGauge label="Trailing Drawdown Room"
+              value={"$" + sc.trailingRoom.toLocaleString()} pct={trailPct} color={col(trailPct)}
               sub={`$${sc.trailingRoom.toLocaleString()} of $${firm.trailingDD.toLocaleString()} remaining`} />
-            <BigGauge
-              label="Daily Loss Room"
-              value={firm.dailyLoss == null ? "N/A" : "$" + (dailyRoom ?? 0).toLocaleString()}
-              pct={dailyPct}
-              color={col(dailyPct)}
+            <BigGauge label="Daily Loss Room"
+              value={firm.dailyLoss == null ? "N/A" : "$" + (dailyRoom ?? 0).toLocaleString()} pct={dailyPct} color={col(dailyPct)}
               sub={firm.dailyLoss == null ? "no daily limit" : `$${(dailyRoom ?? 0).toLocaleString()} of $${firm.dailyLoss.toLocaleString()} remaining`} />
           </div>
-          {/* cockpit: CircularGauge bottom 3 */}
+          {/* cockpit: 3 circular gauges */}
           <div className="grid grid-cols-2 gap-[2px] border border-bd bg-bd md:grid-cols-3 mb-2">
             {smallGauges.map((g) => (
               <CircularGauge key={g.l} label={g.l} value={String(g.v)} pct={g.p} color={g.c} sub={g.s} />
             ))}
           </div>
           <p className="font-mono text-[10px] text-t3">
-            Live account snapshot &#183; firewall evaluates every trade against this state. Rule values are illustrative.
+            Live account snapshot · firewall evaluates every trade against this state.
           </p>
 
           <div className="mt-3 rounded-lg border border-bd bg-panel p-4">
-            <div className="mb-3 font-mono text-[9px] uppercase tracking-wider text-acc">
-              Your account snapshot — edit to match your real account
-            </div>
+            <div className="mb-3 font-mono text-[9px] uppercase tracking-wider text-acc">Your account snapshot — edit to match your real account</div>
             <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
               <Field label="Today P/L ($)"><input type="number" className="fcin" value={sc.todayPnL} onChange={(e) => updState("todayPnL", +e.target.value)} /></Field>
               <Field label="Trailing room ($)"><input type="number" className="fcin" value={sc.trailingRoom} onChange={(e) => updState("trailingRoom", +e.target.value)} /></Field>
@@ -818,7 +1016,7 @@ export default function Dashboard() {
                   ) : (
                     <>
                       <div className="px-6 py-6 text-center" style={{ background: VCOLOR[result.verdict], color: "#021018" }}>
-                        <div className="font-sans text-4xl font-bold">{result.verdict}</div>
+                        <div key={result.verdict} className="verdict-type font-sans text-4xl font-bold">{result.verdict}</div>
                         <div className="mt-2 font-mono text-[11px] tracking-wide opacity-80">{VSUB[result.verdict]}</div>
                       </div>
                       <div className="px-6 py-5">
@@ -893,6 +1091,43 @@ export default function Dashboard() {
                   <p className="text-sm leading-relaxed text-t2" dangerouslySetInnerHTML={{ __html: edge.msg }} />
                 </div>
               </div>
+
+              {/* FundedScore Breakdown — radar + bars */}
+              <div className="mb-5 rounded-lg border border-bd bg-panel p-5">
+                <div className="flex items-center justify-between border-b border-white/5 pb-4 mb-5">
+                  <h3 className="font-sans text-[15px] font-semibold">FundedScore Breakdown</h3>
+                  <span className="font-mono text-[8px] uppercase tracking-wider text-t2">4 components · total {score}/100</span>
+                </div>
+                <div className="flex flex-col items-center gap-6 md:flex-row md:items-start">
+                  <RadarChart {...scoreBreakdown} total={score} />
+                  <div className="flex-1 w-full space-y-4">
+                    {[
+                      { l: "Edge Quality", v: scoreBreakdown.edgePts, max: 40, desc: "Expectancy depth" },
+                      { l: "Win Rate", v: scoreBreakdown.winPts, max: 25, desc: "Hit rate quality" },
+                      { l: "Discipline", v: scoreBreakdown.discPts, max: 25, desc: "Negative setup avoidance" },
+                      { l: "Sample Size", v: scoreBreakdown.samplePts, max: 10, desc: "Statistical confidence" },
+                    ].map((b) => {
+                      const bCol = b.v / b.max > 0.66 ? "#2ADB8A" : b.v / b.max > 0.33 ? "#E8B84B" : "#E85050";
+                      return (
+                        <div key={b.l}>
+                          <div className="flex justify-between font-mono text-[9px] mb-1.5">
+                            <span className="uppercase tracking-wider text-t2">{b.l}</span>
+                            <span className="flex items-center gap-3">
+                              <span className="text-t3 normal-case tracking-normal">{b.desc}</span>
+                              <span className="tabnum font-semibold" style={{ color: bCol }}>{b.v}<span className="opacity-40 font-normal">/{b.max}</span></span>
+                            </span>
+                          </div>
+                          <div className="h-[2px] rounded-full" style={{ background: "rgba(122,184,212,.07)" }}>
+                            <div className="h-full rounded-full"
+                              style={{ width: (b.v / b.max * 100).toFixed(1) + "%", background: bCol, boxShadow: `0 0 8px ${bCol}88`, transition: "width .9s cubic-bezier(.4,0,.2,1)" }} />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
               <div className="mb-5 grid grid-cols-2 gap-[2px] border border-bd bg-bd md:grid-cols-4">
                 {[
                   ["Trades analyzed", String(all.n), "#D8ECF5"],
@@ -978,20 +1213,20 @@ export default function Dashboard() {
           {tab === "mc" && (
             <div className="fade py-8">
               <p className="mb-6 max-w-2xl text-sm leading-relaxed text-t2">
-                Bootstrap resampling from your journal — 500 simulated 80-trade account runs. Each translucent line is a possible future. The red line is your trailing drawdown limit.
+                Bootstrap resampling — 500 simulated 80-trade runs. Each line is a possible future. The red line is your trailing drawdown limit.
               </p>
               <div className="mb-6 grid grid-cols-2 gap-[2px] border border-bd bg-bd md:grid-cols-3">
                 {[
-                  { l: "Blow rate &#183; base", v: (mc.blow * 100).toFixed(0) + "%", c: mc.blow > 0.5 ? "#E85050" : "#E8B84B", s: "hit trailing DD at some point" },
-                  { l: "Survive rate &#183; base", v: (mc.survive * 100).toFixed(0) + "%", c: mc.survive > 0.5 ? "#2ADB8A" : "#E8B84B", s: "avoid DD breach" },
-                  { l: "Pass rate &#183; base", v: (mc.pass * 100).toFixed(0) + "%", c: mc.pass > 0.5 ? "#2ADB8A" : "#E8B84B", s: "survive + profitable" },
-                  { l: "Blow rate &#183; disciplined", v: (mcDisc.blow * 100).toFixed(0) + "%", c: mcDisc.blow < mc.blow ? "#2ADB8A" : "#E85050", s: "after cutting leak setups" },
-                  { l: "Survive rate &#183; disciplined", v: (mcDisc.survive * 100).toFixed(0) + "%", c: mcDisc.survive > mc.survive ? "#2ADB8A" : "#E8B84B", s: "after cutting leak setups" },
-                  { l: "Pass rate &#183; disciplined", v: (mcDisc.pass * 100).toFixed(0) + "%", c: mcDisc.pass > mc.pass ? "#2ADB8A" : "#E8B84B", s: "after cutting leak setups" },
+                  { l: "Blow rate · base", v: (mc.blow * 100).toFixed(0) + "%", c: mc.blow > 0.5 ? "#E85050" : "#E8B84B", s: "hit trailing DD" },
+                  { l: "Survive rate · base", v: (mc.survive * 100).toFixed(0) + "%", c: mc.survive > 0.5 ? "#2ADB8A" : "#E8B84B", s: "avoid DD breach" },
+                  { l: "Pass rate · base", v: (mc.pass * 100).toFixed(0) + "%", c: mc.pass > 0.5 ? "#2ADB8A" : "#E8B84B", s: "survive + profitable" },
+                  { l: "Blow rate · disciplined", v: (mcDisc.blow * 100).toFixed(0) + "%", c: mcDisc.blow < mc.blow ? "#2ADB8A" : "#E85050", s: "after cutting leaks" },
+                  { l: "Survive rate · disciplined", v: (mcDisc.survive * 100).toFixed(0) + "%", c: mcDisc.survive > mc.survive ? "#2ADB8A" : "#E8B84B", s: "after cutting leaks" },
+                  { l: "Pass rate · disciplined", v: (mcDisc.pass * 100).toFixed(0) + "%", c: mcDisc.pass > mc.pass ? "#2ADB8A" : "#E8B84B", s: "after cutting leaks" },
                 ].map((s) => (
                   <div key={s.l} className="bg-panel p-5">
                     <div className="tabnum font-mono text-2xl font-medium" style={{ color: s.c }}>{s.v}</div>
-                    <div className="mt-1 font-mono text-[8px] uppercase tracking-wider text-t2" dangerouslySetInnerHTML={{ __html: s.l }} />
+                    <div className="mt-1 font-mono text-[8px] uppercase tracking-wider text-t2">{s.l}</div>
                     <div className="mt-0.5 font-mono text-[8px] text-t3">{s.s}</div>
                   </div>
                 ))}
@@ -999,30 +1234,23 @@ export default function Dashboard() {
               <div className="mb-5 rounded-lg border border-bd bg-panel">
                 <div className="flex items-center justify-between border-b border-white/5 px-5 py-4">
                   <h3 className="font-sans text-[15px] font-semibold">Account Path Fan Chart — Base Journal</h3>
-                  <span className="font-mono text-[8px] uppercase tracking-wider text-t2">500 sims &#183; 80 trades each</span>
+                  <span className="font-mono text-[8px] uppercase tracking-wider text-t2">500 sims · 80 trades each</span>
                 </div>
                 <div className="p-5">
                   <MonteCarloChart key={"base-" + acct + journal.length} result={mc} trailingDD={firm.trailingDD} />
-                  <div className="mt-3.5 flex flex-wrap gap-5 font-mono text-[10px] text-t2">
-                    <span className="flex items-center gap-1.5"><i className="inline-block h-[2px] w-4 rounded" style={{ background: "rgba(122,184,212,.35)" }} />Individual paths</span>
-                    <span className="flex items-center gap-1.5"><i className="inline-block h-3 w-3 rounded opacity-20" style={{ background: "#7AB8D4" }} />P10-P90</span>
-                    <span className="flex items-center gap-1.5"><i className="inline-block h-3 w-3 rounded opacity-50" style={{ background: "#7AB8D4" }} />P25-P75</span>
-                    <span className="flex items-center gap-1.5"><i className="inline-block h-[2px] w-4 rounded" style={{ background: "#7AB8D4" }} />Median (P50)</span>
-                    <span className="flex items-center gap-1.5"><i className="inline-block h-[2px] w-4 rounded" style={{ background: "#E85050" }} />Blow threshold</span>
-                  </div>
                 </div>
               </div>
               <div className="rounded-lg border border-bd bg-panel">
                 <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/5 px-5 py-4">
                   <h3 className="font-sans text-[15px] font-semibold">Account Path Fan Chart — After Discipline</h3>
                   <span className="font-mono text-[8px] uppercase tracking-wider text-t2">
-                    Cutting negative-expectancy setups &#183; {journal.length - discJournal.length} trades removed
+                    {journal.length - discJournal.length} trades removed
                   </span>
                 </div>
                 <div className="p-5">
                   <MonteCarloChart key={"disc-" + acct + discJournal.length} result={mcDisc} trailingDD={firm.trailingDD} />
                   <p className="mt-3 font-mono text-[10px] text-t3">
-                    Same journal, same bootstrap methodology. Removing negative-expectancy setups reveals the path distribution your account would have taken.
+                    Same journal, same methodology. Removing negative-expectancy setups reveals the path your account would have taken.
                   </p>
                 </div>
               </div>
@@ -1061,6 +1289,8 @@ export default function Dashboard() {
           .fade{animation:fade .35s ease}
           @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
           .pulse{animation:pulse 2s infinite}
+          @keyframes typeVerdict{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0% 0 0)}}
+          .verdict-type{animation:typeVerdict .45s steps(8,end) forwards}
         `}</style>
       </main>
     </>
