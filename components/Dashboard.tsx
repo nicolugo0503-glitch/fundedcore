@@ -620,7 +620,7 @@ function CursorGlow() {
   return (
     <div aria-hidden className="pointer-events-none fixed z-[4]"
       style={{ left: pos.x - 180, top: pos.y - 180, width: 360, height: 360,
-        background: "radial-gradient(circle, rgba(3,105,161,.042) 0%, transparent 70%)",
+        background: "radial-gradient(circle, rgba(22,72,204,.055) 0%, transparent 70%)",
         borderRadius: "50%", transition: "left .1s linear,top .1s linear" }} />
   );
 }
@@ -854,8 +854,7 @@ export default function Dashboard() {
         <div aria-hidden className="fc-scan" />
 
         {/* system status bar */}
-        <div className="sticky top-0 z-[41] flex h-[26px] items-center justify-between px-6 font-mono text-[9px] uppercase tracking-[0.18em]"
-          style={{ background: "rgba(248,250,252,.97)", borderBottom: "1px solid rgba(3,105,161,.06)" }}>
+        <div className="sysbar sticky top-0 z-[41] flex h-[26px] items-center justify-between px-6 font-mono text-[9px] uppercase tracking-[0.18em]">
           <div className="flex items-center gap-6">
             <span className="text-acc tabnum">{clock}</span>
             <span className="flex items-center gap-1.5 text-grn">
@@ -919,7 +918,7 @@ export default function Dashboard() {
                 </h1>
                 <div className="mt-6 flex flex-wrap items-end gap-x-7 gap-y-3">
                   {[
-                    { l: "TRADES", v: String(animTrades), c: "#0F172A" },
+                    { l: "TRADES", v: String(animTrades), c: "#040D1E" },
                     { l: "NET P&L", v: (animNetRaw >= 0 ? "+" : "") + "$" + Math.abs(animNetRaw).toLocaleString(), c: all.sum >= 0 ? "#059669" : "#DC2626" },
                     { l: "WIN RATE", v: animWinRate + "%", c: all.winRate >= 0.5 ? "#059669" : "#B45309" },
                     { l: "EXP / TRADE", v: (animExp >= 0 ? "+" : "") + "$" + Math.abs(animExp), c: all.exp >= 0 ? "#059669" : "#DC2626" },
@@ -975,7 +974,7 @@ export default function Dashboard() {
           <div className="mt-8 flex flex-wrap gap-[2px] border-b border-bd">
             {TABS.map(([id, label]) => (
               <button key={id} onClick={() => setTab(id)}
-                className={`-mb-px border-b-2 px-5 py-3.5 font-mono text-[11px] uppercase tracking-wider transition ${tab === id ? "border-acc text-white tabglow" : "border-transparent text-t2 hover:text-t1"}`}>
+                className={`-mb-px border-b-2 px-5 py-3.5 font-mono text-[11px] uppercase tracking-wider transition ${tab === id ? "border-acc text-t1 tabglow" : "border-transparent text-t2 hover:text-t1"}`}>
                 {label}
               </button>
             ))}
@@ -1013,7 +1012,7 @@ export default function Dashboard() {
                       <Toggle on={tilt} set={setTilt}>After 2 losses today</Toggle>
                     </div>
                     <button onClick={runCheck}
-                      className="w-full rounded-md bg-acc py-3.5 font-mono text-xs font-semibold uppercase tracking-wider text-bg transition hover:bg-[#0284C7]">
+                      className="cta-btn w-full rounded-md py-3.5 font-mono text-xs font-semibold uppercase tracking-wider text-white transition">
                       Run Pre-Trade Check
                     </button>
                   </div>
@@ -1031,13 +1030,13 @@ export default function Dashboard() {
                       <div className="px-6 py-5">
                         <p className="mb-4 text-sm leading-relaxed" dangerouslySetInnerHTML={{ __html: result.reason }} />
                         {result.verdict === "REDUCE" && (
-                          <div className="flex justify-between border-b border-white/5 py-2.5 font-mono text-[11.5px]">
+                          <div className="flex justify-between border-b border-bd py-2.5 font-mono text-[11.5px]">
                             <span className="text-t2">recommended_size</span>
-                            <span className="text-white">{result.safeSize} contracts</span>
+                            <span className="text-acc font-semibold">{result.safeSize} contracts</span>
                           </div>
                         )}
                         {result.checks.map((c, i) => (
-                          <div key={i} className="flex items-center justify-between border-b border-white/5 py-2.5 font-mono text-[11.5px] last:border-0">
+                          <div key={i} className="flex items-center justify-between border-b border-bd py-2.5 font-mono text-[11.5px] last:border-0">
                             <span className="text-t2">{c.l}</span>
                             <span className="flex items-center gap-2">
                               <span className={`rounded px-2 py-0.5 text-[8.5px] uppercase ${c.s === "ok" ? "bg-grn/10 text-grn" : c.s === "warn" ? "bg-amb/10 text-amb" : "bg-red/10 text-red"}`}>
@@ -1276,21 +1275,21 @@ export default function Dashboard() {
         <style>{`
           .ticker-scroll{animation:tickerMove 28s linear infinite}
           @keyframes tickerMove{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-          .fcin{width:100%;background:rgba(255,255,255,.95);color:#0F172A;border:1px solid rgba(3,105,161,.15);border-radius:6px;padding:11px 12px;font-family:"JetBrains Mono",monospace;font-size:13px;outline:none;transition:border-color .2s,box-shadow .2s}
-          .fcin:focus{border-color:#0369A1;box-shadow:0 0 0 3px rgba(3,105,161,.12)}
-          .bg-panel{background:rgba(255,255,255,.96)!important;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 1px 3px rgba(0,0,0,.06)}
-          .border-bd{border-color:rgba(3,105,161,.12)!important}
-          header.sticky{background:rgba(248,250,252,.94)!important;box-shadow:0 1px 0 rgba(3,105,161,.1),0 4px 20px rgba(0,0,0,.06)}
+          .fcin{width:100%;background:rgba(255,255,255,.96);color:#040D1E;border:1px solid rgba(22,72,204,.14);border-radius:6px;padding:11px 12px;font-family:"JetBrains Mono",monospace;font-size:13px;outline:none;transition:border-color .2s,box-shadow .2s}
+          .fcin:focus{border-color:#1648CC;box-shadow:0 0 0 3px rgba(22,72,204,.15)}
+          .bg-panel{background:rgba(255,255,255,.98)!important;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:0 1px 2px rgba(0,0,0,.04),0 8px 40px rgba(4,13,30,.07),0 0 0 1px rgba(22,72,204,.05)}
+          .border-bd{border-color:rgba(22,72,204,.13)!important}
+          header.sticky{background:rgba(247,249,252,.97)!important;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:0 1px 0 rgba(22,72,204,.12),0 4px 32px rgba(4,13,30,.08)}
           .rounded-lg.border,.rounded-xl.border{transition:transform .25s cubic-bezier(.4,0,.2,1),border-color .25s,box-shadow .25s}
-          .rounded-lg.border:hover,.rounded-xl.border:hover{border-color:rgba(3,105,161,.30)!important;box-shadow:0 8px 30px rgba(0,0,0,.08),0 0 0 1px rgba(3,105,161,.10)}
-          .fc-glow{filter:drop-shadow(0 0 18px rgba(3,105,161,.35))}
-          .tabglow{text-shadow:0 0 12px rgba(3,105,161,.40)}
+          .rounded-lg.border:hover,.rounded-xl.border:hover{border-color:rgba(22,72,204,.22)!important;box-shadow:0 12px 40px rgba(4,13,30,.10),0 0 0 1px rgba(22,72,204,.12),0 0 30px rgba(22,72,204,.05);transform:translateY(-1px)}
+          .fc-glow{filter:drop-shadow(0 0 24px rgba(22,72,204,.50))}
+          .tabglow{text-shadow:0 0 18px rgba(22,72,204,.55)}
           .tabnum{font-variant-numeric:tabular-nums}
-          .fc-scan{position:fixed;left:0;right:0;height:1px;z-index:5;pointer-events:none;opacity:.45;background:linear-gradient(90deg,transparent,rgba(3,105,161,0) 8%,rgba(3,105,161,.3) 50%,rgba(186,230,253,.4) 50%,rgba(3,105,161,0) 92%,transparent);animation:fcScan 11s ease-in-out infinite}
+          .fc-scan{position:fixed;left:0;right:0;height:1px;z-index:5;pointer-events:none;opacity:.45;background:linear-gradient(90deg,transparent,rgba(22,72,204,0) 8%,rgba(22,72,204,.4) 50%,rgba(147,197,253,.5) 50%,rgba(22,72,204,0) 92%,transparent);animation:fcScan 11s ease-in-out infinite}
           @keyframes fcScan{0%{top:-2px;opacity:0}4%{opacity:.45}48%{top:100vh;opacity:.22}50%{opacity:0}100%{top:100vh;opacity:0}}
-          .fc-scanlines{background:repeating-linear-gradient(0deg,transparent,transparent 1px,rgba(3,105,161,.022) 1px,rgba(3,105,161,.022) 2px)}
-          .fc-vignette{background:radial-gradient(ellipse at 50% 50%,transparent 55%,rgba(186,230,253,.25) 100%)}
-          .fc-dotgrid{background-image:radial-gradient(circle,rgba(3,105,161,.08) 1px,transparent 1px);background-size:28px 28px}
+          .fc-scanlines{background:repeating-linear-gradient(0deg,transparent,transparent 1px,rgba(22,72,204,.018) 1px,rgba(22,72,204,.018) 2px)}
+          .fc-vignette{background:radial-gradient(ellipse at 50% 50%,transparent 55%,rgba(147,197,253,.20) 100%)}
+          .fc-dotgrid{background-image:radial-gradient(circle,rgba(22,72,204,.07) 1px,transparent 1px);background-size:28px 28px}
           @keyframes verdictFlash{0%{opacity:.6}100%{opacity:0}}
           @keyframes dangerpulse{0%,100%{box-shadow:0 0 0 0 transparent}50%{box-shadow:0 0 24px 3px rgba(220,38,38,.15)}}
           .dangerpulse{animation:dangerpulse 2.5s ease-in-out infinite}
@@ -1300,6 +1299,13 @@ export default function Dashboard() {
           .pulse{animation:pulse 2s infinite}
           @keyframes typeVerdict{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0% 0 0)}}
           .verdict-type{animation:typeVerdict .45s steps(8,end) forwards}
+          .sysbar{background:linear-gradient(90deg,#040D1E 0%,#0A1830 100%)!important;border-bottom:1px solid rgba(22,72,204,.30)!important;color:rgba(255,255,255,.55)!important}
+          .sysbar .text-acc{color:#93C5FD!important}
+          .sysbar .text-grn{color:#34D399!important}
+          .sysbar .bg-grn{background-color:#34D399!important}
+          .sysbar .text-t2,.sysbar .text-t3{color:rgba(255,255,255,.45)!important}
+          .cta-btn{background:linear-gradient(135deg,#1648CC 0%,#7C3AED 100%);box-shadow:0 4px 20px rgba(22,72,204,.35)}
+          .cta-btn:hover{background:linear-gradient(135deg,#1B52E0 0%,#8B47F5 100%);box-shadow:0 6px 28px rgba(22,72,204,.50);transform:translateY(-1px)}
         `}</style>
       </main>
     </>
