@@ -4,9 +4,9 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        bg: "#00020A", s1: "#070C18", panel: "#0B1422", panel2: "#0E1A2C",
-        acc: "#7AB8D4", acc2: "#3A7A9A", grn: "#2ADB8A", amb: "#E8B84B", red: "#E85050",
-        t1: "#D8ECF5", t2: "#7E9DB5", t3: "#3A556B",
+        bg: "#F8FAFC", s1: "#F1F5F9", panel: "#FFFFFF", panel2: "#EEF2F7",
+        acc: "#0369A1", acc2: "#0C4A6E", grn: "#059669", amb: "#B45309", red: "#DC2626",
+        t1: "#0F172A", t2: "#475569", t3: "#94A3B8",
       },
       fontFamily: {
         sans: ['"Space Grotesk"', "system-ui", "sans-serif"],
