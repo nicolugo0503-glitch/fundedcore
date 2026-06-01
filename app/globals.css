@@ -4,19 +4,19 @@
 @tailwind utilities;
 
 :root { color-scheme: light; }
-html, body { background: #F8FAFC; color: #0F172A; }
+html, body { background: #F7F9FC; color: #040D1E; }
 body { font-family: "Inter", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
 
 .grid-bg {
   position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: .6;
   background-image:
-    linear-gradient(rgba(3,105,161,.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(3,105,161,.035) 1px, transparent 1px);
+    linear-gradient(rgba(22,72,204,.042) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(22,72,204,.042) 1px, transparent 1px);
   background-size: 64px 64px;
 }
 .glow { position: fixed; border-radius: 50%; filter: blur(120px); z-index: 0; pointer-events: none; }
-.glow-1 { width: 700px; height: 700px; background: radial-gradient(circle, rgba(186,230,253,.45), transparent 70%); top: -280px; right: -200px; }
-.glow-2 { width: 600px; height: 600px; background: radial-gradient(circle, rgba(219,234,254,.38), transparent 70%); bottom: -260px; left: -180px; }
+.glow-1 { width: 700px; height: 700px; background: radial-gradient(circle, rgba(147,197,253,.65), transparent 70%); top: -280px; right: -200px; }
+.glow-2 { width: 600px; height: 600px; background: radial-gradient(circle, rgba(196,181,253,.45), transparent 70%); bottom: -260px; left: -180px; }
 
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
 .pulse { animation: pulse 2s infinite; }
@@ -24,5 +24,5 @@ body { font-family: "Inter", system-ui, sans-serif; -webkit-font-smoothing: anti
 .fade { animation: fade .4s ease; }
 
 ::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-thumb { background: rgba(3,105,161,.18); border-radius: 5px; }
+::-webkit-scrollbar-thumb { background: rgba(22,72,204,.22); border-radius: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
