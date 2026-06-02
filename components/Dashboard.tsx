@@ -41,7 +41,7 @@ const SCENARIOS: Record<string, { todayPnL: number; trailingRoom: number; daysTr
   tpt50: { todayPnL: -90, trailingRoom: 980, daysTraded: 4 },
 };
 const VCOLOR: Record<Verdict, string> = {
-  APPROVE: "#059669", REDUCE: "#B45309", WAIT: "#B45309", BLOCK: "#DC2626",
+  APPROVE: "#10B981", REDUCE: "#F59E0B", WAIT: "#F59E0B", BLOCK: "#EF4444",
 };
 const VSUB: Record<Verdict, string> = {
   APPROVE: "Cleared to take", REDUCE: "Cut size to stay safe",
@@ -65,11 +65,11 @@ function BootLine({ text, delay }: { text: string; delay: number }) {
   return (
     <div className="flex items-center gap-4 font-mono text-[9px] tracking-widest">
       <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full"
-        style={{ background: done ? "#059669" : "rgba(3,105,161,.15)", boxShadow: done ? "0 0 8px #2ADB8A" : "none", transition: "all .3s" }} />
-      <span style={{ color: done ? "rgba(15,23,42,.80)" : "rgba(71,85,105,.35)", transition: "color .3s" }}>
+        style={{ background: done ? "#10B981" : "rgba(59,130,246,.15)", boxShadow: done ? "0 0 8px #2ADB8A" : "none", transition: "all .3s" }} />
+      <span style={{ color: done ? "rgba(240,244,255,.88)" : "rgba(148,163,184,.40)", transition: "color .3s" }}>
         LOADING {text}
       </span>
-      <span className="ml-auto font-semibold" style={{ color: done ? "#059669" : "rgba(71,85,105,.22)", transition: "color .3s" }}>
+      <span className="ml-auto font-semibold" style={{ color: done ? "#10B981" : "rgba(71,85,105,.35)", transition: "color .3s" }}>
         {done ? "OK" : "—"}
       </span>
     </div>
@@ -87,7 +87,7 @@ function BootScreen({ onDone }: { onDone: () => void }) {
   }, []);
   return (
     <div className="fixed inset-0 z-[70] flex flex-col items-center justify-center"
-      style={{ background: "rgba(248,250,252,.98)", transition: "opacity .5s ease-out,transform .5s ease-out",
+      style={{ background: "rgba(2,8,23,.98)", transition: "opacity .5s ease-out,transform .5s ease-out",
         opacity: sweep ? 0 : 1, transform: sweep ? "scale(1.04)" : "scale(1)", pointerEvents: sweep ? "none" : "all" }}>
       <div aria-hidden className="fc-scanlines pointer-events-none absolute inset-0 z-10" />
       <div className="relative z-20 text-center w-full max-w-xs px-8">
@@ -158,13 +158,13 @@ function ParticleCanvas() {
           const dist = Math.sqrt(dx * dx + dy * dy);
           if (dist < D_CONNECT) {
             ctx.beginPath(); ctx.moveTo(particles[i].x, particles[i].y); ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.strokeStyle = `rgba(3,105,161,${(1 - dist / D_CONNECT) * 0.11})`; ctx.lineWidth = 0.7; ctx.stroke();
+            ctx.strokeStyle = `rgba(59,130,246,${(1 - dist / D_CONNECT) * 0.11})`; ctx.lineWidth = 0.7; ctx.stroke();
           }
         }
       }
       for (const p of particles) {
         ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(3,105,161,0.22)"; ctx.fill();
+        ctx.fillStyle = "rgba(59,130,246,0.22)"; ctx.fill();
       }
       raf = requestAnimationFrame(tick);
     };
@@ -202,12 +202,12 @@ function DataRain() {
     let raf = 0;
     const tick = () => {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.fillStyle = "rgba(248,250,252,.22)";
+      ctx.fillStyle = "rgba(2,8,23,.18)";
       ctx.fillRect(0, 0, w, h);
       ctx.font = '10px "JetBrains Mono",monospace';
       for (let i = 0; i < cols; i++) {
         const bright = Math.random() > 0.94;
-        ctx.fillStyle = bright ? "rgba(3,105,161,.35)" : "rgba(3,105,161,.13)";
+        ctx.fillStyle = bright ? "rgba(59,130,246,.50)" : "rgba(59,130,246,.18)";
         ctx.fillText(CHARS[Math.floor(Math.random() * CHARS.length)], i * COL, drops[i]);
         drops[i] += 15;
         if (drops[i] > h && Math.random() > 0.975) drops[i] = -30;
@@ -246,7 +246,7 @@ function MarketTicker() {
           <span key={i} className="inline-flex items-center gap-1.5">
             <span className="text-t2">{p.sym}</span>
             <span className="tabnum text-t1">{p.px.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-            <span className="tabnum" style={{ color: p.d >= 0 ? "#059669" : "#DC2626" }}>{p.d >= 0 ? "+" : ""}{p.d.toFixed(2)}</span>
+            <span className="tabnum" style={{ color: p.d >= 0 ? "#10B981" : "#EF4444" }}>{p.d >= 0 ? "+" : ""}{p.d.toFixed(2)}</span>
           </span>
         ))}
       </div>
@@ -264,7 +264,7 @@ function BigGauge({ label, value, pct, color, sub }: {
         <span className="font-mono text-[8.5px] uppercase tracking-[0.2em] text-t2">{label}</span>
         <span className="tabnum font-mono text-[38px] font-bold leading-none" style={{ color, textShadow: `0 0 30px ${color}66` }}>{value}</span>
       </div>
-      <div className="relative h-[3px] rounded-full overflow-hidden" style={{ background: "rgba(3,105,161,.08)" }}>
+      <div className="relative h-[3px] rounded-full overflow-hidden" style={{ background: "rgba(59,130,246,.08)" }}>
         <div className="absolute left-0 top-0 h-full rounded-full"
           style={{ width: Math.max(2, Math.min(100, pct)) + "%", background: color, boxShadow: `0 0 12px ${color}aa`, transition: "width 0.8s cubic-bezier(.4,0,.2,1)" }} />
       </div>
@@ -290,19 +290,19 @@ function MiniSparkline({ data }: { data: number[] }) {
     const px = (i: number) => (i / (data.length - 1)) * W;
     const py = (v: number) => H - ((v - min) / range) * (H * 0.82) - H * 0.09;
     const grad = ctx.createLinearGradient(0, 0, 0, H);
-    grad.addColorStop(0, "rgba(3,105,161,.15)");
-    grad.addColorStop(1, "rgba(3,105,161,.01)");
+    grad.addColorStop(0, "rgba(59,130,246,.15)");
+    grad.addColorStop(1, "rgba(59,130,246,.01)");
     ctx.beginPath();
     data.forEach((v, i) => i === 0 ? ctx.moveTo(px(i), py(v)) : ctx.lineTo(px(i), py(v)));
     ctx.lineTo(px(data.length - 1), H); ctx.lineTo(px(0), H); ctx.closePath();
     ctx.fillStyle = grad; ctx.fill();
     ctx.beginPath();
     data.forEach((v, i) => i === 0 ? ctx.moveTo(px(i), py(v)) : ctx.lineTo(px(i), py(v)));
-    ctx.strokeStyle = "#0369A1"; ctx.lineWidth = 1.5; ctx.stroke();
+    ctx.strokeStyle = "#3B82F6"; ctx.lineWidth = 1.5; ctx.stroke();
     const lx = px(data.length - 1), ly = py(data[data.length - 1]);
-    ctx.shadowColor = "#0369A1"; ctx.shadowBlur = 6;
+    ctx.shadowColor = "#3B82F6"; ctx.shadowBlur = 6;
     ctx.beginPath(); ctx.arc(lx, ly, 2.5, 0, Math.PI * 2);
-    ctx.fillStyle = "#0369A1"; ctx.fill();
+    ctx.fillStyle = "#3B82F6"; ctx.fill();
   }, [data]);
   return <canvas ref={ref} style={{ width: "100%", height: "36px", display: "block" }} className="rounded" />;
 }
@@ -327,7 +327,7 @@ function TiltCard({ children, className, style }: {
       onMouseMove={onMove} onMouseLeave={() => setTilt({ rx: 0, ry: 0, mx: 50, my: 50 })}>
       {active && (
         <div className="pointer-events-none absolute inset-0 rounded-lg z-[1]"
-          style={{ background: `radial-gradient(circle at ${tilt.mx}% ${tilt.my}%, rgba(3,105,161,.06) 0%, transparent 65%)` }} />
+          style={{ background: `radial-gradient(circle at ${tilt.mx}% ${tilt.my}%, rgba(59,130,246,.06) 0%, transparent 65%)` }} />
       )}
       {children}
     </div>
@@ -355,8 +355,8 @@ function CircularGauge({ label, value, pct, color, sub, size = 108 }: {
   return (
     <div className="flex flex-col items-center justify-center gap-0.5 bg-panel p-4">
       <svg width={S} height={S} viewBox={`0 0 ${S} ${S}`}>
-        <circle cx={cx} cy={cy} r={R + sw + 3} fill="none" stroke="rgba(3,105,161,.06)" strokeWidth="1.5" />
-        <path d={trackD} fill="none" stroke="rgba(3,105,161,.09)" strokeWidth={sw} strokeLinecap="round" />
+        <circle cx={cx} cy={cy} r={R + sw + 3} fill="none" stroke="rgba(59,130,246,.06)" strokeWidth="1.5" />
+        <path d={trackD} fill="none" stroke="rgba(59,130,246,.09)" strokeWidth={sw} strokeLinecap="round" />
         {activeD && (
           <path d={activeD} fill="none" stroke={color} strokeWidth={sw} strokeLinecap="round"
             style={{ filter: `drop-shadow(0 0 6px ${color}aa)` }} />
@@ -382,16 +382,16 @@ function ScoreRadial({ score }: { score: number }) {
   const sp = pt(startDeg), ef = pt(startDeg + totalDeg), ea = pt(startDeg + sweepDeg);
   const trackD = `M${sp.x.toFixed(2)} ${sp.y.toFixed(2)} A${R} ${R} 0 ${lf(totalDeg)} 1 ${ef.x.toFixed(2)} ${ef.y.toFixed(2)}`;
   const activeD = sweepDeg > 2 ? `M${sp.x.toFixed(2)} ${sp.y.toFixed(2)} A${R} ${R} 0 ${lf(sweepDeg)} 1 ${ea.x.toFixed(2)} ${ea.y.toFixed(2)}` : "";
-  const col = score >= 70 ? "#059669" : score >= 42 ? "#B45309" : "#DC2626";
+  const col = score >= 70 ? "#10B981" : score >= 42 ? "#F59E0B" : "#EF4444";
   const label = score >= 70 ? "STRONG EDGE" : score >= 42 ? "BUILDING" : "NEEDS WORK";
   const tickPcts = [0, 0.25, 0.5, 0.75, 1.0];
   const RI = R - 8, RO = R + 2, RL = R + 17;
   return (
     <div className="flex flex-col items-center gap-1">
       <svg width={S} height={S} viewBox={`0 0 ${S} ${S}`}>
-        <circle cx={cx} cy={cy} r={R + 14} fill="none" stroke="rgba(3,105,161,.06)" strokeWidth="1" />
-        <circle cx={cx} cy={cy} r={R + 11} fill="none" stroke="rgba(3,105,161,.04)" strokeWidth="0.5" />
-        <path d={trackD} fill="none" stroke="rgba(3,105,161,.12)" strokeWidth="8" strokeLinecap="round" />
+        <circle cx={cx} cy={cy} r={R + 14} fill="none" stroke="rgba(59,130,246,.06)" strokeWidth="1" />
+        <circle cx={cx} cy={cy} r={R + 11} fill="none" stroke="rgba(59,130,246,.04)" strokeWidth="0.5" />
+        <path d={trackD} fill="none" stroke="rgba(59,130,246,.12)" strokeWidth="8" strokeLinecap="round" />
         {activeD && (
           <path d={activeD} fill="none" stroke={col} strokeWidth="8" strokeLinecap="round"
             style={{ filter: `drop-shadow(0 0 9px ${col}aa)` }} />
@@ -404,7 +404,7 @@ function ScoreRadial({ score }: { score: number }) {
           return (
             <g key={i}>
               <line x1={inner.x.toFixed(1)} y1={inner.y.toFixed(1)} x2={outer.x.toFixed(1)} y2={outer.y.toFixed(1)}
-                stroke="rgba(3,105,161,.30)" strokeWidth="1.5" />
+                stroke="rgba(59,130,246,.30)" strokeWidth="1.5" />
               <text x={lbl.x.toFixed(1)} y={lbl.y.toFixed(1)} textAnchor="middle" dominantBaseline="central"
                 fill="rgba(71,85,105,.50)" fontSize="6.5" fontFamily='"JetBrains Mono", monospace'>{Math.round(tp * 100)}</text>
             </g>
@@ -437,7 +437,7 @@ function RadarChart({ edgePts, winPts, discPts, samplePts, total }: {
   const px = (i: number, r: number) => cx + r * Math.cos(ang(i));
   const py = (i: number, r: number) => cy + r * Math.sin(ang(i));
   const grids = [0.25, 0.5, 0.75, 1.0];
-  const col = total >= 70 ? "#059669" : total >= 42 ? "#B45309" : "#DC2626";
+  const col = total >= 70 ? "#10B981" : total >= 42 ? "#F59E0B" : "#EF4444";
   const valPath = axes.map((a, i) => {
     const r = R * Math.max(0.04, a.val / a.max);
     return `${i === 0 ? "M" : "L"}${px(i, r).toFixed(1)},${py(i, r).toFixed(1)}`;
@@ -448,12 +448,12 @@ function RadarChart({ edgePts, winPts, discPts, samplePts, total }: {
       {grids.map((g, gi) => {
         const d = axes.map((_, i) => `${i === 0 ? "M" : "L"}${px(i, R * g).toFixed(1)},${py(i, R * g).toFixed(1)}`).join(" ") + " Z";
         return <path key={gi} d={d} fill="none"
-          stroke={gi === 3 ? "rgba(3,105,161,.18)" : "rgba(3,105,161,.08)"}
+          stroke={gi === 3 ? "rgba(59,130,246,.18)" : "rgba(59,130,246,.08)"}
           strokeWidth={gi === 3 ? "0.8" : "0.5"} />;
       })}
       {axes.map((_, i) => (
         <line key={i} x1={cx} y1={cy} x2={px(i, R).toFixed(1)} y2={py(i, R).toFixed(1)}
-          stroke="rgba(3,105,161,.14)" strokeWidth="0.6" />
+          stroke="rgba(59,130,246,.14)" strokeWidth="0.6" />
       ))}
       <path d={valPath} fill={col} fillOpacity="0.14" stroke={col} strokeWidth="1.5"
         style={{ filter: `drop-shadow(0 0 6px ${col}88)` }} />
@@ -517,9 +517,9 @@ function CommandPalette({ open, close, setTab, setAcct, resetJournal }: {
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-[14vh] px-4"
       style={{ background: "rgba(248,250,252,.88)", backdropFilter: "blur(4px)" }} onClick={close}>
       <div className="w-full max-w-md overflow-hidden rounded-xl border shadow-2xl"
-        style={{ borderColor: "rgba(3,105,161,.20)", background: "rgba(255,255,255,.98)" }}
+        style={{ borderColor: "rgba(59,130,246,.20)", background: "rgba(255,255,255,.98)" }}
         onClick={(e) => e.stopPropagation()}>
-        <div className="flex items-center gap-3 border-b px-4 py-3" style={{ borderColor: "rgba(3,105,161,.12)" }}>
+        <div className="flex items-center gap-3 border-b px-4 py-3" style={{ borderColor: "rgba(59,130,246,.12)" }}>
           <span className="font-mono text-xs text-t2">⌘</span>
           <input ref={inputRef} value={q} onChange={(e) => setQ(e.target.value)}
             placeholder="Type a command or search…"
@@ -531,19 +531,19 @@ function CommandPalette({ open, close, setTab, setAcct, resetJournal }: {
               else if (e.key === "Enter" && filtered[sel]) filtered[sel].action();
             }} />
           <kbd className="rounded border px-1.5 py-0.5 font-mono text-[9px] text-t3"
-            style={{ borderColor: "rgba(3,105,161,.15)" }}>ESC</kbd>
+            style={{ borderColor: "rgba(59,130,246,.15)" }}>ESC</kbd>
         </div>
         <div className="max-h-72 overflow-auto py-1">
           {filtered.map((c, i) => (
             <button key={i} onClick={c.action} onMouseEnter={() => setSel(i)}
               className={`flex w-full items-center px-4 py-2.5 text-left font-mono text-[11.5px] transition ${i === sel ? "text-t1" : "text-t2 hover:text-t1"}`}
-              style={i === sel ? { background: "rgba(3,105,161,.09)" } : {}}>
+              style={i === sel ? { background: "rgba(59,130,246,.09)" } : {}}>
               {c.label}
             </button>
           ))}
           {!filtered.length && <p className="px-4 py-5 text-center font-mono text-xs text-t3">No commands match.</p>}
         </div>
-        <div className="border-t px-4 py-2 font-mono text-[9px] text-t3" style={{ borderColor: "rgba(3,105,161,.08)" }}>
+        <div className="border-t px-4 py-2 font-mono text-[9px] text-t3" style={{ borderColor: "rgba(59,130,246,.08)" }}>
           ↑↓ navigate · ⏎ run · ESC dismiss
         </div>
       </div>
@@ -681,7 +681,7 @@ export default function Dashboard() {
     cv.width = window.innerWidth; cv.height = window.innerHeight;
     const ctx = cv.getContext("2d");
     if (!ctx) return;
-    const COLS = ["#059669", "#0369A1", "#B45309", "#0F172A", "#059669", "#0369A1"];
+    const COLS = ["#10B981", "#3B82F6", "#F59E0B", "#0F172A", "#10B981", "#3B82F6"];
     const pts = Array.from({ length: 90 }, () => ({
       x: window.innerWidth / 2 + (Math.random() - 0.5) * 300,
       y: window.innerHeight * 0.38,
@@ -755,14 +755,14 @@ export default function Dashboard() {
   const dailyPct = firm.dailyLoss == null ? 100 : (dailyRoom! / firm.dailyLoss) * 100;
   const trailPct = (sc.trailingRoom / firm.trailingDD) * 100;
   const minPct = firm.minDays === 0 ? 100 : Math.min(100, (sc.daysTraded / firm.minDays) * 100);
-  const col = (p: number) => (p > 50 ? "#059669" : p > 25 ? "#B45309" : "#DC2626");
+  const col = (p: number) => (p > 50 ? "#10B981" : p > 25 ? "#F59E0B" : "#EF4444");
 
   const threatLevel = useMemo(() => {
     const p = Math.min(dailyPct, trailPct);
-    if (p < 15) return { level: "critical", color: "#DC2626", msg: "BREACH IMMINENT — reduce exposure immediately" };
-    if (p < 30) return { level: "critical", color: "#DC2626", msg: "CRITICAL RISK — drawdown limit approaching fast" };
-    if (p < 50) return { level: "elevated", color: "#B45309", msg: "Elevated risk — monitor drawdown closely" };
-    return { level: "nominal", color: "#059669", msg: "All limits healthy" };
+    if (p < 15) return { level: "critical", color: "#EF4444", msg: "BREACH IMMINENT — reduce exposure immediately" };
+    if (p < 30) return { level: "critical", color: "#EF4444", msg: "CRITICAL RISK — drawdown limit approaching fast" };
+    if (p < 50) return { level: "elevated", color: "#F59E0B", msg: "Elevated risk — monitor drawdown closely" };
+    return { level: "nominal", color: "#10B981", msg: "All limits healthy" };
   }, [dailyPct, trailPct]);
 
   // SystemStatusBar (with session timer)
@@ -784,17 +784,17 @@ export default function Dashboard() {
   const animExp = useCountUp(Math.round(all.exp));
 
   const smallGauges = [
-    { l: "Today P&L", v: (sc.todayPnL >= 0 ? "+" : "") + "$" + sc.todayPnL, p: 50, c: sc.todayPnL >= 0 ? "#059669" : "#DC2626", s: "realized" },
-    { l: "Min Days", v: sc.daysTraded + "/" + firm.minDays, p: minPct, c: minPct >= 100 ? "#059669" : "#0369A1", s: firm.minDays === 0 ? "no minimum" : Math.max(0, firm.minDays - sc.daysTraded) + " left" },
-    { l: "Account", v: "ALIVE", p: 100, c: "#059669", s: firm.name.split(" ")[0] + " · funded" },
+    { l: "Today P&L", v: (sc.todayPnL >= 0 ? "+" : "") + "$" + sc.todayPnL, p: 50, c: sc.todayPnL >= 0 ? "#10B981" : "#EF4444", s: "realized" },
+    { l: "Min Days", v: sc.daysTraded + "/" + firm.minDays, p: minPct, c: minPct >= 100 ? "#10B981" : "#3B82F6", s: firm.minDays === 0 ? "no minimum" : Math.max(0, firm.minDays - sc.daysTraded) + " left" },
+    { l: "Account", v: "ALIVE", p: 100, c: "#10B981", s: firm.name.split(" ")[0] + " · funded" },
   ];
 
   const disciplined = eq.B[eq.B.length - 1] || 0;
   let edge: { icon: string; col: string; bg: string; title: string; msg: string };
-  if (all.exp > 15) edge = { icon: "✓", col: "#059669", bg: "rgba(5,150,105,.10)", title: "Demonstrated edge: YES", msg: `Across ${all.n} trades your overall expectancy is <b style="color:#059669">${fmtMoney(all.exp)}/trade</b>. The edge is real — protect it by cutting the red rows below.` };
-  else if (all.exp > 0) edge = { icon: "≈", col: "#B45309", bg: "rgba(180,83,9,.09)", title: "Demonstrated edge: MARGINAL", msg: `Overall expectancy is only <b style="color:#B45309">${fmtMoney(all.exp)}/trade</b> across ${all.n} trades.` };
-  else if (disciplined > 0) edge = { icon: "!", col: "#B45309", bg: "rgba(180,83,9,.09)", title: "Demonstrated edge: BURIED", msg: `Net <b style="color:#DC2626">${fmtMoney(all.sum)}</b> — but cutting <b>${eq.negSetups.join(" &amp; ")}</b> flips it to <b style="color:#059669">${fmtMoney(disciplined)}</b>.` };
-  else edge = { icon: "✗", col: "#DC2626", bg: "rgba(220,38,38,.09)", title: "Demonstrated edge: NONE YET", msg: `Overall expectancy is <b style="color:#DC2626">${fmtMoney(all.exp)}/trade</b>. Priority: find one positive-expectancy setup.` };
+  if (all.exp > 15) edge = { icon: "✓", col: "#10B981", bg: "rgba(5,150,105,.10)", title: "Demonstrated edge: YES", msg: `Across ${all.n} trades your overall expectancy is <b style="color:#059669">${fmtMoney(all.exp)}/trade</b>. The edge is real — protect it by cutting the red rows below.` };
+  else if (all.exp > 0) edge = { icon: "≈", col: "#F59E0B", bg: "rgba(180,83,9,.09)", title: "Demonstrated edge: MARGINAL", msg: `Overall expectancy is only <b style="color:#B45309">${fmtMoney(all.exp)}/trade</b> across ${all.n} trades.` };
+  else if (disciplined > 0) edge = { icon: "!", col: "#F59E0B", bg: "rgba(180,83,9,.09)", title: "Demonstrated edge: BURIED", msg: `Net <b style="color:#DC2626">${fmtMoney(all.sum)}</b> — but cutting <b>${eq.negSetups.join(" &amp; ")}</b> flips it to <b style="color:#059669">${fmtMoney(disciplined)}</b>.` };
+  else edge = { icon: "✗", col: "#EF4444", bg: "rgba(220,38,38,.09)", title: "Demonstrated edge: NONE YET", msg: `Overall expectancy is <b style="color:#DC2626">${fmtMoney(all.exp)}/trade</b>. Priority: find one positive-expectancy setup.` };
 
   const actOf = (e: number) => (e > 10 ? "scale" : e < 0 ? "cut" : "hold");
   const actCls: Record<string, string> = { scale: "text-grn bg-grn/10", cut: "text-red bg-red/10", hold: "text-t2 bg-white/5" };
@@ -899,7 +899,7 @@ export default function Dashboard() {
         <div className="mx-auto max-w-6xl px-6">
 
           {/* hero */}
-          <div className="py-10"
+          <div className="py-14"
             onMouseMove={(e) => {
               const r = e.currentTarget.getBoundingClientRect();
               setMouse({ x: (e.clientX - r.left - r.width / 2) / r.width, y: (e.clientY - r.top - r.height / 2) / r.height });
@@ -910,7 +910,7 @@ export default function Dashboard() {
                 <div className="mb-3 flex items-center gap-2.5 font-mono text-[9px] uppercase tracking-[0.3em] text-acc">
                   <span className="h-px w-6 bg-acc" />Trader Operating System
                 </div>
-                <h1 className="font-sans text-3xl font-bold leading-tight tracking-tight sm:text-4xl">
+                <h1 className="font-sans text-4xl font-bold leading-tight tracking-tight sm:text-5xl">
                   Keep the account alive.<br />
                   <span className="fc-glow bg-gradient-to-r from-t1 to-acc bg-clip-text text-transparent">
                     Then make it profitable.
@@ -918,13 +918,13 @@ export default function Dashboard() {
                 </h1>
                 <div className="mt-6 flex flex-wrap items-end gap-x-7 gap-y-3">
                   {[
-                    { l: "TRADES", v: String(animTrades), c: "#040D1E" },
-                    { l: "NET P&L", v: (animNetRaw >= 0 ? "+" : "") + "$" + Math.abs(animNetRaw).toLocaleString(), c: all.sum >= 0 ? "#059669" : "#DC2626" },
-                    { l: "WIN RATE", v: animWinRate + "%", c: all.winRate >= 0.5 ? "#059669" : "#B45309" },
-                    { l: "EXP / TRADE", v: (animExp >= 0 ? "+" : "") + "$" + Math.abs(animExp), c: all.exp >= 0 ? "#059669" : "#DC2626" },
+                    { l: "TRADES", v: String(animTrades), c: "#F0F4FF" },
+                    { l: "NET P&L", v: (animNetRaw >= 0 ? "+" : "") + "$" + Math.abs(animNetRaw).toLocaleString(), c: all.sum >= 0 ? "#10B981" : "#EF4444" },
+                    { l: "WIN RATE", v: animWinRate + "%", c: all.winRate >= 0.5 ? "#10B981" : "#F59E0B" },
+                    { l: "EXP / TRADE", v: (animExp >= 0 ? "+" : "") + "$" + Math.abs(animExp), c: all.exp >= 0 ? "#10B981" : "#EF4444" },
                   ].map((s) => (
                     <div key={s.l} className="flex flex-col">
-                      <span className="tabnum font-mono text-[22px] font-semibold leading-none" style={{ color: s.c }}>{s.v}</span>
+                      <span className="tabnum font-mono text-[30px] font-bold leading-none tracking-tight" style={{ color: s.c }}>{s.v}</span>
                       <span className="mt-1 font-mono text-[7.5px] uppercase tracking-[0.22em] text-t3">{s.l}</span>
                     </div>
                   ))}
@@ -1018,7 +1018,7 @@ export default function Dashboard() {
                   </div>
                 </div>
                 <TiltCard className="overflow-hidden rounded-lg border"
-                  style={{ borderColor: result ? VCOLOR[result.verdict] : "rgba(3,105,161,0.09)" }}>
+                  style={{ borderColor: result ? VCOLOR[result.verdict] : "rgba(59,130,246,0.18)" }}>
                   {!result ? (
                     <div className="px-6 py-20 text-center font-mono text-xs tracking-wide text-t3">Run a check to see the verdict.</div>
                   ) : (
@@ -1063,7 +1063,7 @@ export default function Dashboard() {
               {sigs.map((s, i) => (
                 <div key={i} className="relative mb-3.5 overflow-hidden rounded-lg border border-bd bg-panel p-6">
                   <div className="absolute left-0 top-0 h-full w-[3px]"
-                    style={{ background: s.sev === "high" ? "#DC2626" : s.sev === "med" ? "#B45309" : "#059669" }} />
+                    style={{ background: s.sev === "high" ? "#EF4444" : s.sev === "med" ? "#F59E0B" : "#10B981" }} />
                   <div className="mb-2.5 flex items-start justify-between gap-4">
                     <div className="font-sans text-base font-semibold">{s.name}</div>
                     <div className={`whitespace-nowrap rounded px-2.5 py-1 font-mono text-[8.5px] uppercase tracking-wider ${s.sev === "high" ? "bg-red/10 text-red" : s.sev === "med" ? "bg-amb/10 text-amb" : "bg-grn/10 text-grn"}`}>
@@ -1115,7 +1115,7 @@ export default function Dashboard() {
                       { l: "Discipline", v: scoreBreakdown.discPts, max: 25, desc: "Negative setup avoidance" },
                       { l: "Sample Size", v: scoreBreakdown.samplePts, max: 10, desc: "Statistical confidence" },
                     ].map((b) => {
-                      const bCol = b.v / b.max > 0.66 ? "#059669" : b.v / b.max > 0.33 ? "#B45309" : "#DC2626";
+                      const bCol = b.v / b.max > 0.66 ? "#10B981" : b.v / b.max > 0.33 ? "#F59E0B" : "#EF4444";
                       return (
                         <div key={b.l}>
                           <div className="flex justify-between font-mono text-[9px] mb-1.5">
@@ -1125,7 +1125,7 @@ export default function Dashboard() {
                               <span className="tabnum font-semibold" style={{ color: bCol }}>{b.v}<span className="opacity-40 font-normal">/{b.max}</span></span>
                             </span>
                           </div>
-                          <div className="h-[2px] rounded-full" style={{ background: "rgba(3,105,161,.08)" }}>
+                          <div className="h-[2px] rounded-full" style={{ background: "rgba(59,130,246,.08)" }}>
                             <div className="h-full rounded-full"
                               style={{ width: (b.v / b.max * 100).toFixed(1) + "%", background: bCol, boxShadow: `0 0 8px ${bCol}88`, transition: "width .9s cubic-bezier(.4,0,.2,1)" }} />
                           </div>
@@ -1140,8 +1140,8 @@ export default function Dashboard() {
                 {[
                   ["Trades analyzed", String(all.n), "#0F172A"],
                   ["Win rate", (all.winRate * 100).toFixed(0) + "%", "#0F172A"],
-                  ["Expectancy / trade", fmtMoney(all.exp), all.exp >= 0 ? "#059669" : "#DC2626"],
-                  ["Net P&L", fmtMoney(all.sum), all.sum >= 0 ? "#059669" : "#DC2626"],
+                  ["Expectancy / trade", fmtMoney(all.exp), all.exp >= 0 ? "#10B981" : "#EF4444"],
+                  ["Net P&L", fmtMoney(all.sum), all.sum >= 0 ? "#10B981" : "#EF4444"],
                 ].map((b) => (
                   <div key={b[0]} className="bg-panel p-4">
                     <div className="tabnum font-mono text-2xl font-medium" style={{ color: b[2] }}>{b[1]}</div>
@@ -1158,7 +1158,7 @@ export default function Dashboard() {
                   <EquityChart trades={journal} />
                   <div className="mt-3.5 flex flex-wrap gap-5 font-mono text-[10px] text-t2">
                     <span className="flex items-center gap-1.5"><i className="inline-block h-[3px] w-3.5 rounded" style={{ background: "#475569" }} />Actual equity</span>
-                    <span className="flex items-center gap-1.5"><i className="inline-block h-[3px] w-3.5 rounded" style={{ background: "#059669" }} />If you cut negative-expectancy trades</span>
+                    <span className="flex items-center gap-1.5"><i className="inline-block h-[3px] w-3.5 rounded" style={{ background: "#10B981" }} />If you cut negative-expectancy trades</span>
                   </div>
                 </div>
               </div>
@@ -1225,12 +1225,12 @@ export default function Dashboard() {
               </p>
               <div className="mb-6 grid grid-cols-2 gap-[2px] border border-bd bg-bd md:grid-cols-3">
                 {[
-                  { l: "Blow rate · base", v: (mc.blow * 100).toFixed(0) + "%", c: mc.blow > 0.5 ? "#DC2626" : "#B45309", s: "hit trailing DD" },
-                  { l: "Survive rate · base", v: (mc.survive * 100).toFixed(0) + "%", c: mc.survive > 0.5 ? "#059669" : "#B45309", s: "avoid DD breach" },
-                  { l: "Pass rate · base", v: (mc.pass * 100).toFixed(0) + "%", c: mc.pass > 0.5 ? "#059669" : "#B45309", s: "survive + profitable" },
-                  { l: "Blow rate · disciplined", v: (mcDisc.blow * 100).toFixed(0) + "%", c: mcDisc.blow < mc.blow ? "#059669" : "#DC2626", s: "after cutting leaks" },
-                  { l: "Survive rate · disciplined", v: (mcDisc.survive * 100).toFixed(0) + "%", c: mcDisc.survive > mc.survive ? "#059669" : "#B45309", s: "after cutting leaks" },
-                  { l: "Pass rate · disciplined", v: (mcDisc.pass * 100).toFixed(0) + "%", c: mcDisc.pass > mc.pass ? "#059669" : "#B45309", s: "after cutting leaks" },
+                  { l: "Blow rate · base", v: (mc.blow * 100).toFixed(0) + "%", c: mc.blow > 0.5 ? "#EF4444" : "#F59E0B", s: "hit trailing DD" },
+                  { l: "Survive rate · base", v: (mc.survive * 100).toFixed(0) + "%", c: mc.survive > 0.5 ? "#10B981" : "#F59E0B", s: "avoid DD breach" },
+                  { l: "Pass rate · base", v: (mc.pass * 100).toFixed(0) + "%", c: mc.pass > 0.5 ? "#10B981" : "#F59E0B", s: "survive + profitable" },
+                  { l: "Blow rate · disciplined", v: (mcDisc.blow * 100).toFixed(0) + "%", c: mcDisc.blow < mc.blow ? "#10B981" : "#EF4444", s: "after cutting leaks" },
+                  { l: "Survive rate · disciplined", v: (mcDisc.survive * 100).toFixed(0) + "%", c: mcDisc.survive > mc.survive ? "#10B981" : "#F59E0B", s: "after cutting leaks" },
+                  { l: "Pass rate · disciplined", v: (mcDisc.pass * 100).toFixed(0) + "%", c: mcDisc.pass > mc.pass ? "#10B981" : "#F59E0B", s: "after cutting leaks" },
                 ].map((s) => (
                   <div key={s.l} className="bg-panel p-5">
                     <div className="tabnum font-mono text-2xl font-medium" style={{ color: s.c }}>{s.v}</div>
@@ -1275,23 +1275,23 @@ export default function Dashboard() {
         <style>{`
           .ticker-scroll{animation:tickerMove 28s linear infinite}
           @keyframes tickerMove{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-          .fcin{width:100%;background:rgba(255,255,255,.96);color:#040D1E;border:1px solid rgba(22,72,204,.14);border-radius:6px;padding:11px 12px;font-family:"JetBrains Mono",monospace;font-size:13px;outline:none;transition:border-color .2s,box-shadow .2s}
-          .fcin:focus{border-color:#1648CC;box-shadow:0 0 0 3px rgba(22,72,204,.15)}
-          .bg-panel{background:rgba(255,255,255,.98)!important;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:0 1px 2px rgba(0,0,0,.04),0 8px 40px rgba(4,13,30,.07),0 0 0 1px rgba(22,72,204,.05)}
-          .border-bd{border-color:rgba(22,72,204,.13)!important}
-          header.sticky{background:rgba(247,249,252,.97)!important;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:0 1px 0 rgba(22,72,204,.12),0 4px 32px rgba(4,13,30,.08)}
+          .fcin{width:100%;background:rgba(255,255,255,.04);color:#F0F4FF;border:1px solid rgba(255,255,255,.10);border-radius:8px;padding:11px 14px;font-family:"JetBrains Mono",monospace;font-size:13px;outline:none;transition:border-color .2s,box-shadow .2s}
+          .fcin:focus{border-color:#3B82F6;box-shadow:0 0 0 3px rgba(59,130,246,.20)}
+          .bg-panel{background:rgba(10,22,40,.82)!important;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);box-shadow:0 0 0 1px rgba(255,255,255,.06),0 4px 8px rgba(0,0,0,.35),0 24px 64px rgba(0,0,0,.45)}
+          .border-bd{border-color:rgba(255,255,255,.07)!important}
+          header.sticky{background:rgba(2,8,23,.92)!important;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);box-shadow:0 1px 0 rgba(255,255,255,.07),0 4px 32px rgba(0,0,0,.55)}
           .rounded-lg.border,.rounded-xl.border{transition:transform .25s cubic-bezier(.4,0,.2,1),border-color .25s,box-shadow .25s}
-          .rounded-lg.border:hover,.rounded-xl.border:hover{border-color:rgba(22,72,204,.22)!important;box-shadow:0 12px 40px rgba(4,13,30,.10),0 0 0 1px rgba(22,72,204,.12),0 0 30px rgba(22,72,204,.05);transform:translateY(-1px)}
-          .fc-glow{filter:drop-shadow(0 0 24px rgba(22,72,204,.50))}
-          .tabglow{text-shadow:0 0 18px rgba(22,72,204,.55)}
+          .rounded-lg.border:hover,.rounded-xl.border:hover{border-color:rgba(59,130,246,.45)!important;box-shadow:0 0 0 1px rgba(59,130,246,.22),0 24px 64px rgba(0,0,0,.55),0 0 60px rgba(59,130,246,.12);transform:translateY(-2px)}
+          .fc-glow{filter:drop-shadow(0 0 32px rgba(59,130,246,.75))}
+          .tabglow{text-shadow:0 0 24px rgba(59,130,246,.80)}
           .tabnum{font-variant-numeric:tabular-nums}
-          .fc-scan{position:fixed;left:0;right:0;height:1px;z-index:5;pointer-events:none;opacity:.45;background:linear-gradient(90deg,transparent,rgba(22,72,204,0) 8%,rgba(22,72,204,.4) 50%,rgba(147,197,253,.5) 50%,rgba(22,72,204,0) 92%,transparent);animation:fcScan 11s ease-in-out infinite}
+          .fc-scan{position:fixed;left:0;right:0;height:1px;z-index:5;pointer-events:none;opacity:.70;background:linear-gradient(90deg,transparent,rgba(59,130,246,0) 8%,rgba(59,130,246,.60) 50%,rgba(147,197,253,.70) 50%,rgba(59,130,246,0) 92%,transparent);animation:fcScan 11s ease-in-out infinite}
           @keyframes fcScan{0%{top:-2px;opacity:0}4%{opacity:.45}48%{top:100vh;opacity:.22}50%{opacity:0}100%{top:100vh;opacity:0}}
-          .fc-scanlines{background:repeating-linear-gradient(0deg,transparent,transparent 1px,rgba(22,72,204,.018) 1px,rgba(22,72,204,.018) 2px)}
-          .fc-vignette{background:radial-gradient(ellipse at 50% 50%,transparent 55%,rgba(147,197,253,.20) 100%)}
-          .fc-dotgrid{background-image:radial-gradient(circle,rgba(22,72,204,.07) 1px,transparent 1px);background-size:28px 28px}
+          .fc-scanlines{background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,255,255,.012) 2px,rgba(255,255,255,.012) 3px)}
+          .fc-vignette{background:radial-gradient(ellipse at 50% 50%,transparent 38%,rgba(0,0,0,.60) 100%)}
+          .fc-dotgrid{background-image:radial-gradient(circle,rgba(255,255,255,.055) 1px,transparent 1px);background-size:32px 32px}
           @keyframes verdictFlash{0%{opacity:.6}100%{opacity:0}}
-          @keyframes dangerpulse{0%,100%{box-shadow:0 0 0 0 transparent}50%{box-shadow:0 0 24px 3px rgba(220,38,38,.15)}}
+          @keyframes dangerpulse{0%,100%{box-shadow:0 0 0 0 transparent}50%{box-shadow:0 0 32px 4px rgba(239,68,68,.25)}}
           .dangerpulse{animation:dangerpulse 2.5s ease-in-out infinite}
           @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
           .fade{animation:fade .35s ease}
@@ -1299,13 +1299,14 @@ export default function Dashboard() {
           .pulse{animation:pulse 2s infinite}
           @keyframes typeVerdict{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0% 0 0)}}
           .verdict-type{animation:typeVerdict .45s steps(8,end) forwards}
-          .sysbar{background:linear-gradient(90deg,#040D1E 0%,#0A1830 100%)!important;border-bottom:1px solid rgba(22,72,204,.30)!important;color:rgba(255,255,255,.55)!important}
-          .sysbar .text-acc{color:#93C5FD!important}
+          .sysbar{background:linear-gradient(90deg,#020817 0%,#0C1A32 50%,#020817 100%)!important;border-bottom:1px solid rgba(59,130,246,.20)!important;color:rgba(255,255,255,.52)!important}
+          .sysbar .text-acc{color:#60A5FA!important}
           .sysbar .text-grn{color:#34D399!important}
           .sysbar .bg-grn{background-color:#34D399!important}
-          .sysbar .text-t2,.sysbar .text-t3{color:rgba(255,255,255,.45)!important}
-          .cta-btn{background:linear-gradient(135deg,#1648CC 0%,#7C3AED 100%);box-shadow:0 4px 20px rgba(22,72,204,.35)}
-          .cta-btn:hover{background:linear-gradient(135deg,#1B52E0 0%,#8B47F5 100%);box-shadow:0 6px 28px rgba(22,72,204,.50);transform:translateY(-1px)}
+          .sysbar .text-t2,.sysbar .text-t3{color:rgba(255,255,255,.38)!important}
+          .cta-btn{background:linear-gradient(135deg,#1D4ED8 0%,#7C3AED 100%);box-shadow:0 4px 28px rgba(29,78,216,.55),0 0 0 1px rgba(255,255,255,.09)}
+          .cta-btn:hover{background:linear-gradient(135deg,#2563EB 0%,#8B47F5 100%);box-shadow:0 8px 40px rgba(29,78,216,.70),0 0 0 1px rgba(255,255,255,.13),0 0 70px rgba(59,130,246,.18);transform:translateY(-2px)}
+          .grad-text{background:linear-gradient(135deg,#F0F4FF 0%,#93C5FD 60%,#818CF8 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
         `}</style>
       </main>
     </>
