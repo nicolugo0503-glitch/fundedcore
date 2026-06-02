@@ -54,6 +54,7 @@ const TABS = [
   ["edge", "03 · Edge Analytics"],
   ["journal", "04 · Journal"],
   ["mc", "05 · Monte Carlo"],
+  ["coach", "06 · AI Coach ✨"],
 ] as const;
 
 // ─── Boot Screen ──────────────────────────────────────────────────────────────
@@ -651,6 +652,13 @@ export default function Dashboard() {
     try { return !sessionStorage.getItem("fc_booted"); } catch { return false; }
   });
 
+  // ── AI Coach state ────────────────────────────────────────────────────────
+  const [apiKey, setApiKey] = useState<string>(() => { try { return localStorage.getItem("fc_api_key") || ""; } catch { return ""; } });
+  const [apiKeyInput, setApiKeyInput] = useState("");
+  const [coachMsgs, setCoachMsgs] = useState<{role:"user"|"assistant";content:string}[]>([]);
+  const [coachInput, setCoachInput] = useState("");
+  const [coachLoading, setCoachLoading] = useState(false);
+
   // persistence
   useEffect(() => {
     try {
@@ -828,6 +836,60 @@ export default function Dashboard() {
       if (rows.length) { setJournal(rows); setCsvName(f.name); try { localStorage.setItem("fc_journal", JSON.stringify(rows)); } catch {} }
     };
     r.readAsText(f);
+  }
+
+  // ── AI Coach: call /api/coach with full trading context ─────────────────
+  async function askCoach(question: string) {
+    if (!question.trim() || coachLoading) return;
+    const key = apiKey;
+    const userMsg = { role: "user" as const, content: question };
+    const newMsgs = [...coachMsgs, userMsg];
+    setCoachMsgs(newMsgs);
+    setCoachInput("");
+    setCoachLoading(true);
+
+    // Build rich context from live state
+    const setupRows = setups.map(s => `  ${s.key}: n=${s.n} winRate=${(s.winRate*100).toFixed(0)}% exp=$${s.exp.toFixed(0)}/trade net=$${s.sum.toFixed(0)}`).join("\n");
+    const hourRows = [groupBy(journal, (t) => hourBucket(t.hour)).sort((a,b)=>a.exp-b.exp)].flat().map(h => `  ${h.key}: n=${h.n} winRate=${(h.winRate*100).toFixed(0)}% exp=$${h.exp.toFixed(0)}/trade`).join("\n");
+    const sigText = sigs.map(s => `${s.name} [${s.sev}]: cost ~$${s.score.toFixed(0)}`).join("; ");
+
+    const context = {
+      firmName: firm.name,
+      accountSize: firm.start,
+      trailingDD: firm.trailingDD,
+      drawdownType: firm.drawdownType,
+      dailyLoss: firm.dailyLoss,
+      contractCap: firm.contractCap,
+      trailingRoom: sc.trailingRoom,
+      todayPnL: sc.todayPnL,
+      totalTrades: all.n,
+      winRate: Math.round(all.winRate * 100),
+      expectancy: Math.round(all.exp),
+      netPnL: Math.round(all.sum),
+      fundedScore: score,
+      revengeTrades: journal.filter(t => t.revenge).length,
+      revengePct: all.n > 0 ? Math.round(journal.filter(t => t.revenge).length / all.n * 100) : 0,
+      signatures: sigText,
+      setups: setupRows,
+      hourBuckets: hourRows,
+    };
+
+    try {
+      const res = await fetch("/api/coach", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: newMsgs, apiKey: key, context }),
+      });
+      const data = await res.json();
+      if (data.content) {
+        setCoachMsgs([...newMsgs, { role: "assistant", content: data.content }]);
+      } else {
+        setCoachMsgs([...newMsgs, { role: "assistant", content: `⚠️ ${data.error || "Unknown error"}` }]);
+      }
+    } catch {
+      setCoachMsgs([...newMsgs, { role: "assistant", content: "⚠️ Connection error. Check your API key and network." }]);
+    }
+    setCoachLoading(false);
   }
 
   return (
@@ -1302,6 +1364,129 @@ export default function Dashboard() {
             </div>
           )}
         </div>
+
+        {/* ── tab: AI Coach ─────────────────────────────────────────────────────── */}
+        {tab === "coach" && (
+          <div className="fade py-8">
+            <div className="mb-6">
+              <div className="mb-2 flex items-center gap-2.5 font-mono text-[9px] uppercase tracking-[0.3em]" style={{ color: "#3B82F6" }}>
+                <span className="h-1.5 w-1.5 rounded-full pulse" style={{ background: "#3B82F6" }} />
+                Powered by Claude
+              </div>
+              <h2 className="font-sans text-2xl font-bold">AI Trading Coach</h2>
+              <p className="mt-1 max-w-2xl text-sm leading-relaxed text-t2">
+                Claude analyzes your actual journal data — {all.n} trades, your firm&apos;s exact rules, and your live account state — to find the specific behaviors costing you money.
+              </p>
+            </div>
+
+            {/* API Key setup */}
+            {!apiKey && (
+              <div className="mb-8 rounded-xl border p-6" style={{ borderColor: "rgba(59,130,246,.25)", background: "rgba(14,28,56,.60)" }}>
+                <div className="mb-1 font-mono text-[10px] uppercase tracking-wider" style={{ color: "#60A5FA" }}>Connect Claude to activate AI coaching</div>
+                <p className="mb-4 text-sm leading-relaxed text-t2">
+                  Enter your Anthropic API key. It's stored in your browser only — FundedCore never sees it.
+                  Get one at <a href="https://console.anthropic.com" target="_blank" rel="noopener noreferrer" style={{ color: "#60A5FA" }}>console.anthropic.com</a>.
+                </p>
+                <div className="flex gap-3">
+                  <input type="password" className="fcin flex-1" placeholder="sk-ant-api03-…"
+                    value={apiKeyInput} onChange={(e) => setApiKeyInput(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter" && apiKeyInput.startsWith("sk-")) { setApiKey(apiKeyInput); try { localStorage.setItem("fc_api_key", apiKeyInput); } catch {} } }} />
+                  <button
+                    onClick={() => { if (apiKeyInput.startsWith("sk-")) { setApiKey(apiKeyInput); try { localStorage.setItem("fc_api_key", apiKeyInput); } catch {} } }}
+                    className="cta-btn rounded-lg px-5 py-2.5 font-mono text-xs font-semibold uppercase tracking-wider text-white">
+                    Activate
+                  </button>
+                </div>
+                <p className="mt-3 font-mono text-[9px] text-t3">Each coaching session uses ~$0.05–0.15 of API credits at standard Anthropic pricing.</p>
+              </div>
+            )}
+
+            {apiKey && (
+              <div className="grid gap-6 lg:grid-cols-[1fr_300px]">
+                {/* Chat */}
+                <div className="flex flex-col gap-4">
+                  {/* Quick prompts */}
+                  <div className="flex flex-wrap gap-2">
+                    {["Why am I losing money?","What is my biggest behavioral flaw?","Will I blow this account?","Which setups should I cut?","Top 3 changes for next week"].map((q) => (
+                      <button key={q} onClick={() => askCoach(q)} disabled={coachLoading}
+                        className="rounded-full border px-3 py-1.5 font-mono text-[10px] transition hover:border-acc hover:text-acc"
+                        style={{ borderColor: "rgba(255,255,255,.10)", color: "#94A3B8" }}>{q}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Messages */}
+                  <div className="min-h-[220px] max-h-[420px] overflow-y-auto space-y-4 rounded-xl border p-4"
+                    style={{ borderColor: "rgba(255,255,255,.07)", background: "rgba(10,22,40,.6)" }}>
+                    {coachMsgs.length === 0 && !coachLoading && (
+                      <p className="py-10 text-center font-mono text-[11px] text-t3">
+                        Ask a question or pick one above. Claude has your full {all.n}-trade journal as context.
+                      </p>
+                    )}
+                    {coachMsgs.map((m, i) => (
+                      <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+                        <div className="max-w-xl rounded-lg px-4 py-3 font-mono text-[12px] leading-relaxed whitespace-pre-wrap"
+                          style={m.role === "user"
+                            ? { background: "rgba(59,130,246,.15)", color: "#93C5FD" }
+                            : { background: "rgba(255,255,255,.05)", color: "#F0F4FF", border: "1px solid rgba(255,255,255,.07)" }}>
+                          {m.content}
+                        </div>
+                      </div>
+                    ))}
+                    {coachLoading && (
+                      <div className="flex justify-start">
+                        <div className="rounded-lg border px-4 py-3 font-mono text-[11px] text-t3"
+                          style={{ borderColor: "rgba(255,255,255,.07)" }}>
+                          Analyzing {all.n} trades<span className="pulse">…</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Input */}
+                  <div className="flex gap-3">
+                    <input className="fcin flex-1" placeholder="Ask about your patterns, risk, or what to change next session…"
+                      value={coachInput} onChange={(e) => setCoachInput(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === "Enter") askCoach(coachInput); }} />
+                    <button onClick={() => askCoach(coachInput)} disabled={coachLoading || !coachInput.trim()}
+                      className="cta-btn rounded-lg px-5 py-2.5 font-mono text-xs font-semibold uppercase tracking-wider text-white">
+                      Send
+                    </button>
+                  </div>
+                  <button onClick={() => { setApiKey(""); setCoachMsgs([]); try { localStorage.removeItem("fc_api_key"); } catch {} }}
+                    className="self-start font-mono text-[9px] text-t3 transition hover:text-t2">× disconnect key</button>
+                </div>
+
+                {/* Context panel */}
+                <div className="rounded-xl border p-5 self-start" style={{ borderColor: "rgba(255,255,255,.07)", background: "rgba(10,22,40,.6)" }}>
+                  <div className="mb-3 font-mono text-[9px] uppercase tracking-wider" style={{ color: "#60A5FA" }}>Claude has this context</div>
+                  {([
+                    ["Firm", firm.name],
+                    ["Account", "$" + firm.start.toLocaleString()],
+                    ["DD type", firm.drawdownType === "eod_trailing" ? "EOD" : "Intraday"],
+                    ["Trailing room", "$" + sc.trailingRoom.toLocaleString()],
+                    ["Today P&L", "$" + sc.todayPnL.toLocaleString()],
+                    ["Trades", String(all.n)],
+                    ["Win rate", Math.round(all.winRate * 100) + "%"],
+                    ["Expectancy", "$" + Math.round(all.exp)],
+                    ["Net P&L", "$" + Math.round(all.sum).toLocaleString()],
+                    ["FundedScore", score + "/100"],
+                    ["Revenge trades", String(journal.filter(t => t.revenge).length)],
+                    ["Behaviors found", String(sigs.length)],
+                  ] as [string,string][]).map(([l, v]) => (
+                    <div key={l} className="flex justify-between border-b py-1.5 font-mono text-[10px] last:border-0" style={{ borderColor: "rgba(255,255,255,.05)" }}>
+                      <span className="text-t3">{l}</span>
+                      <span className="text-t2">{v}</span>
+                    </div>
+                  ))}
+                  <p className="mt-3 font-mono text-[9px] text-t3 leading-relaxed">
+                    Claude receives your full setup-by-setup and hour-by-hour breakdown. The coaching is specific to your numbers, not generic advice.
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         <footer className="mt-12 border-t border-bd py-7">
           <div className="mx-auto max-w-6xl px-6 font-mono text-[10px] leading-relaxed text-t3">
