@@ -7,7 +7,8 @@ import {
   FIRMS, INSTRUMENTS, generateJournal, parseCSV, CSV_TEMPLATE,
   expectancy, groupBy, hourBucket, equitySeries, behaviorSignatures,
   preTradeCheck, fmtMoney, monteCarlo, fundedScore,
-  type Trade, type CheckResult, type Verdict,
+  checkNewsWindow, getEventsForDate,
+  type Trade, type CheckResult, type Verdict, type NewsEvent,
 } from "@/lib/engine";
 
 // ─── useCountUp ────────────────────────────────────────────────────────────────
@@ -754,7 +755,6 @@ export default function Dashboard() {
   const dailyRoom = firm.dailyLoss == null ? null : Math.max(0, firm.dailyLoss - Math.max(0, -sc.todayPnL));
   const dailyPct = firm.dailyLoss == null ? 100 : (dailyRoom! / firm.dailyLoss) * 100;
   const trailPct = (sc.trailingRoom / firm.trailingDD) * 100;
-  const minPct = firm.minDays === 0 ? 100 : Math.min(100, (sc.daysTraded / firm.minDays) * 100);
   const col = (p: number) => (p > 50 ? "#10B981" : p > 25 ? "#F59E0B" : "#EF4444");
 
   const threatLevel = useMemo(() => {
@@ -777,6 +777,18 @@ export default function Dashboard() {
   const mm = String(Math.floor((elapsed % 3600) / 60)).padStart(2, "0");
   const ss = String(elapsed % 60).padStart(2, "0");
 
+  // Live economic news window detection (checked every 30s)
+  const [liveNews, setLiveNews] = useState<ReturnType<typeof checkNewsWindow>>(
+    () => checkNewsWindow(new Date(Date.now() + ((-4) * 3600000) - (new Date().getTimezoneOffset() * 60000)))
+  );
+  useEffect(() => {
+    const toET = () => { const now = new Date(); return new Date(now.getTime() + (now.getTimezoneOffset() + (-4 * 60)) * 60000); };
+    const check = () => setLiveNews(checkNewsWindow(toET()));
+    check();
+    const id = setInterval(check, 30000);
+    return () => clearInterval(id);
+  }, []);
+
   // animated hero counters
   const animTrades = useCountUp(all.n);
   const animNetRaw = useCountUp(Math.round(all.sum));
@@ -785,7 +797,9 @@ export default function Dashboard() {
 
   const smallGauges = [
     { l: "Today P&L", v: (sc.todayPnL >= 0 ? "+" : "") + "$" + sc.todayPnL, p: 50, c: sc.todayPnL >= 0 ? "#10B981" : "#EF4444", s: "realized" },
-    { l: "Min Days", v: sc.daysTraded + "/" + firm.minDays, p: minPct, c: minPct >= 100 ? "#10B981" : "#3B82F6", s: firm.minDays === 0 ? "no minimum" : Math.max(0, firm.minDays - sc.daysTraded) + " left" },
+    { l: "DD Type", v: firm.drawdownType === "eod_trailing" ? "EOD" : "INTRA", p: 100,
+      c: firm.drawdownType === "eod_trailing" ? "#10B981" : "#F59E0B",
+      s: firm.drawdownType === "eod_trailing" ? "end-of-day — safer" : "intraday trailing — caution" },
     { l: "Account", v: "ALIVE", p: 100, c: "#10B981", s: firm.name.split(" ")[0] + " · funded" },
   ];
 
@@ -800,7 +814,7 @@ export default function Dashboard() {
   const actCls: Record<string, string> = { scale: "text-grn bg-grn/10", cut: "text-red bg-red/10", hold: "text-t2 bg-white/5" };
 
   function runCheck() {
-    const r = preTradeCheck(firm, sc, { instrument: inst, size: Math.max(1, size || 1), stop: Math.max(1, stop || 1), news, tilt });
+    const r = preTradeCheck(firm, sc, { instrument: inst, size: Math.max(1, size || 1), stop: Math.max(1, stop || 1), news, tilt, newsWindow: liveNews });
     setResult(r);
     setFlash(VCOLOR[r.verdict]);
     setTimeout(() => setFlash(null), 860);
@@ -860,6 +874,17 @@ export default function Dashboard() {
             <span className="flex items-center gap-1.5 text-grn">
               <span className="inline-block h-1 w-1 rounded-full bg-grn pulse" />SYSTEM ONLINE
             </span>
+            {liveNews.blocked && liveNews.event && (
+              <span className="flex items-center gap-1.5 font-bold" style={{ color: "#F59E0B" }}>
+                <span className="inline-block h-1 w-1 rounded-full pulse" style={{ background: "#F59E0B" }} />
+                {liveNews.event.name} WINDOW ACTIVE
+              </span>
+            )}
+            {!liveNews.blocked && liveNews.minutesUntil !== null && liveNews.minutesUntil <= 20 && liveNews.event && (
+              <span className="hidden text-amb md:inline">
+                ⏱ {liveNews.event.name} in {liveNews.minutesUntil}m
+              </span>
+            )}
             <span className="hidden text-t3 md:inline">{journal.length} TRADES LOADED</span>
             <span className="hidden tabnum text-t3 lg:inline">SESSION {hh}:{mm}:{ss}</span>
           </div>
@@ -890,7 +915,17 @@ export default function Dashboard() {
               <select value={acct}
                 onChange={(e) => { setAcct(e.target.value); setResult(null); try { localStorage.setItem("fc_acct", e.target.value); } catch {} }}
                 className="rounded border border-bd bg-panel px-3 py-2 font-mono text-[11px] text-t1 outline-none">
-                {Object.keys(FIRMS).map((k) => (<option key={k} value={k}>{FIRMS[k].name}</option>))}
+                {Object.entries(
+                  Object.entries(FIRMS).reduce((acc: Record<string, [string, typeof FIRMS[string]][]>, [k, f]) => {
+                    (acc[f.firmBrand] = acc[f.firmBrand] || []).push([k, f]); return acc;
+                  }, {})
+                ).map(([brand, entries]) => (
+                  <optgroup key={brand} label={brand}>
+                    {entries.map(([k, f]) => (
+                      <option key={k} value={k}>{f.name}</option>
+                    ))}
+                  </optgroup>
+                ))}
               </select>
             </div>
           </div>
@@ -1008,7 +1043,9 @@ export default function Dashboard() {
                       </select>
                     </Field>
                     <div className="mb-4 flex flex-wrap gap-2.5">
-                      <Toggle on={news} set={setNews}>News window</Toggle>
+                      <Toggle on={news} set={setNews}>
+                        News window{liveNews.blocked && liveNews.event ? ` — ${liveNews.event.name} LIVE` : ""}
+                      </Toggle>
                       <Toggle on={tilt} set={setTilt}>After 2 losses today</Toggle>
                     </div>
                     <button onClick={runCheck}
