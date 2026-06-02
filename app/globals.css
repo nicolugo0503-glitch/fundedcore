@@ -3,20 +3,20 @@
 @tailwind components;
 @tailwind utilities;
 
-:root { color-scheme: light; }
-html, body { background: #F7F9FC; color: #040D1E; }
+:root { color-scheme: dark; }
+html, body { background: #020817; color: #F0F4FF; }
 body { font-family: "Inter", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
 
 .grid-bg {
   position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: .6;
   background-image:
-    linear-gradient(rgba(22,72,204,.042) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(22,72,204,.042) 1px, transparent 1px);
+    linear-gradient(rgba(255,255,255,.028) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.028) 1px, transparent 1px);
   background-size: 64px 64px;
 }
 .glow { position: fixed; border-radius: 50%; filter: blur(120px); z-index: 0; pointer-events: none; }
-.glow-1 { width: 700px; height: 700px; background: radial-gradient(circle, rgba(147,197,253,.65), transparent 70%); top: -280px; right: -200px; }
-.glow-2 { width: 600px; height: 600px; background: radial-gradient(circle, rgba(196,181,253,.45), transparent 70%); bottom: -260px; left: -180px; }
+.glow-1 { width: 900px; height: 900px; background: radial-gradient(circle, rgba(59,130,246,.20), transparent 70%); top: -360px; right: -260px; }
+.glow-2 { width: 750px; height: 750px; background: radial-gradient(circle, rgba(124,58,237,.18), transparent 70%); bottom: -320px; left: -230px; }
 
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
 .pulse { animation: pulse 2s infinite; }
@@ -24,5 +24,5 @@ body { font-family: "Inter", system-ui, sans-serif; -webkit-font-smoothing: anti
 .fade { animation: fade .4s ease; }
 
 ::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-thumb { background: rgba(22,72,204,.22); border-radius: 5px; }
-::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,.12); border-radius: 5px; }
+::-webkit-scrollbar-track { background: rgba(255,255,255,.03); }
