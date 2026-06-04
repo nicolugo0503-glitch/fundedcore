@@ -1,24 +1,28 @@
-# Deploy FundedCore in ~2 minutes
+# Deploying FundedCore to Vercel (project: `fundedcore`)
 
-## Fastest: Vercel CLI
+The `fundedcore` Vercel project is connected to the GitHub repo
+`nicolugo0503-glitch/fundedcore` and auto-deploys on every push to `main`.
+Pick whichever path is easiest — both replace the current (broken) production deployment.
+
+## Option A — push to GitHub (auto-deploys, recommended)
+From the project folder:
 ```bash
-cd fundedcore
-npm install
+git add -A
+git commit -m "rebuild: AI-native prop firm — Trader Score engine, apply flow, funded dashboard"
+git push origin main
+```
+Vercel picks it up automatically and ships it to production in ~1–2 minutes.
+
+## Option B — Vercel CLI (direct)
+```bash
 npm i -g vercel
-vercel login        # if not already logged in
-vercel --prod       # follow prompts; accept defaults (Next.js auto-detected)
+vercel link          # select the existing "fundedcore" project (already linked via .vercel/)
+vercel deploy --prod
 ```
-That's it — you'll get a live URL.
 
-## Via GitHub (recommended for ongoing work)
-```bash
-cd fundedcore
-git init && git add -A && git commit -m "FundedCore v0.1"
-git branch -M main
-git remote add origin https://github.com/<your-username>/fundedcore.git
-git push -u origin main
-```
-Then: vercel.com → Add New → Project → Import `fundedcore` → Deploy.
-Every future `git push` auto-deploys.
-
-No environment variables required for this version.
+## Notes
+- `next.config.mjs` already detects Vercel (`VERCEL` env) and uses the standard
+  Next.js build there; the static-export/basePath config only applies to GitHub Pages.
+- No environment variables are required — scoring runs entirely client-side.
+- The previous production deployment was failing to build; this rebuild compiles clean
+  (`npm run build` → all routes prerendered).

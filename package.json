@@ -2,7 +2,7 @@
   "name": "fundedcore",
   "version": "0.1.0",
   "private": true,
-  "description": "FundedCore — the pre-trade risk firewall for funded traders",
+  "description": "FundedCore — the AI-native prop firm. Get a verified Trader Score and get funded directly.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
