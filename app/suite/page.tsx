@@ -15,12 +15,14 @@ import { SimulatorTab } from "../../components/suite/SimulatorTab";
 import { TodayTab } from "../../components/suite/TodayTab";
 import { PlanTab } from "../../components/suite/PlanTab";
 import { ToolsTab } from "../../components/suite/ToolsTab";
+import { ChartsTab } from "../../components/suite/ChartsTab";
 import { SettingsTab } from "../../components/suite/SettingsTab";
 import { AlertsBar } from "../../components/suite/AlertsBar";
 
 const TABS = [
   ["brief", "Daily Brief", "◎"],
   ["today", "Today · Live", "●"],
+  ["charts", "Charts", "◫"],
   ["risk", "Risk", "🛡"],
   ["insights", "Insights", "✦"],
   ["news", "News", "◷"],
@@ -86,6 +88,7 @@ export default function Suite() {
           {tab === "today" && <TodayTab profile={profile} setProfile={setProfile} />}
           {tab === "plan" && <PlanTab profile={profile} setProfile={setProfile} />}
           {tab === "tools" && <ToolsTab profile={profile} />}
+          {tab === "charts" && <ChartsTab profile={profile} />}
           {tab === "settings" && <SettingsTab profile={profile} setProfile={setProfile} />}
         </main>
       </div>
