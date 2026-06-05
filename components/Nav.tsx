@@ -26,14 +26,15 @@ export function Nav({ cta = true }: { cta?: boolean }) {
       <div className="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between">
         <Link href="/"><Logo /></Link>
         <nav className="hidden md:flex items-center gap-7 text-sm text-t2">
-          <Link href="/cockpit" className="hover:text-t1 transition">Cockpit</Link>
+          <Link href="/suite" className="hover:text-t1 transition">Suite</Link>
+          <Link href="/cockpit" className="hover:text-t1 transition">Risk</Link>
           <Link href="/live" className="hover:text-t1 transition">Live demo</Link>
           <Link href="/apply" className="hover:text-t1 transition">Trader Score</Link>
           <a href="/#how" className="hover:text-t1 transition">How it works</a>
         </nav>
         {cta && (
-          <Link href="/cockpit" className="btn btn-primary !py-2 !px-4 text-sm">
-            Open the cockpit
+          <Link href="/suite" className="btn btn-primary !py-2 !px-4 text-sm">
+            Open the suite
           </Link>
         )}
       </div>

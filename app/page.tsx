@@ -13,6 +13,7 @@ export default function Home() {
         <ScoreSection />
         <Economics />
         <Compare />
+        <Pricing />
         <Faq />
         <CtaBand />
       </main>
@@ -46,29 +47,29 @@ function Hero() {
   return (
     <section className="pt-20 pb-16 text-center relative">
       <div className="inline-flex items-center gap-2 chip mb-6">
-        <span className="w-1.5 h-1.5 rounded-full bg-grn pulse" /> The always-on risk layer for funded traders
+        <span className="w-1.5 h-1.5 rounded-full bg-grn pulse" /> Everything a funded trader needs — for $5/mo
       </div>
       <h1 className="text-[2.7rem] md:text-[4rem] font-bold leading-[1.04] tracking-tight max-w-4xl mx-auto">
-        Never blow a <span className="grad-text">funded account</span><br className="hidden md:block" />
-        by accident again.
+        Every tool a funded trader needs.<br className="hidden md:block" />
+        <span className="grad-text">One app. Five dollars.</span>
       </h1>
       <p className="mt-6 text-lg text-t2 max-w-2xl mx-auto leading-relaxed">
-        One blown rule ends a funded account you paid for. FundedCore is the cockpit that tracks your
-        <strong className="text-t1"> Distance to Breach</strong> across every account and firm in real time —
-        and a pre-trade guardrail that tells you the largest size you can take right now without blowing up.
+        Risk cockpit, pre-trade guardrail, live news, leak-finder, AI coach, challenge tracker, and your Trader Score —
+        personalized to you, in one place. Before every trade, you see <strong className="text-t1">everything</strong>.
+        All of it for <strong className="text-t1">$5/month</strong> instead of the $100+ traders pay for five scattered tools.
       </p>
       <div className="mt-9 flex items-center justify-center gap-3 flex-wrap">
-        <Link href="/cockpit" className="btn btn-primary text-base !px-7 !py-3.5">Open the Risk Cockpit →</Link>
+        <Link href="/suite" className="btn btn-primary text-base !px-7 !py-3.5">Open the suite →</Link>
         <Link href="/live" className="btn btn-ghost text-base !px-6 !py-3.5">Watch it live</Link>
       </div>
-      <div className="mt-5 text-xs text-t3">Free to start · connect every funded account, across every firm.</div>
+      <div className="mt-5 text-xs text-t3">Free to try · everything included · cancel anytime.</div>
 
       <div className="mt-14 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
         {[
-          ["1", "screen for every account"],
+          ["8", "tools in one app"],
+          ["$5", "a month, everything"],
           ["13+", "firm rule-sets built in"],
-          ["0", "blown accounts by surprise"],
-          ["∞", "accounts tracked"],
+          ["0", "tabs you'll miss"],
         ].map(([n, l]) => (
           <div key={l} className="card p-5">
             <div className="text-2xl md:text-3xl font-bold grad-text mono">{n}</div>
@@ -257,6 +258,23 @@ function Row({ cells, last }: { cells: string[]; last: boolean }) {
   );
 }
 
+function Pricing() {
+  const inc = ["Risk cockpit + Distance to Breach", "Pre-trade guardrail (max safe size)", "Live high-impact news + no-trade windows", "Leak-finder (what's costing you)", "AI coach grounded in your data", "Challenge / pass tracker", "Trader Score + journal", "Personalized daily brief"];
+  return (
+    <section className="py-16">
+      <div className="max-w-xl mx-auto card p-8 text-center" style={{ borderColor: "rgba(59,130,246,.35)" }}>
+        <div className="eyebrow">Pricing</div>
+        <h2 className="text-3xl font-bold mt-2">$5<span className="text-lg text-t2">/month</span></h2>
+        <p className="text-t2 text-sm mt-1">Everything. No tiers, no add-ons, no upsells.</p>
+        <ul className="text-left mt-6 grid sm:grid-cols-2 gap-y-2 gap-x-4">
+          {inc.map((x) => <li key={x} className="text-[.86rem] text-t2 flex gap-2"><span className="text-grn">✓</span>{x}</li>)}
+        </ul>
+        <Link href="/suite" className="btn btn-primary w-full mt-7">Start free →</Link>
+      </div>
+    </section>
+  );
+}
+
 function Faq() {
   const qs = [
     ["Is it really free?", "Yes. Scoring and funding cost you nothing upfront. There's no evaluation fee and no card required. FundedCore earns only its share of profits you actually generate on a funded account."],
@@ -292,7 +310,7 @@ function CtaBand() {
             Stop trading one bad click away from a blown account.
           </h2>
           <p className="text-t2 mt-4 max-w-xl mx-auto">Open the cockpit, add an account, and see your Distance to Breach in under a minute.</p>
-          <Link href="/cockpit" className="btn btn-primary text-base !px-8 !py-4 mt-8">Open the Risk Cockpit →</Link>
+          <Link href="/suite" className="btn btn-primary text-base !px-8 !py-4 mt-8">Open the suite — $5/mo →</Link>
         </div>
       </div>
     </section>

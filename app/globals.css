@@ -64,3 +64,8 @@ table.tbl tr:hover td { background:rgba(255,255,255,.02); }
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.12); border-radius: 5px; }
 ::-webkit-scrollbar-track { background: rgba(255,255,255,.03); }
+
+/* suite form inputs */
+.inp { width:100%; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.1); border-radius:9px; padding:.5rem .7rem; color:#F0F4FF; font-size:.9rem; }
+.inp:focus { outline:none; border-color:rgba(59,130,246,.6); }
+.lbl { font-size:.7rem; text-transform:uppercase; letter-spacing:.05em; color:#64748B; margin-bottom:.25rem; display:block; }
