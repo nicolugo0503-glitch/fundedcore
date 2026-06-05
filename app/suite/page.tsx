@@ -59,19 +59,31 @@ export default function Suite() {
         <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
           <Link href="/"><Logo size={24} /></Link>
           <div className="text-sm text-t2 hidden sm:block">Hi, <span className="text-t1 font-medium">{profile.name}</span> · {profile.accounts.length} account{profile.accounts.length !== 1 ? "s" : ""} · {profile.trades.length} trades</div>
-          <span className="chip" style={{ borderColor: "#10B98155", color: "#10B981" }}>$5/mo · everything</span>
+          <span className="chip" style={{ borderColor: "#34D39955", color: "#34D399" }}><span className="w-1.5 h-1.5 rounded-full pulse" style={{ background: "#34D399" }} /> live · all systems</span>
         </div>
       </header>
 
       <div className="max-w-7xl mx-auto w-full px-4 flex-1 grid md:grid-cols-[200px_1fr] gap-5 py-5">
         <nav className="md:sticky md:top-20 md:self-start">
-          <div className="flex md:flex-col gap-1 overflow-x-auto pb-2 md:pb-0">
+          <div className="navrail flex md:flex-col gap-1 overflow-x-auto">
             {TABS.map(([id, label, icon]) => (
               <button key={id} onClick={() => setTab(id)}
-                className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm whitespace-nowrap transition ${tab === id ? "bg-acc/15 text-t1 border border-acc/40" : "text-t2 hover:text-t1 hover:bg-white/[.03] border border-transparent"}`}>
-                <span className="opacity-80">{icon}</span> {label}
+                className={`navitem whitespace-nowrap ${tab === id ? "active" : ""}`}>
+                <span className="opacity-90 text-[.95rem]">{icon}</span>
+                <span className="hidden md:inline">{label}</span>
+                <span className="md:hidden">{label.split(" ")[0]}</span>
               </button>
             ))}
+          </div>
+          <div className="hidden md:flex items-center gap-2.5 mt-3 px-3 py-2.5 navrail">
+            <span className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0"
+              style={{ background: "linear-gradient(135deg,#5B8CFF,#8B5CF6)", boxShadow: "0 0 18px -4px rgba(91,140,255,.7)" }}>
+              {profile.name.charAt(0).toUpperCase()}
+            </span>
+            <div className="min-w-0">
+              <div className="text-[.8rem] font-medium truncate">{profile.name}</div>
+              <div className="text-[.65rem] text-t3">Pro · $5/mo</div>
+            </div>
           </div>
         </nav>
 

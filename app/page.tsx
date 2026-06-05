@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Nav, Footer } from "../components/Nav";
 import { Ticker } from "../components/Ticker";
+import { HeroShot } from "../components/HeroShot";
 
 export default function Home() {
   return (
@@ -33,11 +34,14 @@ function GuardianBand() {
   return (
     <section className="py-12">
       <div className="grid md:grid-cols-3 gap-5">
-        {cards.map(([t, d, href, cta]) => (
-          <Link key={t} href={href} className="card card-hover p-6 block">
+        {cards.map(([t, d, href, cta], i) => (
+          <Link key={t} href={href} className="card card-hover p-6 block group">
+            <div className="ring-num mb-4">{String(i + 1).padStart(2, "0")}</div>
             <h3 className="font-semibold text-lg">{t}</h3>
             <p className="text-[.88rem] text-t2 mt-2 leading-relaxed">{d}</p>
-            <div className="text-acc text-sm font-medium mt-4">{cta}</div>
+            <div className="text-acc text-sm font-medium mt-4 inline-flex items-center gap-1.5">
+              {cta.replace(" →", "")}<span className="transition-transform group-hover:translate-x-1.5">→</span>
+            </div>
           </Link>
         ))}
       </div>
@@ -65,6 +69,8 @@ function Hero() {
         <Link href="/live" className="btn btn-ghost text-base !px-6 !py-3.5">Watch it live</Link>
       </div>
       <div className="mt-5 text-xs text-t3">Free to try · everything included · cancel anytime.</div>
+
+      <HeroShot />
 
       {/* floating cockpit panels */}
       <div className="hidden lg:block absolute left-[-30px] top-44 floaty" style={{ ["--tilt" as any]: "-5deg" }}>
