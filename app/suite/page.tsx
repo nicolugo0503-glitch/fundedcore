@@ -11,6 +11,7 @@ import { NewsTab } from "../../components/suite/NewsTab";
 import { CoachTab } from "../../components/suite/CoachTab";
 import { JournalTab } from "../../components/suite/JournalTab";
 import { ChallengeTab } from "../../components/suite/ChallengeTab";
+import { SimulatorTab } from "../../components/suite/SimulatorTab";
 import { SettingsTab } from "../../components/suite/SettingsTab";
 import { AlertsBar } from "../../components/suite/AlertsBar";
 
@@ -22,6 +23,7 @@ const TABS = [
   ["coach", "AI Coach", "✧"],
   ["journal", "Journal & Score", "▤"],
   ["challenge", "Challenge", "◆"],
+  ["simulator", "Firm Simulator", "⇄"],
   ["settings", "Settings", "⚙"],
 ] as const;
 
@@ -74,6 +76,7 @@ export default function Suite() {
           {tab === "coach" && <CoachTab profile={profile} />}
           {tab === "journal" && <JournalTab profile={profile} setProfile={setProfile} />}
           {tab === "challenge" && <ChallengeTab profile={profile} />}
+          {tab === "simulator" && <SimulatorTab profile={profile} />}
           {tab === "settings" && <SettingsTab profile={profile} setProfile={setProfile} />}
         </main>
       </div>

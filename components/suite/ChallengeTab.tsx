@@ -2,6 +2,7 @@
 import { type Profile } from "../../lib/profile";
 import { assessAccount } from "../../lib/risk";
 import { usd } from "../../lib/format";
+import { monteCarlo } from "../../lib/montecarlo";
 
 export function ChallengeTab({ profile }: { profile: Profile }) {
   const evals = profile.accounts.filter((a) => assessAccount(a).firm.profitTarget > 0);
@@ -18,12 +19,18 @@ export function ChallengeTab({ profile }: { profile: Profile }) {
         const daysAssumed = 20; // illustrative funding window
         const daysLeft = Math.max(1, daysAssumed - a.daysTraded);
         const reqDaily = remaining / daysLeft;
-        // crude probability: based on buffer + progress
-        const prob = Math.round(Math.max(5, Math.min(95, progress * 60 + r.pctBuffer * 30 + 10)));
+        // probability: Monte Carlo on the trader's own P&L when available
+        let prob = Math.round(Math.max(5, Math.min(95, progress * 60 + r.pctBuffer * 30 + 10)));
+        let mcNote = "estimate";
+        if (profile.trades.length >= 10) {
+          const mc = monteCarlo(profile.trades, r.firm.trailingDD, 400, 60);
+          prob = Math.round(mc.survive * 100);
+          mcNote = "Monte Carlo, 400 runs of your own trades";
+        }
         return (
           <div key={a.id} className="card p-6">
             <div className="flex justify-between items-start"><div><div className="font-semibold">{a.label}</div><div className="text-[.78rem] text-t3">{r.firm.name}</div></div>
-              <span className="chip" style={{ borderColor: "#3B82F655", color: "#60A5FA" }}>{prob}% on track</span></div>
+              <span className="chip" style={{ borderColor: "#3B82F655", color: "#60A5FA" }} title={mcNote}>{prob}% survive odds</span></div>
             <div className="mt-4"><div className="flex justify-between text-[.8rem] text-t3"><span>profit target</span><span>{usd(Math.max(0, r.netPnL))} / {usd(target)}</span></div>
               <div className="h-3 rounded-full bg-white/[.06] overflow-hidden mt-1"><div className="h-full rounded-full bg-acc" style={{ width: `${progress * 100}%` }} /></div></div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-5">
@@ -32,7 +39,7 @@ export function ChallengeTab({ profile }: { profile: Profile }) {
               <Stat label="Req. daily P&L" value={usd(reqDaily)} />
               <Stat label="Breach buffer" value={usd(Math.max(0, r.distanceToBreach))} />
             </div>
-            <p className="text-[.78rem] text-t3 mt-3">Funding window and probability are illustrative estimates. Edit days traded in your account data.</p>
+            <p className="text-[.78rem] text-t3 mt-3">Survival odds: {mcNote}. Funding window is illustrative. Edit days traded in your account data.</p>
           </div>
         );
       })}
