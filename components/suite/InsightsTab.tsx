@@ -39,7 +39,14 @@ export function InsightsTab({ profile }: { profile: Profile }) {
         <BucketChart title="By hour (UTC)" buckets={ins.byHour} />
         <BucketChart title="By day of week" buckets={ins.byDay} />
       </div>
-      <BucketTable title="By instrument" buckets={ins.bySymbol} />
+      <div className="grid md:grid-cols-2 gap-5">
+        <BucketTable title="By instrument" buckets={ins.bySymbol} />
+        {ins.bySetup.length > 0 ? <BucketTable title="By setup" buckets={ins.bySetup} /> : (
+          <div className="card p-5 flex items-center justify-center text-center text-t3 text-sm">
+            Tag your trades with a setup (Today tab, or a &quot;setup&quot; column in your CSV)<br />to see which playbook actually pays you.
+          </div>
+        )}
+      </div>
     </div>
   );
 }

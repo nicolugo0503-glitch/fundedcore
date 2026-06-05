@@ -20,6 +20,7 @@ export type Trade = {
   size?: number;       // contracts / shares / lots
   pnl: number;         // net realized P&L in account currency
   rMultiple?: number;  // optional: P&L expressed in units of risk
+  tag?: string;        // optional: setup/strategy label
 };
 
 export type SubScore = {

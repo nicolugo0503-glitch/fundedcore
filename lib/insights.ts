@@ -22,6 +22,7 @@ export type Insights = {
   byHour: Bucket[];
   byDay: Bucket[];
   bySymbol: Bucket[];
+  bySetup: Bucket[];
   bySide: Bucket[];
   afterLoss: { net: number; trades: number; avgSizeMult: number };
   leaks: Leak[];
@@ -56,6 +57,8 @@ export function analyze(trades: Trade[]): Insights {
   const byDay = group(sorted, (t) => DOW[new Date(t.timestamp).getUTCDay()]);
   const bySymbol = group(sorted, (t) => t.symbol || "—").sort((a, b) => b.trades - a.trades);
   const bySide = group(sorted, (t) => t.side || "—");
+  const tagged = sorted.filter((t) => t.tag);
+  const bySetup = tagged.length >= 5 ? group(tagged, (t) => t.tag!).sort((a, b) => b.net - a.net) : [];
 
   // After-loss behavior (revenge): trades immediately following a losing trade.
   const sizes = sorted.map((t) => (t.size != null ? Math.abs(t.size) : Math.abs(t.pnl) || 1));
@@ -144,6 +147,17 @@ export function analyze(trades: Trade[]): Insights {
     });
   }
 
+  const worstSetup = bySetup.filter((b) => b.trades >= 4).sort((a, b) => a.net - b.net)[0];
+  if (worstSetup && worstSetup.net < 0) {
+    leaks.push({
+      title: `Setup "${worstSetup.key}" is bleeding`,
+      detail: `${worstSetup.trades} trades, ${pct(worstSetup.winRate)} win rate, ${fmt(worstSetup.net)} net.`,
+      cost: -worstSetup.net,
+      severity: "med",
+      fix: `Bench "${worstSetup.key}" until you can explain why it loses.`,
+    });
+  }
+
   leaks.sort((a, b) => b.cost - a.cost);
 
   // ── Strengths ───────────────────────────────────────────────────────────────
@@ -156,7 +170,7 @@ export function analyze(trades: Trade[]): Insights {
   if (bestSym && bestSym.net > 0) strengths.push(`${bestSym.key} is your money-maker (+${fmt(bestSym.net)}).`);
   if (totals.avgLoss > 0 && totals.avgWin / totals.avgLoss > 1.3) strengths.push(`Healthy payoff: your average win is ${(totals.avgWin / totals.avgLoss).toFixed(1)}× your average loss.`);
 
-  return { byHour, byDay, bySymbol, bySide, afterLoss, leaks, strengths, bestWindow, worstWindow, totals };
+  return { byHour, byDay, bySymbol, bySide, bySetup, afterLoss, leaks, strengths, bestWindow, worstWindow, totals };
 }
 
 function fmt(n: number) { return (n < 0 ? "-$" : "$") + Math.abs(Math.round(n)).toLocaleString(); }

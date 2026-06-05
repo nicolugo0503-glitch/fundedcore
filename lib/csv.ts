@@ -11,6 +11,7 @@ const SYMBOL_KEYS = ["symbol", "ticker", "instrument", "market", "contract", "as
 const SIDE_KEYS = ["side", "direction", "type", "position", "buysell", "longshort"];
 const SIZE_KEYS = ["size", "qty", "quantity", "contracts", "lots", "shares", "volume", "units"];
 const R_KEYS = ["r", "rmultiple", "rmult", "rr", "rrealized"];
+const TAG_KEYS = ["setup", "strategy", "tag", "playbook", "pattern", "system"];
 
 function norm(s: string) {
   return s.toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -84,6 +85,7 @@ export function parseTradesCsv(text: string): ParseResult {
   const iSide = findKey(headers, SIDE_KEYS);
   const iSize = findKey(headers, SIZE_KEYS);
   const iR = findKey(headers, R_KEYS);
+  const iTag = findKey(headers, TAG_KEYS);
 
   if (iPnl < 0) {
     return {
@@ -131,6 +133,7 @@ export function parseTradesCsv(text: string): ParseResult {
       side,
       size: size != null && !isNaN(size) ? size : undefined,
       rMultiple: rMultiple != null && !isNaN(rMultiple) ? rMultiple : undefined,
+      tag: iTag >= 0 ? (cells[iTag] || undefined) : undefined,
     });
   }
 

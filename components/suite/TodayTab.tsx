@@ -10,6 +10,7 @@ import type { Trade } from "../../lib/score";
 export function TodayTab({ profile, setProfile }: { profile: Profile; setProfile: (p: Profile) => void }) {
   const [accId, setAccId] = useState(profile.accounts[0]?.id || "");
   const [pnl, setPnl] = useState<string>("");
+  const [setup, setSetup] = useState<string>("");
 
   const today = new Date().toISOString().slice(0, 10);
   const todayTrades = profile.trades.filter((t) => t.date === today);
@@ -30,7 +31,7 @@ export function TodayTab({ profile, setProfile }: { profile: Profile; setProfile
     if (!v || !acc) return;
     const p = sign * v;
     const now = Date.now();
-    const t: Trade = { id: now, date: today, timestamp: now, symbol: profile.settings.instrument, pnl: p };
+    const t: Trade = { id: now, date: today, timestamp: now, symbol: profile.settings.instrument, pnl: p, tag: setup.trim() || undefined };
     const accounts = profile.accounts.map((a) => a.id === acc.id
       ? { ...a, balance: a.balance + p, todayPnL: a.todayPnL + p, peakEquity: Math.max(a.peakEquity, a.balance + p) }
       : a);
@@ -64,7 +65,7 @@ export function TodayTab({ profile, setProfile }: { profile: Profile; setProfile
       {/* logger */}
       <section className="card p-6">
         <div className="grid sm:grid-cols-[1fr_auto] gap-3 items-end">
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-3 gap-3">
             <label><span className="lbl">Account</span>
               <select className="inp" value={accId} onChange={(e) => setAccId(e.target.value)}>
                 {profile.accounts.map((a) => <option key={a.id} value={a.id}>{a.label}</option>)}
@@ -72,6 +73,8 @@ export function TodayTab({ profile, setProfile }: { profile: Profile; setProfile
             <label><span className="lbl">P&L of the trade ($)</span>
               <input className="inp" type="number" placeholder="150" value={pnl} onChange={(e) => setPnl(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter") log(1); }} /></label>
+            <label><span className="lbl">Setup (optional)</span>
+              <input className="inp" placeholder="ORB, reversal…" value={setup} onChange={(e) => setSetup(e.target.value)} /></label>
           </div>
           <div className="flex gap-2">
             <button className="btn btn-ghost" style={{ borderColor: "#10B98155", color: "#10B981" }} onClick={() => log(1)}>+ Win</button>

@@ -38,9 +38,9 @@ export function JournalTab({ profile, setProfile }: { profile: Profile; setProfi
           <h3 className="font-semibold mb-3">Recent trades</h3>
           <div className="overflow-x-auto">
             <table className="tbl">
-              <thead><tr><th>Date</th><th>Symbol</th><th>Side</th><th>Size</th><th className="text-right">P&L</th></tr></thead>
+              <thead><tr><th>Date</th><th>Symbol</th><th>Setup</th><th>Side</th><th className="text-right">P&L</th></tr></thead>
               <tbody>{recent.map((t) => (
-                <tr key={t.id}><td className="mono text-t2">{t.date}</td><td className="mono">{t.symbol || "—"}</td><td className="capitalize text-t2">{t.side || "—"}</td><td className="mono text-t2">{t.size ?? "—"}</td>
+                <tr key={t.id}><td className="mono text-t2">{t.date}</td><td className="mono">{t.symbol || "—"}</td><td className="text-t2">{t.tag || "—"}</td><td className="capitalize text-t2">{t.side || "—"}</td>
                   <td className={`text-right mono ${t.pnl >= 0 ? "text-grn" : "text-red"}`}>{t.pnl >= 0 ? "+" : ""}{usd(t.pnl)}</td></tr>
               ))}</tbody>
             </table>

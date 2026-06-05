@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { Nav, Footer } from "../components/Nav";
+import { Ticker } from "../components/Ticker";
 
 export default function Home() {
   return (
     <>
       <Nav />
+      <Ticker />
       <main className="max-w-6xl mx-auto px-5">
         <Hero />
         <GuardianBand />
@@ -63,6 +65,27 @@ function Hero() {
         <Link href="/live" className="btn btn-ghost text-base !px-6 !py-3.5">Watch it live</Link>
       </div>
       <div className="mt-5 text-xs text-t3">Free to try · everything included · cancel anytime.</div>
+
+      {/* floating cockpit panels */}
+      <div className="hidden lg:block absolute left-[-30px] top-44 floaty" style={{ ["--tilt" as any]: "-5deg" }}>
+        <div className="card px-5 py-4 w-[200px] text-left">
+          <div className="lbl">Distance to breach</div>
+          <div className="mono text-2xl font-bold" style={{ color: "#34D399" }}>$1,820</div>
+          <div className="h-1.5 rounded-full bg-white/[.07] mt-2 overflow-hidden"><div className="h-full w-[68%] rounded-full" style={{ background: "linear-gradient(90deg,#34D399,#22D3EE)" }} /></div>
+        </div>
+      </div>
+      <div className="hidden lg:block absolute right-[-26px] top-64 floaty" style={{ ["--tilt" as any]: "4deg", animationDelay: "1.2s" }}>
+        <div className="card px-5 py-4 w-[190px] text-left">
+          <div className="lbl">Trader Score</div>
+          <div className="mono text-2xl font-bold grad-text">87 A</div>
+          <div className="text-[.7rem] text-t3 mt-1">edge: statistically real</div>
+        </div>
+      </div>
+      <div className="hidden lg:block absolute right-[60px] top-[420px] floaty" style={{ ["--tilt" as any]: "-3deg", animationDelay: "2.1s" }}>
+        <div className="card px-4 py-3 text-left">
+          <div className="text-[.72rem] font-semibold" style={{ color: "#FBBF24" }}>⚠ CPI in 14m — no-trade window</div>
+        </div>
+      </div>
 
       <div className="mt-14 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
         {[
