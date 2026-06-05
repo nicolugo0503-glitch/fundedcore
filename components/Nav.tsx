@@ -5,8 +5,8 @@ export function Logo({ size = 26 }: { size?: number }) {
     <span className="inline-flex items-center gap-2.5">
       <svg width={size} height={size} viewBox="0 0 32 32" fill="none">
         <rect width="32" height="32" rx="8" fill="url(#lg)" />
-        <path d="M9 21V11h8M9 16h6" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-        <circle cx="22.5" cy="20.5" r="2.6" fill="#fff" />
+        <path d="M16 5l8 3v6c0 5-3.5 9-8 11-4.5-2-8-6-8-11V8l8-3z" stroke="#fff" strokeWidth="2" strokeLinejoin="round" fill="none" />
+        <path d="M12 15.5l3 3 5-6" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
         <defs>
           <linearGradient id="lg" x1="0" y1="0" x2="32" y2="32">
             <stop stopColor="#3B82F6" /><stop offset="1" stopColor="#1D4ED8" />
@@ -26,14 +26,14 @@ export function Nav({ cta = true }: { cta?: boolean }) {
       <div className="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between">
         <Link href="/"><Logo /></Link>
         <nav className="hidden md:flex items-center gap-7 text-sm text-t2">
+          <Link href="/cockpit" className="hover:text-t1 transition">Cockpit</Link>
+          <Link href="/live" className="hover:text-t1 transition">Live demo</Link>
+          <Link href="/apply" className="hover:text-t1 transition">Trader Score</Link>
           <a href="/#how" className="hover:text-t1 transition">How it works</a>
-          <a href="/#score" className="hover:text-t1 transition">Trader Score</a>
-          <a href="/#economics" className="hover:text-t1 transition">Economics</a>
-          <Link href="/dashboard" className="hover:text-t1 transition">Dashboard</Link>
         </nav>
         {cta && (
-          <Link href="/apply" className="btn btn-primary !py-2 !px-4 text-sm">
-            Get scored — free
+          <Link href="/cockpit" className="btn btn-primary !py-2 !px-4 text-sm">
+            Open the cockpit
           </Link>
         )}
       </div>
@@ -47,9 +47,9 @@ export function Footer() {
       <div className="max-w-6xl mx-auto px-5 py-10 flex flex-col md:flex-row gap-6 md:items-center justify-between text-sm text-t3">
         <div className="flex items-center gap-3"><Logo size={22} /></div>
         <p className="max-w-xl leading-relaxed">
-          FundedCore is an early-stage product. Scores and funding decisions shown here are
-          illustrative and generated from a demonstration model. Nothing here is financial advice
-          or an offer of capital. Trading futures involves substantial risk of loss.
+          FundedCore is an early-stage product. Rule snapshots, scores, and risk figures shown here are
+          illustrative and for demonstration only — not financial advice. Trading futures involves
+          substantial risk of loss.
         </p>
         <p>© {new Date().getFullYear()} FundedCore</p>
       </div>

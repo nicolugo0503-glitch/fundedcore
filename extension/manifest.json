@@ -1,0 +1,16 @@
+{
+  "manifest_version": 3,
+  "name": "FundedCore — Breach Guardian",
+  "version": "0.1.0",
+  "description": "Always-on HUD that shows your Distance to Breach on any funded account, on any trading platform.",
+  "action": { "default_popup": "popup.html", "default_title": "Breach Guardian" },
+  "permissions": ["storage"],
+  "host_permissions": ["<all_urls>"],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["rules.js", "content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

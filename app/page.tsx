@@ -7,6 +7,7 @@ export default function Home() {
       <Nav />
       <main className="max-w-6xl mx-auto px-5">
         <Hero />
+        <GuardianBand />
         <Problem />
         <How />
         <ScoreSection />
@@ -20,33 +21,54 @@ export default function Home() {
   );
 }
 
+function GuardianBand() {
+  const cards = [
+    ["Risk Cockpit", "Every funded account on one screen, with live Distance to Breach and status across all your firms.", "/cockpit", "Open cockpit →"],
+    ["Pre-trade guardrail", "Before you click buy: the largest size you can take right now without breaching. APPROVE, REDUCE, or BLOCK.", "/cockpit", "Try the guardrail →"],
+    ["Live demo", "Watch the Guardian track a simulated account tick by tick — and scream before it breaches.", "/live", "Watch it live →"],
+  ];
+  return (
+    <section className="py-12">
+      <div className="grid md:grid-cols-3 gap-5">
+        {cards.map(([t, d, href, cta]) => (
+          <Link key={t} href={href} className="card card-hover p-6 block">
+            <h3 className="font-semibold text-lg">{t}</h3>
+            <p className="text-[.88rem] text-t2 mt-2 leading-relaxed">{d}</p>
+            <div className="text-acc text-sm font-medium mt-4">{cta}</div>
+          </Link>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function Hero() {
   return (
     <section className="pt-20 pb-16 text-center relative">
       <div className="inline-flex items-center gap-2 chip mb-6">
-        <span className="w-1.5 h-1.5 rounded-full bg-grn pulse" /> The first AI-native prop firm
+        <span className="w-1.5 h-1.5 rounded-full bg-grn pulse" /> The always-on risk layer for funded traders
       </div>
       <h1 className="text-[2.7rem] md:text-[4rem] font-bold leading-[1.04] tracking-tight max-w-4xl mx-auto">
-        Get funded for your <span className="grad-text">edge</span>,<br className="hidden md:block" />
-        not your ability to pass a <span className="line-through decoration-red/70 decoration-2">trick test</span>.
+        Never blow a <span className="grad-text">funded account</span><br className="hidden md:block" />
+        by accident again.
       </h1>
       <p className="mt-6 text-lg text-t2 max-w-2xl mx-auto leading-relaxed">
-        No challenge fees. No $500 upfront. No rules engineered to make you fail. Connect your trading
-        history, our AI builds a verified <strong className="text-t1">Trader Score</strong>, and if you
-        have a real edge — we fund you directly. Keep up to 90% of profits. You only pay when you win.
+        One blown rule ends a funded account you paid for. FundedCore is the cockpit that tracks your
+        <strong className="text-t1"> Distance to Breach</strong> across every account and firm in real time —
+        and a pre-trade guardrail that tells you the largest size you can take right now without blowing up.
       </p>
       <div className="mt-9 flex items-center justify-center gap-3 flex-wrap">
-        <Link href="/apply" className="btn btn-primary text-base !px-7 !py-3.5">Get your Trader Score — free →</Link>
-        <a href="#how" className="btn btn-ghost text-base !px-6 !py-3.5">See how it works</a>
+        <Link href="/cockpit" className="btn btn-primary text-base !px-7 !py-3.5">Open the Risk Cockpit →</Link>
+        <Link href="/live" className="btn btn-ghost text-base !px-6 !py-3.5">Watch it live</Link>
       </div>
-      <div className="mt-5 text-xs text-t3">No card. No challenge. No catch. Underwriting is always free.</div>
+      <div className="mt-5 text-xs text-t3">Free to start · connect every funded account, across every firm.</div>
 
       <div className="mt-14 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
         {[
-          ["$0", "to get scored & funded"],
-          ["75–90%", "profit split to you"],
-          ["4", "dimensions of edge scored"],
-          ["∞", "free re-submissions"],
+          ["1", "screen for every account"],
+          ["13+", "firm rule-sets built in"],
+          ["0", "blown accounts by surprise"],
+          ["∞", "accounts tracked"],
         ].map(([n, l]) => (
           <div key={l} className="card p-5">
             <div className="text-2xl md:text-3xl font-bold grad-text mono">{n}</div>
@@ -90,13 +112,13 @@ function Problem() {
 
 function How() {
   const steps = [
-    ["01", "Connect your history", "Upload a trade-history CSV from any broker or journal — or try a sample trader. No account, no card, nothing to pay."],
-    ["02", "Get your Trader Score", "Our engine runs a full actuarial assessment of your edge across four dimensions and returns a transparent 0–100 score in seconds."],
-    ["03", "Get funded directly", "Clear the underwriting bar and we allocate live capital from our pool. You trade, you keep up to 90%, we earn only on profit you make."],
+    ["01", "Connect your accounts", "Add every funded account across every firm. The cockpit knows each firm's exact drawdown and daily-loss rules out of the box."],
+    ["02", "See your Distance to Breach", "Live, per account: how much room you have left before the account dies — and the largest size you can safely take right now."],
+    ["03", "Know your edge", "Every trade builds your Trader Score — a transparent read on whether your edge is real, consistent, and worth scaling."],
   ];
   return (
     <section id="how" className="py-16">
-      <SectionHead eyebrow="How it works" title="From trade history to funded in three steps." />
+      <SectionHead eyebrow="How it works" title="Three things, one job: keep your account alive." />
       <div className="grid md:grid-cols-3 gap-5 mt-9">
         {steps.map(([n, t, d]) => (
           <div key={n} className="card card-hover p-6">
@@ -267,10 +289,10 @@ function CtaBand() {
         <div className="glow" style={{ width: 500, height: 500, background: "radial-gradient(circle,rgba(59,130,246,.25),transparent 70%)", top: -200, left: "50%", transform: "translateX(-50%)", position: "absolute" }} />
         <div className="relative">
           <h2 className="text-3xl md:text-[2.6rem] font-bold leading-tight max-w-2xl mx-auto">
-            Find out if you have an edge worth funding.
+            Stop trading one bad click away from a blown account.
           </h2>
-          <p className="text-t2 mt-4 max-w-xl mx-auto">It takes a CSV and about ten seconds. It costs nothing.</p>
-          <Link href="/apply" className="btn btn-primary text-base !px-8 !py-4 mt-8">Get scored — free →</Link>
+          <p className="text-t2 mt-4 max-w-xl mx-auto">Open the cockpit, add an account, and see your Distance to Breach in under a minute.</p>
+          <Link href="/cockpit" className="btn btn-primary text-base !px-8 !py-4 mt-8">Open the Risk Cockpit →</Link>
         </div>
       </div>
     </section>
