@@ -14,6 +14,9 @@ export type Profile = {
     dailyLossStop: number; // self-imposed $ stop
     anthropicKey?: string;
   };
+  plan: string;                 // the trader's written trading plan
+  checklist: string[];          // pre-session checklist items
+  checklistDone: { date: string; done: number[] }; // today's checked items
   onboarded: boolean;
 };
 
@@ -24,6 +27,15 @@ export const DEFAULT_PROFILE: Profile = {
   accounts: [],
   trades: [],
   settings: { instrument: "MNQ", defaultStop: 20, maxTradesPerDay: 4, dailyLossStop: 500 },
+  plan: "",
+  checklist: [
+    "Reviewed today's high-impact news times",
+    "Checked Distance to Breach on every account",
+    "Know my max size at my stop",
+    "Committed to my daily loss stop",
+    "Trading only my best window",
+  ],
+  checklistDone: { date: "", done: [] },
   onboarded: false,
 };
 

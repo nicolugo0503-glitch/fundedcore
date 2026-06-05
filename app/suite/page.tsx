@@ -12,11 +12,15 @@ import { CoachTab } from "../../components/suite/CoachTab";
 import { JournalTab } from "../../components/suite/JournalTab";
 import { ChallengeTab } from "../../components/suite/ChallengeTab";
 import { SimulatorTab } from "../../components/suite/SimulatorTab";
+import { TodayTab } from "../../components/suite/TodayTab";
+import { PlanTab } from "../../components/suite/PlanTab";
+import { ToolsTab } from "../../components/suite/ToolsTab";
 import { SettingsTab } from "../../components/suite/SettingsTab";
 import { AlertsBar } from "../../components/suite/AlertsBar";
 
 const TABS = [
   ["brief", "Daily Brief", "◎"],
+  ["today", "Today · Live", "●"],
   ["risk", "Risk", "🛡"],
   ["insights", "Insights", "✦"],
   ["news", "News", "◷"],
@@ -24,6 +28,8 @@ const TABS = [
   ["journal", "Journal & Score", "▤"],
   ["challenge", "Challenge", "◆"],
   ["simulator", "Firm Simulator", "⇄"],
+  ["plan", "Plan & Ritual", "✓"],
+  ["tools", "Calculators", "∑"],
   ["settings", "Settings", "⚙"],
 ] as const;
 
@@ -77,6 +83,9 @@ export default function Suite() {
           {tab === "journal" && <JournalTab profile={profile} setProfile={setProfile} />}
           {tab === "challenge" && <ChallengeTab profile={profile} />}
           {tab === "simulator" && <SimulatorTab profile={profile} />}
+          {tab === "today" && <TodayTab profile={profile} setProfile={setProfile} />}
+          {tab === "plan" && <PlanTab profile={profile} setProfile={setProfile} />}
+          {tab === "tools" && <ToolsTab profile={profile} />}
           {tab === "settings" && <SettingsTab profile={profile} setProfile={setProfile} />}
         </main>
       </div>
