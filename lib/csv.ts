@@ -16,7 +16,13 @@ function norm(s: string) {
   return s.toLowerCase().replace(/[^a-z0-9]/g, "");
 }
 
-function splitCsvLine(line: string): string[] {
+function detectDelim(header: string): string {
+  const counts: [string, number][] = [[",", (header.match(/,/g) || []).length], [";", (header.match(/;/g) || []).length], ["\t", (header.match(/\t/g) || []).length]];
+  counts.sort((a, b) => b[1] - a[1]);
+  return counts[0][1] > 0 ? counts[0][0] : ",";
+}
+
+function splitCsvLine(line: string, delim = ","): string[] {
   const out: string[] = [];
   let cur = "";
   let q = false;
@@ -25,7 +31,7 @@ function splitCsvLine(line: string): string[] {
     if (c === '"') {
       if (q && line[i + 1] === '"') { cur += '"'; i++; }
       else q = !q;
-    } else if (c === "," && !q) {
+    } else if (c === delim && !q) {
       out.push(cur); cur = "";
     } else cur += c;
   }
@@ -70,7 +76,8 @@ export function parseTradesCsv(text: string): ParseResult {
   if (lines.length < 2) {
     return { trades: [], warnings: ["File looks empty or has no data rows."], mapped: {} };
   }
-  const headers = splitCsvLine(lines[0]);
+  const delim = detectDelim(lines[0]);
+  const headers = splitCsvLine(lines[0], delim);
   const iPnl = findKey(headers, PNL_KEYS);
   const iDate = findKey(headers, DATE_KEYS);
   const iSym = findKey(headers, SYMBOL_KEYS);
@@ -91,7 +98,7 @@ export function parseTradesCsv(text: string): ParseResult {
   const trades: Trade[] = [];
   let dropped = 0;
   for (let r = 1; r < lines.length; r++) {
-    const cells = splitCsvLine(lines[r]);
+    const cells = splitCsvLine(lines[r], delim);
     const pnl = toNumber(cells[iPnl]);
     if (isNaN(pnl)) { dropped++; continue; }
 

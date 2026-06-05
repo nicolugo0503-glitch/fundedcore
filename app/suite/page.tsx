@@ -12,6 +12,7 @@ import { CoachTab } from "../../components/suite/CoachTab";
 import { JournalTab } from "../../components/suite/JournalTab";
 import { ChallengeTab } from "../../components/suite/ChallengeTab";
 import { SettingsTab } from "../../components/suite/SettingsTab";
+import { AlertsBar } from "../../components/suite/AlertsBar";
 
 const TABS = [
   ["brief", "Daily Brief", "◎"],
@@ -28,7 +29,10 @@ export default function Suite() {
   const [profile, setProfileState] = useState<Profile | null>(null);
   const [tab, setTab] = useState<string>("brief");
 
-  useEffect(() => { setProfileState(loadProfile()); }, []);
+  useEffect(() => {
+    setProfileState(loadProfile());
+    if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(() => {});
+  }, []);
 
   function setProfile(p: Profile) { setProfileState(p); saveProfile(p); }
 
@@ -62,6 +66,7 @@ export default function Suite() {
         </nav>
 
         <main className="min-w-0">
+          <AlertsBar profile={profile} />
           {tab === "brief" && <Brief profile={profile} go={setTab} />}
           {tab === "risk" && <RiskTab profile={profile} setProfile={setProfile} />}
           {tab === "insights" && <InsightsTab profile={profile} />}

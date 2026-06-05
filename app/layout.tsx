@@ -1,11 +1,14 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "FundedCore — The AI-Native Prop Firm",
   description:
     "No challenge fees. No $500 upfront. Connect your trading history, get a verified Trader Score, and get funded directly. Keep up to 90% of profits — you only pay when you win.",
+  manifest: "/manifest.json",
 };
+
+export const viewport: Viewport = { themeColor: "#020817" };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

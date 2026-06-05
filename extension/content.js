@@ -93,7 +93,22 @@
   }
 
   // ---- config load + live updates ----
+  // On the FundedCore app itself, auto-configure from the suite profile.
+  function tryAppProfile() {
+    try {
+      const raw = window.localStorage.getItem("fundedcore.profile.v1");
+      if (!raw) return false;
+      const p = JSON.parse(raw);
+      const a = (p.accounts || [])[0];
+      if (!a) return false;
+      cfg = { ...cfg, firmKey: FC_FIRMS[a.firmKey] ? a.firmKey : cfg.firmKey, start: a.startBalance, mode: "manual", manualBalance: a.balance, instrument: (p.settings && p.settings.instrument) || cfg.instrument, stop: (p.settings && p.settings.defaultStop) || cfg.stop };
+      peak = Math.max(a.peakEquity || a.startBalance, a.balance);
+      return true;
+    } catch (e) { return false; }
+  }
+
   function load() {
+    if (tryAppProfile()) { render(); }
     try {
       chrome.storage.sync.get("fcGuardian", (d) => { if (d && d.fcGuardian) { cfg = { ...DEFAULT, ...d.fcGuardian }; peak = Math.max(peak, cfg.start); } render(); });
     } catch (e) { render(); }
