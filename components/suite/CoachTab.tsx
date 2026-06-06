@@ -5,6 +5,7 @@ import { analyze } from "../../lib/insights";
 import { scoreTrades } from "../../lib/score";
 import { assessAccount } from "../../lib/risk";
 import { usd, pct } from "../../lib/format";
+import { SuiteHeader } from "./ui";
 
 const QUICK = ["What's my biggest flaw?", "Will I blow this account?", "Which setups should I cut?", "How should I size today?"];
 
@@ -49,7 +50,7 @@ export function CoachTab({ profile }: { profile: Profile }) {
 
   return (
     <div className="space-y-4 fade">
-      <div><div className="eyebrow">AI Coach</div><h1 className="text-2xl font-bold mt-1">Grounded in your real data</h1></div>
+      <SuiteHeader eyebrow="AI Coach" title="Your coach, grounded in your real data" sub="It can see your accounts, trades, score, and leaks — not generic advice." />
       <div className="card p-4 min-h-[320px] flex flex-col">
         <div className="flex-1 space-y-3">
           {msgs.map((m, i) => (

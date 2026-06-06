@@ -4,6 +4,7 @@ import { type Profile } from "../../lib/profile";
 import { FIRMS, INSTRUMENTS } from "../../lib/firms";
 import { assessAccount, guardrail, maxSizeNow, STATUS_META, type Account } from "../../lib/risk";
 import { usd } from "../../lib/format";
+import { SuiteHeader } from "./ui";
 
 const INSTR = Object.keys(INSTRUMENTS);
 
@@ -27,7 +28,7 @@ export function RiskTab({ profile, setProfile }: { profile: Profile; setProfile:
 
   return (
     <div className="space-y-5 fade">
-      <div><div className="eyebrow">Risk</div><h1 className="text-2xl font-bold mt-1">Distance to breach + pre-trade guardrail</h1></div>
+      <SuiteHeader eyebrow="Risk" title="Distance to breach + pre-trade guardrail" sub="Live breach distance across every account, and the largest size you can take right now." />
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {profile.accounts.map((a) => {

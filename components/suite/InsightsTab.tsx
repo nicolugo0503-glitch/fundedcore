@@ -2,6 +2,7 @@
 import { type Profile } from "../../lib/profile";
 import { analyze, type Bucket } from "../../lib/insights";
 import { usd, pct } from "../../lib/format";
+import { SuiteHeader } from "./ui";
 
 export function InsightsTab({ profile }: { profile: Profile }) {
   if (profile.trades.length < 5) return <div className="card p-8 text-center text-t3">Add at least ~20 trades (Journal tab) to unlock your personalized insights.</div>;
@@ -10,7 +11,7 @@ export function InsightsTab({ profile }: { profile: Profile }) {
 
   return (
     <div className="space-y-5 fade">
-      <div><div className="eyebrow">Insights</div><h1 className="text-2xl font-bold mt-1">What's costing you — and what's working</h1></div>
+      <SuiteHeader eyebrow="Insights" title="What's costing you — and what's working" sub="Your leaks, ranked by the dollars they cost you. Your strengths, ready to scale." />
 
       <section className="space-y-3">
         <h3 className="font-semibold">Your leaks, ranked by what they cost you</h3>

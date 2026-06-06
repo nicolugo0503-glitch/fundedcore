@@ -4,6 +4,7 @@ import { type Profile, clearProfile, DEFAULT_PROFILE } from "../../lib/profile";
 import { FIRMS, INSTRUMENTS } from "../../lib/firms";
 import { type Account } from "../../lib/risk";
 import { usd } from "../../lib/format";
+import { SuiteHeader } from "./ui";
 
 const INSTR = Object.keys(INSTRUMENTS);
 let _id = 1; const nid = () => "acc" + _id++ + Date.now().toString(36);
@@ -25,7 +26,7 @@ export function SettingsTab({ profile, setProfile }: { profile: Profile; setProf
 
   return (
     <div className="space-y-5 fade max-w-2xl">
-      <div><div className="eyebrow">Settings</div><h1 className="text-2xl font-bold mt-1">Personalize your suite</h1></div>
+      <SuiteHeader eyebrow="Settings" title="Personalize your suite" />
 
       <section className="card p-5 space-y-3">
         <h3 className="font-semibold">You</h3>

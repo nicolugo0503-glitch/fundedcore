@@ -1,5 +1,6 @@
 "use client";
 import { type Profile } from "../../lib/profile";
+import { SuiteHeader } from "./ui";
 
 // Trading plan + pre-session checklist. The ritual that separates pros from tilt.
 export function PlanTab({ profile, setProfile }: { profile: Profile; setProfile: (p: Profile) => void }) {
@@ -23,10 +24,7 @@ export function PlanTab({ profile, setProfile }: { profile: Profile; setProfile:
 
   return (
     <div className="space-y-5 fade">
-      <div><div className="eyebrow">Plan & ritual</div>
-        <h1 className="text-2xl font-bold mt-1">Your plan, in writing. Your ritual, every day.</h1>
-        <p className="text-t2 text-sm mt-1">Traders with a written plan and a pre-session ritual breach less. That's the whole tab.</p>
-      </div>
+      <SuiteHeader eyebrow="Plan & ritual" title="Your plan, in writing. Your ritual, every day." sub="A written plan and a pre-session ritual mean fewer blown accounts. That's the whole tab." />
 
       {/* pre-session checklist */}
       <section className="card p-6" style={{ borderColor: allDone ? "#10B98155" : undefined }}>

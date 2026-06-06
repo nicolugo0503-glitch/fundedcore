@@ -4,6 +4,7 @@ import { type Profile } from "../../lib/profile";
 import { assessAccount, STATUS_META } from "../../lib/risk";
 import { usd } from "../../lib/format";
 import type { Trade } from "../../lib/score";
+import { SuiteHeader } from "./ui";
 
 // Live session logger: log each trade as you take it. The suite enforces your
 // discipline rules in real time — cooldowns, trade caps, daily stop.
@@ -52,10 +53,7 @@ export function TodayTab({ profile, setProfile }: { profile: Profile; setProfile
 
   return (
     <div className="space-y-5 fade">
-      <div><div className="eyebrow">Today · live session</div>
-        <h1 className="text-2xl font-bold mt-1">Log every trade. We hold the line.</h1>
-        <p className="text-t2 text-sm mt-1">Each trade updates your breach distance instantly — and we call the cooldowns so you don't have to trust yourself.</p>
-      </div>
+      <SuiteHeader eyebrow="Today · live session" title="Log every trade. We hold the line." sub="Each trade updates your breach distance instantly — and we call the cooldowns for you." />
 
       {/* hard stops */}
       {hitDailyStop && <Banner color="#EF4444">■ DAILY STOP HIT ({usd(todayNet)}). You agreed to stop here. Close the platform.</Banner>}

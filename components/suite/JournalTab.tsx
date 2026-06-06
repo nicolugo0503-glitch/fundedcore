@@ -6,6 +6,7 @@ import { scoreTrades } from "../../lib/score";
 import { sampleById } from "../../lib/sampleTraders";
 import { ScoreReport } from "../ScoreReport";
 import { usd, pct } from "../../lib/format";
+import { SuiteHeader } from "./ui";
 
 export function JournalTab({ profile, setProfile }: { profile: Profile; setProfile: (p: Profile) => void }) {
   const fileRef = useRef<HTMLInputElement>(null);
@@ -20,7 +21,7 @@ export function JournalTab({ profile, setProfile }: { profile: Profile; setProfi
   return (
     <div className="space-y-5 fade">
       <div className="flex items-end justify-between flex-wrap gap-3">
-        <div><div className="eyebrow">Journal & Score</div><h1 className="text-2xl font-bold mt-1">Your verified edge</h1></div>
+        <SuiteHeader eyebrow="Journal & Score" title="Your verified edge" />
         <div className="flex gap-2">
           <button className="btn btn-ghost text-sm" onClick={() => fileRef.current?.click()}>↑ Upload CSV</button>
           <button className="btn btn-ghost text-sm" onClick={() => { const s = sampleById("maya")!; setProfile({ ...profile, trades: s.trades }); }}>Use sample</button>

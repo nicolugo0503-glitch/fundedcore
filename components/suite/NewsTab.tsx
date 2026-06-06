@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { SuiteHeader } from "./ui";
 
 type Ev = { title: string; country: string; impact: string; date: string; forecast?: string; previous?: string };
 
@@ -16,7 +17,7 @@ export function NewsTab() {
   return (
     <div className="space-y-5 fade">
       <div className="flex items-end justify-between">
-        <div><div className="eyebrow">News</div><h1 className="text-2xl font-bold mt-1">High-impact economic calendar</h1></div>
+        <SuiteHeader eyebrow="News" title="High-impact economic calendar" sub="Don't trade through the print. No-trade windows, flagged before they hit." />
         {source && <span className="chip text-[.7rem]">{source === "live" ? "live feed" : "scheduled"}</span>}
       </div>
       <p className="text-t2 text-sm">Don't enter or hold through a high-impact release. Spreads widen and slippage can breach you. Wait 2–5 minutes after the print.</p>

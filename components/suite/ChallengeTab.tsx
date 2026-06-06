@@ -3,6 +3,7 @@ import { type Profile } from "../../lib/profile";
 import { assessAccount } from "../../lib/risk";
 import { usd } from "../../lib/format";
 import { monteCarlo } from "../../lib/montecarlo";
+import { SuiteHeader } from "./ui";
 
 export function ChallengeTab({ profile }: { profile: Profile }) {
   const evals = profile.accounts.filter((a) => assessAccount(a).firm.profitTarget > 0);
@@ -10,7 +11,7 @@ export function ChallengeTab({ profile }: { profile: Profile }) {
 
   return (
     <div className="space-y-5 fade">
-      <div><div className="eyebrow">Challenge tracker</div><h1 className="text-2xl font-bold mt-1">Pass on time, without blowing up</h1></div>
+      <SuiteHeader eyebrow="Challenge tracker" title="Pass on time, without blowing up" sub="Progress, required daily P&L, and Monte-Carlo survival odds on your own trades." />
       {evals.map((a) => {
         const r = assessAccount(a);
         const target = r.firm.profitTarget;

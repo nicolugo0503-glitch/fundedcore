@@ -2,6 +2,7 @@
 import { type Profile } from "../../lib/profile";
 import { simulateAll } from "../../lib/simulator";
 import { usd } from "../../lib/format";
+import { SuiteHeader } from "./ui";
 
 const OUT: Record<string, { label: string; color: string }> = {
   passed: { label: "PASSED", color: "#10B981" },
@@ -16,10 +17,7 @@ export function SimulatorTab({ profile }: { profile: Profile }) {
 
   return (
     <div className="space-y-5 fade">
-      <div><div className="eyebrow">Firm Simulator</div>
-        <h1 className="text-2xl font-bold mt-1">Which firm would your trading actually survive?</h1>
-        <p className="text-t2 text-sm mt-1.5">Your real {profile.trades.length} trades, replayed against every rulebook — drawdown style, daily loss, profit target.</p>
-      </div>
+      <SuiteHeader eyebrow="Firm Simulator" title="Which firm would your trading actually survive?" sub={`Your real ${profile.trades.length} trades, replayed against every rulebook.`} />
 
       {best && best.outcome !== "breached" && (
         <div className="card p-5" style={{ borderColor: "#10B98155" }}>

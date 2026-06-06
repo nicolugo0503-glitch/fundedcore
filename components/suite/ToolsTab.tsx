@@ -3,12 +3,12 @@ import { useState } from "react";
 import { type Profile } from "../../lib/profile";
 import { analyze } from "../../lib/insights";
 import { usd, pct } from "../../lib/format";
+import { SuiteHeader } from "./ui";
 
 export function ToolsTab({ profile }: { profile: Profile }) {
   return (
     <div className="space-y-5 fade">
-      <div><div className="eyebrow">Calculators</div>
-        <h1 className="text-2xl font-bold mt-1">The math traders do on napkins — done right.</h1></div>
+      <SuiteHeader eyebrow="Calculators" title="The math traders do on napkins — done right." sub="Payout after fees, risk of ruin, recovery time, and a what-if loss cap on your real history." />
       <div className="grid lg:grid-cols-2 gap-5">
         <Payout />
         <RiskOfRuin profile={profile} />
