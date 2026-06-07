@@ -10,11 +10,12 @@ import type { BrokerConnector, LiveAccount, LivePosition, LiveFill, ConnStatus }
 import { MockConnector } from "../../lib/connectors/mock";
 import { TradovateConnector } from "../../lib/connectors/tradovate";
 import { RithmicConnector } from "../../lib/connectors/rithmic";
+import { WebhookConnector } from "../../lib/connectors/webhook";
 
 const FIRM_KEYS = Object.keys(FIRMS);
 
 export function ConnectTab({ profile }: { profile: Profile }) {
-  const [provider, setProvider] = useState<"sim" | "tradovate" | "rithmic">("sim");
+  const [provider, setProvider] = useState<"sim" | "tradovate" | "rithmic" | "webhook">("sim");
   const [status, setStatus] = useState<ConnStatus>("idle");
   const [statusMsg, setStatusMsg] = useState("");
   const [acct, setAcct] = useState<LiveAccount | null>(null);
@@ -23,12 +24,20 @@ export function ConnectTab({ profile }: { profile: Profile }) {
   const [firmKey, setFirmKey] = useState(profile.accounts[0]?.firmKey || FIRM_KEYS[0]);
   const [creds, setCreds] = useState({ name: "", password: "", cid: "", sec: "", live: false });
   const [rith, setRith] = useState({ gateway: "", systemName: "", user: "", password: "" });
+  const [hookKey] = useState(() => { try { const k = localStorage.getItem("fc-hook-key"); if (k) return k; const n = "fc_" + Math.random().toString(36).slice(2, 12); localStorage.setItem("fc-hook-key", n); return n; } catch { return "fc_demo"; } });
   const conn = useRef<BrokerConnector | null>(null);
 
+  const hookUrl = (typeof window !== "undefined" ? window.location.origin : "") + "/api/connect/hook?key=" + hookKey;
+  async function sendTest() {
+    try {
+      await fetch("/api/connect/hook?key=" + hookKey, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ kind: "account", name: "WEBHOOK-TEST", balance: 51200, dayPnl: 200, openPnl: 0 }) });
+      await fetch("/api/connect/hook?key=" + hookKey, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ kind: "fill", symbol: "MNQ", side: "buy", qty: 1, price: 18042 }) });
+    } catch {}
+  }
   function connect() {
     conn.current?.disconnect();
     setAcct(null); setPositions([]); setFills([]); setStatusMsg("");
-    const c: BrokerConnector = provider === "sim" ? new MockConnector() : provider === "rithmic" ? new RithmicConnector(rith) : new TradovateConnector(creds);
+    const c: BrokerConnector = provider === "sim" ? new MockConnector() : provider === "rithmic" ? new RithmicConnector(rith) : provider === "webhook" ? new WebhookConnector(hookKey) : new TradovateConnector(creds);
     conn.current = c;
     c.connect({
       onStatus: (s, m) => { setStatus(s); if (m) setStatusMsg(m); },
@@ -56,7 +65,7 @@ export function ConnectTab({ profile }: { profile: Profile }) {
 
       <div className="card p-5">
         <div className="flex flex-wrap items-center gap-2 mb-4">
-          {([["sim", "Simulated feed"], ["tradovate", "Tradovate"], ["rithmic", "Rithmic"]] as const).map(([k, label]) => (
+          {([["sim", "Simulated feed"], ["webhook", "Webhook (any firm)"], ["tradovate", "Tradovate"], ["rithmic", "Rithmic"]] as const).map(([k, label]) => (
             <button key={k} onClick={() => setProvider(k)} className={`px-3.5 py-2 rounded-lg text-[.82rem] font-medium border transition ${provider === k ? "bg-acc/15 border-acc/40 text-t1" : "border-line2 text-t2 hover:text-t1"}`}>{label}</button>
           ))}
           <span className="ml-auto chip" style={{ color: live ? "var(--grn)" : status === "error" ? "var(--red)" : "var(--t3)" }}>
@@ -72,6 +81,17 @@ export function ConnectTab({ profile }: { profile: Profile }) {
             <label><span className="lbl">API Key (cid) · optional</span><input className="inp" value={creds.cid} onChange={(e) => setCreds({ ...creds, cid: e.target.value })} /></label>
             <label><span className="lbl">API Secret (sec) · optional</span><input className="inp" value={creds.sec} onChange={(e) => setCreds({ ...creds, sec: e.target.value })} /></label>
             <label className="flex items-center gap-2 text-[.82rem] text-t2 sm:col-span-2"><input type="checkbox" checked={creds.live} onChange={(e) => setCreds({ ...creds, live: e.target.checked })} /> Live account (uncheck for Tradovate demo)</label>
+          </div>
+        )}
+        {provider === "webhook" && (
+          <div className="mb-4">
+            <span className="lbl">Your inbox URL — point any bridge (TradersPost, PickMyTrade) or script here</span>
+            <div className="flex gap-2 mt-1">
+              <input readOnly className="inp mono text-[.78rem]" value={hookUrl} onClick={(e) => (e.target as HTMLInputElement).select()} />
+              <button onClick={() => { try { navigator.clipboard.writeText(hookUrl); } catch {} }} className="btn btn-ghost text-sm shrink-0">Copy</button>
+              <button onClick={sendTest} className="btn btn-ghost text-sm shrink-0">Send test event</button>
+            </div>
+            <div className="text-[.74rem] text-t3 mt-2 flex items-center gap-1.5"><Icon name="bolt" size={12} /> POST JSON like {"{ kind:'fill', symbol:'MNQ', side:'buy', qty:1, price:18000 }"} or {"{ kind:'account', balance, dayPnl, openPnl }"}. Connect, then events stream in live.</div>
           </div>
         )}
         {provider === "rithmic" && (
