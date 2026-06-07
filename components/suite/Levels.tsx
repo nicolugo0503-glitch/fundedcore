@@ -53,3 +53,38 @@ export function KeyLevels({ lv }: { lv: Levels }) {
     </div>
   );
 }
+
+import type { CondResult } from "../../lib/conditions";
+export function ConditionsEdge({ res }: { res: NonNullable<CondResult> }) {
+  return (
+    <div>
+      <div className="space-y-2.5">
+        {res.dims.map((d) => {
+          const max = Math.max(Math.abs(d.good.avg), Math.abs(d.bad.avg), 1);
+          const Row = ({ s, isGood }: { s: { label: string; avg: number; n: number }; isGood: boolean }) => {
+            const isToday = (isGood && d.todaySide === "good") || (!isGood && d.todaySide === "bad");
+            const col = s.avg >= 0 ? "var(--grn)" : "var(--red)";
+            return (
+              <div className="flex items-center gap-2.5">
+                <span className="text-[.78rem] w-32 shrink-0" style={{ color: isToday ? "var(--t1)" : "var(--t2)", fontWeight: isToday ? 600 : 400 }}>
+                  {s.label}{isToday && <span className="text-acc"> · today</span>}
+                </span>
+                <div className="flex-1 h-4 rounded relative" style={{ background: "var(--panel2)", outline: isToday ? "1px solid var(--acc)" : "none" }}>
+                  <div className="absolute inset-y-0 left-0 rounded" style={{ width: (Math.abs(s.avg) / max) * 100 + "%", background: col, opacity: isToday ? 1 : 0.5 }} />
+                </div>
+                <span className="mono text-[.76rem] w-16 text-right" style={{ color: col }}>{s.avg >= 0 ? "+" : ""}${Math.round(s.avg)}</span>
+              </div>
+            );
+          };
+          return (
+            <div key={d.key}>
+              <Row s={d.good} isGood />
+              <div className="mt-1.5"><Row s={d.bad} isGood={false} /></div>
+            </div>
+          );
+        })}
+      </div>
+      <div className="text-[.78rem] text-t2 mt-3 leading-relaxed">{res.summary}</div>
+    </div>
+  );
+}

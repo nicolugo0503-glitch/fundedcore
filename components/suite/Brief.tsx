@@ -7,7 +7,8 @@ import { scoreTrades } from "../../lib/score";
 import { usd, pct, scoreColor } from "../../lib/format";
 import { SuiteHeader, Panel, Ring, EmptyState } from "./ui";
 import { ClearanceCard, EdgeClock } from "./Decision";
-import { KeyLevels, type Levels } from "./Levels";
+import { KeyLevels, ConditionsEdge, type Levels } from "./Levels";
+import { conditionEdge } from "../../lib/conditions";
 import { rootSymbol } from "../../lib/market";
 import { Icon } from "../Icon";
 
@@ -50,6 +51,7 @@ export function Brief({ profile, go, setProfile }: { profile: Profile; go: (t: s
   const [heads, setHeads] = useState<Head[] | null>(null);
   const [mkt, setMkt] = useState<Mkt[] | null>(null);
   const [levels, setLevels] = useState<Levels | null>(null);
+  const [histCandles, setHistCandles] = useState<any[] | null>(null);
   const [brief, setBrief] = useState<{ text: string; source: string } | null>(null);
   const [briefLoading, setBriefLoading] = useState(true);
   const [tradeRead, setTradeRead] = useState<{ text: string; source: string } | null>(null);
@@ -70,8 +72,9 @@ export function Brief({ profile, go, setProfile }: { profile: Profile; go: (t: s
   }, []);
   useEffect(() => {
     const root = rootSymbol(profile.settings.instrument) || "NQ";
-    fetch("/api/market?symbol=" + root + "&interval=1d&range=2mo").then((r) => r.json()).then((d) => {
+    fetch("/api/market?symbol=" + root + "&interval=1d&range=3mo").then((r) => r.json()).then((d) => {
       const cs: any[] = d.candles || [];
+      setHistCandles(cs);
       if (cs.length < 16) { setLevels(null); return; }
       const today = cs[cs.length - 1], prior = cs[cs.length - 2];
       let trSum = 0; for (let i = cs.length - 14; i < cs.length; i++) { const c = cs[i], p = cs[i - 1]; trSum += Math.max(c.h - c.l, Math.abs(c.h - p.c), Math.abs(c.l - p.c)); }
@@ -125,7 +128,7 @@ export function Brief({ profile, go, setProfile }: { profile: Profile; go: (t: s
 
   const reds = reasons.filter(r => r.tone === "red").length;
   const ambers = reasons.filter(r => r.tone === "amber").length;
-  const verdict: "GO" | "CAUTION" | "STAND DOWN" = reds > 0 ? "STAND DOWN" : ambers > 0 ? "CAUTION" : "GO";
+  let verdict: "GO" | "CAUTION" | "STAND DOWN" = reds > 0 ? "STAND DOWN" : ambers > 0 ? "CAUTION" : "GO";
 
   let budget: { dollars: number; perTrade: number; contracts: number; instrument: string; stop: number } | null = null;
   if (tightAcct && tightest) {
@@ -146,6 +149,17 @@ export function Brief({ profile, go, setProfile }: { profile: Profile; go: (t: s
     const greens = [...byDate.values()].filter((n) => n > 0).sort((a, b) => a - b);
     if (greens.length >= 3) { const med = greens[Math.floor(greens.length / 2)]; dayTarget = Math.round(med / 10) * 10; }
   }
+
+  const cond = conditionEdge(
+    histCandles || [],
+    profile.trades,
+    levels ? { gap: levels.gap, prevClose: levels.PDC, tape: (tone as any), range: levels.dayH - levels.dayL } : null
+  );
+  if (cond) {
+    if (cond.unfavorableCount >= 2) reasons.push({ tone: "amber", text: "Today's conditions are historically weak for you" });
+    else if (cond.favorableCount >= 2) reasons.push({ tone: "green", text: "Today's conditions suit your edge" });
+  }
+  { const r = reasons.filter(x => x.tone === "red").length, a = reasons.filter(x => x.tone === "amber").length; verdict = r > 0 ? "STAND DOWN" : a > 0 ? "CAUTION" : "GO"; }
 
   const spx = mkt?.find((m) => m.key === "SPX");
   const ndx = mkt?.find((m) => m.key === "NDX");
@@ -326,6 +340,10 @@ export function Brief({ profile, go, setProfile }: { profile: Profile; go: (t: s
         <div className="lg:col-span-8 space-y-4">
           <Panel title="Key levels in play" icon={<Icon name="chart" />} action={<button className="text-acc text-xs" onClick={() => go("charts")}>charts →</button>}>
             {levels ? <KeyLevels lv={levels} /> : <EmptyState icon="chart" title="Levels loading" body="Prior-day high/low/close, the overnight range, today's gap and expected range for your instrument — the map every day trader reads before the open." />}
+          </Panel>
+
+          <Panel title="Conditions × your edge" icon={<Icon name="spark" />} action={<button className="text-acc text-xs" onClick={() => go("insights")}>insights →</button>}>
+            {cond ? <ConditionsEdge res={cond} /> : <EmptyState icon="spark" title="Which markets suit you" body="Once you have ~10 trading days, this cross-references your P&L with each day's gap, tape, and volatility — revealing the conditions you actually make money in, matched to today." cta={setProfile && <button onClick={() => setProfile(demoProfile(profile))} className="btn btn-primary text-sm">Load demo data</button>} />}
           </Panel>
 
           <Panel title="Your edge clock" icon={<Icon name="clock" />} action={<button className="text-acc text-xs" onClick={() => go("insights")}>insights →</button>}>
