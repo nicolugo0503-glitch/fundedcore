@@ -95,6 +95,10 @@ export function Brief({ profile, go, setProfile }: { profile: Profile; go: (t: s
   const dayKey = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][todayDow];
   const dayBucket = ins?.byDay.find((b) => b.key === dayKey);
   const topLeak = ins?.leaks[0];
+  const spx = mkt?.find((m) => m.key === "SPX");
+  const ndx = mkt?.find((m) => m.key === "NDX");
+  const vix = mkt?.find((m) => m.key === "VIX");
+  const tone = spx ? (spx.chg < -0.007 ? "risk-off" : spx.chg > 0.007 ? "risk-on" : "flat") : null;
 
   // ── Decision layer ──
   function dailyStreak(): { dir: number; len: number } {
@@ -167,10 +171,6 @@ export function Brief({ profile, go, setProfile }: { profile: Profile; go: (t: s
   }
   { const r = reasons.filter(x => x.tone === "red").length, a = reasons.filter(x => x.tone === "amber").length; verdict = r > 0 ? "STAND DOWN" : a > 0 ? "CAUTION" : "GO"; }
 
-  const spx = mkt?.find((m) => m.key === "SPX");
-  const ndx = mkt?.find((m) => m.key === "NDX");
-  const vix = mkt?.find((m) => m.key === "VIX");
-  const tone = spx ? (spx.chg < -0.007 ? "risk-off" : spx.chg > 0.007 ? "risk-on" : "flat") : null;
 
   function loadBrief() {
     setBriefLoading(true);
