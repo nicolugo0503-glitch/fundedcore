@@ -176,7 +176,9 @@ table.tbl tr:hover td { background: rgba(0,0,0,.025); }
 .aura span { position: absolute; border-radius: 50%; filter: blur(70px); opacity: .5; will-change: transform; }
 .aura .a1 { width: 46vw; height: 46vw; left: -8vw; top: -10vw; background: radial-gradient(circle, var(--acc), transparent 65%); opacity: .14; animation: drift1 26s ease-in-out infinite; }
 .aura .a2 { width: 40vw; height: 40vw; right: -6vw; top: 8vh; background: radial-gradient(circle, #5B9CFF, transparent 65%); opacity: .10; animation: drift2 32s ease-in-out infinite; }
-.aura .a3 { width: 38vw; height: 38vw; left: 28vw; bottom: -14vw; background: radial-gradient(circle, #8B5CF6, transparent 65%); opacity: .08; animation: drift3 38s ease-in-out infinite; }
+.aura .a3 { width: 38vw; height: 38vw; left: 28vw; bottom: -14vw; background: radial-gradient(circle, #8B5CF6, transparent 65%); opacity: .09; animation: drift3 38s ease-in-out infinite; }
+.aura .a4 { width: 30vw; height: 30vw; right: 18vw; bottom: -8vw; background: radial-gradient(circle, var(--acc), transparent 65%); opacity: .07; animation: drift1 30s ease-in-out infinite reverse; }
+:root[data-theme="dark"] .aura .a4 { opacity: .13; }
 :root[data-theme="dark"] .aura .a1 { opacity: .22; } :root[data-theme="dark"] .aura .a2 { opacity: .16; } :root[data-theme="dark"] .aura .a3 { opacity: .14; }
 @keyframes drift1 { 0%,100% { transform: translate(0,0) scale(1); } 33% { transform: translate(6vw,4vh) scale(1.12); } 66% { transform: translate(-4vw,6vh) scale(.95); } }
 @keyframes drift2 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-7vw,5vh) scale(1.15); } }
@@ -233,3 +235,10 @@ table.tbl tr:hover td { background: rgba(0,0,0,.025); }
 .content .fade > *:nth-child(3){animation-delay:.16s}.content .fade > *:nth-child(4){animation-delay:.23s}
 .content .fade > *:nth-child(5){animation-delay:.3s}.content .fade > *:nth-child(6){animation-delay:.37s}
 @media (prefers-reduced-motion: reduce){ .content .fade > * { animation: none; } .card-hover { transform: none !important; } }
+
+/* constellation canvas + panning grid */
+.particles { position: fixed; inset: 0; z-index: 0; width: 100%; height: 100%; pointer-events: none; opacity: .6; }
+:root[data-theme="dark"] .particles { opacity: .8; }
+.grid-bg::before { content: ""; position: absolute; inset: -50%; background-image: linear-gradient(color-mix(in srgb, var(--acc) 7%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, var(--acc) 7%, transparent) 1px, transparent 1px); background-size: 46px 46px; mask-image: radial-gradient(60% 50% at 50% 40%, #000, transparent 75%); -webkit-mask-image: radial-gradient(60% 50% at 50% 40%, #000, transparent 75%); animation: pan 40s linear infinite; opacity: .5; }
+@keyframes pan { from { transform: translate(0,0); } to { transform: translate(46px,46px); } }
+@media (prefers-reduced-motion: reduce){ .grid-bg::before { animation: none; } }

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { CardSpotlight } from "../components/CardSpotlight";
+import { ParticleField } from "../components/ParticleField";
 
 export const metadata: Metadata = {
   title: "FundedCore — The AI-Native Prop Firm",
@@ -19,7 +20,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         <div className="grid-bg" />
-        <div className="aura"><span className="a1" /><span className="a2" /><span className="a3" /></div>
+        <ParticleField />
+        <div className="aura"><span className="a1" /><span className="a2" /><span className="a3" /><span className="a4" /></div>
         <CardSpotlight />
         <div className="relative z-10">{children}</div>
       </body>
