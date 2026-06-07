@@ -89,7 +89,7 @@ export default function Suite() {
 
         <main className="min-w-0">
           <AlertsBar profile={profile} />
-          {tab === "brief" && <Brief profile={profile} go={setTab} />}
+          {tab === "brief" && <Brief profile={profile} go={setTab} setProfile={setProfile} />}
           {tab === "risk" && <RiskTab profile={profile} setProfile={setProfile} />}
           {tab === "insights" && <InsightsTab profile={profile} />}
           {tab === "news" && <NewsTab />}

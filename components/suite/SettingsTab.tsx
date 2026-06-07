@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { type Profile, clearProfile, DEFAULT_PROFILE } from "../../lib/profile";
+import { type Profile, clearProfile, DEFAULT_PROFILE, demoProfile } from "../../lib/profile";
 import { FIRMS, INSTRUMENTS } from "../../lib/firms";
 import { type Account } from "../../lib/risk";
 import { usd } from "../../lib/format";
@@ -59,6 +59,12 @@ export function SettingsTab({ profile, setProfile }: { profile: Profile; setProf
         <label className="block"><span className="lbl">Anthropic API key (optional, stored only in your browser)</span>
           <input className="inp" type="password" value={profile.settings.anthropicKey || ""} onChange={(e) => set("anthropicKey", e.target.value)} placeholder="sk-ant-…" /></label>
         <p className="text-[.74rem] text-t3">Without a key, the coach uses built-in rule-based guidance. With one, it answers with Claude, grounded in your stats.</p>
+      </section>
+
+      <section className="card p-5">
+        <h3 className="font-semibold mb-2">Demo data</h3>
+        <p className="text-[.8rem] text-t2 mb-2">Fill the whole suite with a realistic funded trader to see every tool alive.</p>
+        <button className="btn btn-primary text-sm" onClick={() => setProfile(demoProfile(profile))}>Load demo data</button>
       </section>
 
       <section className="card p-5">

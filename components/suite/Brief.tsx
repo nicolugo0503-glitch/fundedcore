@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { type Profile } from "../../lib/profile";
+import { type Profile, demoProfile } from "../../lib/profile";
 import { assessAccount, STATUS_META } from "../../lib/risk";
 import { analyze } from "../../lib/insights";
 import { scoreTrades } from "../../lib/score";
@@ -9,7 +9,7 @@ import { SuiteHeader, Panel, Ring, EmptyState } from "./ui";
 
 const DOW = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
-export function Brief({ profile, go }: { profile: Profile; go: (t: string) => void }) {
+export function Brief({ profile, go, setProfile }: { profile: Profile; go: (t: string) => void; setProfile?: (p: Profile) => void }) {
   const [news, setNews] = useState<any[] | null>(null);
   useEffect(() => { fetch("/api/news").then((r) => r.json()).then((d) => setNews(d.events || [])).catch(() => setNews([])); }, []);
 
@@ -116,7 +116,7 @@ export function Brief({ profile, go }: { profile: Profile; go: (t: string) => vo
               <p className="text-[.85rem] text-t2 mt-1.5 leading-relaxed">{topLeak.detail}</p>
               <div className="mt-3 rounded-xl px-3.5 py-2.5 text-[.85rem] text-t1" style={{ background: "rgba(248,113,113,.08)", border: "1px solid rgba(248,113,113,.25)" }}>→ {topLeak.fix}</div>
             </div>
-          ) : <EmptyState icon="✦" title="No leaks yet" body="Add ~20+ trades and we'll rank the patterns costing you the most money — in dollars." cta={<button onClick={() => go("journal")} className="btn btn-ghost text-sm">Add trades</button>} />}
+          ) : <EmptyState icon="✦" title="No leaks yet" body="Add ~20+ trades and we'll rank the patterns costing you the most money — in dollars." cta={<div className="flex gap-2"><button onClick={() => go("journal")} className="btn btn-ghost text-sm">Add my trades</button>{setProfile && <button onClick={() => setProfile(demoProfile(profile))} className="btn btn-primary text-sm">Load demo data</button>}</div>} />}
         </Panel>
         <Panel title="What's working" icon="▲" accent="#34D399">
           {ins && ins.strengths.length ? (

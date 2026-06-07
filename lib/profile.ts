@@ -60,3 +60,29 @@ export function clearProfile() {
   if (typeof window === "undefined") return;
   try { window.localStorage.removeItem(KEY); } catch {}
 }
+
+// One-click demo: fills the suite with a realistic funded trader so every
+// panel, ring, chart and insight comes alive immediately.
+import { demoAccounts } from "./risk";
+import { sampleById } from "./sampleTraders";
+
+export function demoProfile(base: Profile): Profile {
+  const maya = sampleById("maya");
+  const accts = demoAccounts();
+  // stamp recent trades onto the current week so charts/news overlays line up
+  const src = maya ? maya.trades : [];
+  const now = Date.now();
+  const span = src.length ? src[src.length - 1].timestamp - src[0].timestamp : 1;
+  const trades = src.map((t) => {
+    const frac = span ? (t.timestamp - src[0].timestamp) / span : 0;
+    const ts = now - (1 - frac) * 30 * 86400000; // last 30 days
+    return { ...t, timestamp: ts, date: new Date(ts).toISOString().slice(0, 10) };
+  });
+  return {
+    ...base,
+    name: base.name && base.name !== "Trader" ? base.name : "Maya",
+    accounts: accts,
+    trades,
+    onboarded: true,
+  };
+}

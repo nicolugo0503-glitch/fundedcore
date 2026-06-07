@@ -3,7 +3,7 @@ import { useState, useRef } from "react";
 import { Logo } from "../Nav";
 import { FIRMS } from "../../lib/firms";
 import { type Account } from "../../lib/risk";
-import { type Profile } from "../../lib/profile";
+import { type Profile, demoProfile } from "../../lib/profile";
 import { parseTradesCsv } from "../../lib/csv";
 import { sampleById } from "../../lib/sampleTraders";
 import { usd } from "../../lib/format";
@@ -65,6 +65,7 @@ export function Onboarding({ onDone, initial }: { onDone: (p: Profile) => void; 
             <label className="lbl">What should we call you?</label>
             <input className="inp" value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name or handle" />
             <button className="btn btn-primary w-full mt-5" onClick={() => setStep(1)}>Continue →</button>
+            <button className="btn btn-ghost w-full mt-2 text-sm" onClick={() => onDone(demoProfile({ ...initial, name: name || "Maya" }))}>Skip — explore with demo data</button>
           </>
         )}
 
