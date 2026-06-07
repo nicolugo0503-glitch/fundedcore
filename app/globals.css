@@ -27,7 +27,7 @@
 }
 
 html, body { background: var(--bg); color: var(--t1); }
-body { font-family: "Inter", system-ui, sans-serif; -webkit-font-smoothing: antialiased; letter-spacing: -0.011em; }
+body { font-family: "Inter", system-ui, sans-serif; -webkit-font-smoothing: antialiased; letter-spacing: -0.011em; font-size: 14px; line-height: 1.5; }
 h1,h2,h3,h4 { font-family: "Inter", system-ui, sans-serif; letter-spacing: -0.025em; font-weight: 600; }
 .mono { font-family: "JetBrains Mono", monospace; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
 ::selection { background: rgba(110,139,255,.28); }
@@ -51,10 +51,10 @@ h1,h2,h3,h4 { font-family: "Inter", system-ui, sans-serif; letter-spacing: -0.02
 .card {
   background: var(--panel);
   border: 1px solid var(--line);
-  border-radius: 14px;
+  border-radius: 12px;
   transition: border-color .18s, background .18s;
 }
-.card-hover:hover { border-color: var(--line2); background: var(--panel2); }
+.card-hover:hover { border-color: var(--line2); }
 
 /* ── buttons: solid, flat, confident ────────────────────────────────────── */
 .btn {
@@ -73,7 +73,7 @@ h1,h2,h3,h4 { font-family: "Inter", system-ui, sans-serif; letter-spacing: -0.02
   display:inline-flex; align-items:center; gap:.4rem; font-size:.72rem; font-weight:550; letter-spacing:0;
   padding:.28rem .6rem; border-radius:7px; border:1px solid var(--line2); background:rgba(255,255,255,.03); color: var(--t2);
 }
-.eyebrow { font-size:.72rem; font-weight:600; letter-spacing:.04em; text-transform:uppercase; color: var(--t3); }
+.eyebrow { font-size:.68rem; font-weight:500; letter-spacing:.08em; text-transform:uppercase; color: var(--t3); }
 .grad-text { color: var(--t1); }   /* no gradient — solid, tight */
 .divider { height:1px; background: var(--line); }
 

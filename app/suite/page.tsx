@@ -59,7 +59,7 @@ export default function Suite() {
   return (
     <div className="min-h-screen flex flex-col">
       <header className="sticky top-0 z-30 backdrop-blur-md bg-bg/70 border-b border-white/[.06]">
-        <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-5 h-14 flex items-center justify-between">
           <Link href="/"><Logo size={24} /></Link>
           <div className="text-sm text-t2 hidden sm:block">Hi, <span className="text-t1 font-medium">{profile.name}</span> · {profile.accounts.length} account{profile.accounts.length !== 1 ? "s" : ""} · {profile.trades.length} trades</div>
           <span className="chip" style={{ borderColor: "#34D39955", color: "#34D399" }}><span className="w-1.5 h-1.5 rounded-full pulse" style={{ background: "#34D399" }} /> live · all systems</span>

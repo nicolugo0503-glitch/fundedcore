@@ -10,12 +10,12 @@ export function SuiteHeader({ eyebrow, title, sub, right }: { eyebrow?: string; 
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           {eyebrow && <div className="eyebrow mb-1.5">{eyebrow}</div>}
-          <h1 className="display text-2xl md:text-[1.9rem] text-white leading-tight">{title}</h1>
-          {sub && <p className="text-t2 text-sm mt-1.5 max-w-xl leading-relaxed">{sub}</p>}
+          <h1 className="display text-[1.35rem] md:text-[1.55rem] text-white leading-tight">{title}</h1>
+          {sub && <p className="text-t2 text-[.86rem] mt-1 max-w-xl leading-relaxed">{sub}</p>}
         </div>
         {right}
       </div>
-      <div className="mt-4 h-px w-full" style={{ background: "linear-gradient(90deg, rgba(91,140,255,.5), rgba(139,92,246,.2) 40%, transparent 80%)" }} />
+      <div className="mt-4 h-px w-full" style={{ background: "var(--line)" }} />
     </div>
   );
 }
@@ -61,11 +61,11 @@ export function StatTile({ icon, label, value, sub, accent = "#5B8CFF", onClick 
 export function Panel({ title, icon, action, accent = "#5B8CFF", children, className = "" }:
   { title?: string; icon?: ReactNode; action?: ReactNode; accent?: string; children: ReactNode; className?: string }) {
   return (
-    <section className={`card p-6 relative overflow-hidden ${className}`}>
+    <section className={`card p-5 relative overflow-hidden ${className}`}>
       
       {title && (
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold flex items-center gap-2 text-[1rem]">
+          <h3 className="font-semibold flex items-center gap-2 text-[.92rem]">
             {icon && <span style={{ color: accent }}>{icon}</span>}{title}
           </h3>
           {action}
