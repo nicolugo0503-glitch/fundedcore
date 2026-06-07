@@ -21,6 +21,30 @@ function gauss(r: () => number) {
   return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
 }
 
+
+// Synthesize entry/exit/high/low consistent with pnl so execution analytics work.
+function synthPrices(pnl: number, size: number, side: "long" | "short", r: () => number) {
+  const pp = 2;
+  const captured = (pnl / Math.max(1, size)) / pp; // signed profit in points
+  const entry = 100;
+  let exit: number, high: number, low: number;
+  if (pnl >= 0) {
+    const eff = 0.4 + r() * 0.35;            // capture 40-75% of MFE -> shows the "cut winners early" leak
+    const mfe = Math.abs(captured) / eff;
+    const heat = Math.abs(captured) * (0.1 + r() * 0.4);
+    if (side === "long") { exit = entry + captured; high = entry + mfe; low = entry - heat; }
+    else { exit = entry - captured; low = entry - mfe; high = entry + heat; }
+  } else {
+    const loss = Math.abs(captured);
+    const mfe = r() < 0.4 ? 0 : loss * (0.2 + r() * 0.5); // ~40% go straight red
+    const extra = loss * (1 + r() * 0.3);     // MAE >= final loss
+    if (side === "long") { exit = entry - loss; high = entry + mfe; low = entry - extra; }
+    else { exit = entry + loss; low = entry - mfe; high = entry + extra; }
+  }
+  const round = (x: number) => Math.round(x * 100) / 100;
+  return { entry: round(entry), exit: round(exit), high: round(high), low: round(low) };
+}
+
 type Profile = {
   seed: number;
   days: number;
@@ -58,14 +82,17 @@ function generate(p: Profile): Trade[] {
       if (win) pnl = Math.max(5, p.avgWin + gauss(r) * p.winVar);
       else pnl = -Math.max(5, p.avgLoss + gauss(r) * p.lossVar) * (lastLoss ? p.tilt : 1);
       pnl = Math.round(pnl);
+      const side: "long" | "short" = r() < 0.5 ? "long" : "short";
+      const px = synthPrices(pnl, size, side, r);
       trades.push({
         id: id++,
         date: new Date(t).toISOString().slice(0, 10),
         timestamp: t + k * 600000,
         symbol: SYMS[Math.floor(r() * SYMS.length)] || p.symbol,
-        side: r() < 0.5 ? "long" : "short",
+        side,
         size,
         pnl,
+        entry: px.entry, exit: px.exit, high: px.high, low: px.low,
       });
       lastLoss = pnl < 0;
     }

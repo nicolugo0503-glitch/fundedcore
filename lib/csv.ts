@@ -11,6 +11,10 @@ const SYMBOL_KEYS = ["symbol", "ticker", "instrument", "market", "contract", "as
 const SIDE_KEYS = ["side", "direction", "type", "position", "buysell", "longshort"];
 const SIZE_KEYS = ["size", "qty", "quantity", "contracts", "lots", "shares", "volume", "units"];
 const R_KEYS = ["r", "rmultiple", "rmult", "rr", "rrealized"];
+const ENTRY_KEYS = ["entry", "entryprice", "openprice", "avgentry", "fillprice", "priceopen", "buyprice"];
+const EXIT_KEYS = ["exit", "exitprice", "closeprice", "avgexit", "priceclose", "sellprice"];
+const HIGH_KEYS = ["high", "maxprice", "highprice", "mfe", "maxfavorable", "runup", "maxprofitprice"];
+const LOW_KEYS = ["low", "minprice", "lowprice", "mae", "maxadverse", "drawdownprice", "maxlossprice"];
 const TAG_KEYS = ["setup", "strategy", "tag", "playbook", "pattern", "system"];
 
 function norm(s: string) {
@@ -85,6 +89,10 @@ export function parseTradesCsv(text: string): ParseResult {
   const iSide = findKey(headers, SIDE_KEYS);
   const iSize = findKey(headers, SIZE_KEYS);
   const iR = findKey(headers, R_KEYS);
+  const iEntry = findKey(headers, ENTRY_KEYS);
+  const iExit = findKey(headers, EXIT_KEYS);
+  const iHigh = findKey(headers, HIGH_KEYS);
+  const iLow = findKey(headers, LOW_KEYS);
   const iTag = findKey(headers, TAG_KEYS);
 
   if (iPnl < 0) {
@@ -123,6 +131,8 @@ export function parseTradesCsv(text: string): ParseResult {
     const side = /s|sell|short/.test(sideRaw) && !/buy|long/.test(sideRaw) ? "short" : sideRaw ? "long" : undefined;
     const size = iSize >= 0 ? Math.abs(toNumber(cells[iSize])) : undefined;
     const rMultiple = iR >= 0 ? toNumber(cells[iR]) : undefined;
+    const px = (i: number) => { if (i < 0) return undefined; const v = toNumber(cells[i]); return isNaN(v) ? undefined : v; };
+    const entry = px(iEntry), exit = px(iExit), high = px(iHigh), low = px(iLow);
 
     trades.push({
       id: trades.length + 1,
@@ -134,6 +144,7 @@ export function parseTradesCsv(text: string): ParseResult {
       size: size != null && !isNaN(size) ? size : undefined,
       rMultiple: rMultiple != null && !isNaN(rMultiple) ? rMultiple : undefined,
       tag: iTag >= 0 ? (cells[iTag] || undefined) : undefined,
+      entry, exit, high, low,
     });
   }
 
@@ -155,10 +166,11 @@ export function parseTradesCsv(text: string): ParseResult {
 }
 
 // A clean template users can download to format their own history.
+export const CSV_TEMPLATE_NOTE = "";
 export const CSV_TEMPLATE =
-  "date,symbol,side,size,pnl\n" +
-  "2025-01-06,MNQ,long,2,180\n" +
-  "2025-01-06,MNQ,long,2,-95\n" +
-  "2025-01-07,ES,short,1,240\n" +
-  "2025-01-08,MNQ,long,3,-120\n" +
-  "2025-01-08,MES,long,4,310\n";
+  "date,symbol,side,size,entry,exit,high,low,pnl,setup\n" +
+  "2025-01-06,MNQ,long,2,18050,18095,18130,18040,180,ORB\n" +
+  "2025-01-06,MNQ,long,2,18110,18086,18140,18080,-95,ORB\n" +
+  "2025-01-07,ES,short,1,5305,5293,5312,5290,240,reversal\n" +
+  "2025-01-08,MNQ,long,3,18200,18180,18260,18175,-120,breakout\n" +
+  "2025-01-08,MES,long,4,5320,5335,5342,5316,310,trend\n";

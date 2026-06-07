@@ -21,6 +21,10 @@ export type Trade = {
   pnl: number;         // net realized P&L in account currency
   rMultiple?: number;  // optional: P&L expressed in units of risk
   tag?: string;        // optional: setup/strategy label
+  entry?: number;      // entry price (enables execution analytics)
+  exit?: number;       // exit price
+  high?: number;       // max favorable price reached during the trade
+  low?: number;        // max adverse price reached during the trade
 };
 
 export type SubScore = {

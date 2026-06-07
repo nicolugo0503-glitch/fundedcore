@@ -21,6 +21,7 @@ import { ChartsTab } from "../../components/suite/ChartsTab";
 import { MarketsTab } from "../../components/suite/MarketsTab";
 import { LiveFlowTab } from "../../components/suite/LiveFlowTab";
 import { PreMortemTab } from "../../components/suite/PreMortemTab";
+import { ExecutionTab } from "../../components/suite/ExecutionTab";
 import { SettingsTab } from "../../components/suite/SettingsTab";
 import { AlertsBar } from "../../components/suite/AlertsBar";
 import { CommandPalette, type Command } from "../../components/suite/CommandPalette";
@@ -37,6 +38,7 @@ const TABS = [
   ["risk", "Risk", "shield"],
   ["premortem", "Pre-Mortem", "alert"],
   ["insights", "Insights", "spark"],
+  ["execution", "Execution", "target"],
   ["news", "News", "news"],
   ["coach", "AI Coach", "brain"],
   ["journal", "Journal & Score", "book"],
@@ -50,7 +52,7 @@ const TABS = [
 const GROUPS: { label: string; ids: string[] }[] = [
   { label: "Daily", ids: ["brief", "today"] },
   { label: "Markets", ids: ["markets", "flow", "charts", "news"] },
-  { label: "Risk & Edge", ids: ["risk", "premortem", "insights", "journal", "score"] },
+  { label: "Risk & Edge", ids: ["risk", "premortem", "insights", "execution", "journal", "score"] },
   { label: "Pass & Plan", ids: ["challenge", "simulator", "plan", "tools"] },
   { label: "AI", ids: ["coach"] },
 ];
@@ -132,6 +134,7 @@ export default function Suite() {
           {tab === "risk" && <RiskTab profile={profile} setProfile={setProfile} />}
           {tab === "premortem" && <PreMortemTab profile={profile} setProfile={setProfile} />}
           {tab === "insights" && <InsightsTab profile={profile} />}
+          {tab === "execution" && <ExecutionTab profile={profile} setProfile={setProfile} />}
           {tab === "news" && <NewsTab />}
           {tab === "coach" && <CoachTab profile={profile} />}
           {tab === "journal" && <JournalTab profile={profile} setProfile={setProfile} />}
