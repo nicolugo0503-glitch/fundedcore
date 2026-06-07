@@ -11,7 +11,14 @@ const DOW = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "
 
 export function Brief({ profile, go, setProfile }: { profile: Profile; go: (t: string) => void; setProfile?: (p: Profile) => void }) {
   const [news, setNews] = useState<any[] | null>(null);
+  const [mkt, setMkt] = useState<{ key: string; label: string; last: number; chg: number }[] | null>(null);
   useEffect(() => { fetch("/api/news").then((r) => r.json()).then((d) => setNews(d.events || [])).catch(() => setNews([])); }, []);
+  useEffect(() => {
+    const wl = [["SPX", "S&P 500"], ["NDX", "Nasdaq"], ["GOLD", "Gold"], ["WTI", "Crude"], ["BTC", "Bitcoin"], ["US10Y", "10Y"]];
+    Promise.all(wl.map(async ([k, label]) => {
+      try { const d = await fetch(`/api/market?symbol=${k}&interval=1h&range=5d`).then((r) => r.json()); const cs = d.candles || []; if (cs.length) return { key: k, label, last: cs[cs.length - 1].c, chg: (cs[cs.length - 1].c - cs[0].o) / cs[0].o }; } catch {} return null;
+    })).then((r) => setMkt(r.filter(Boolean) as any));
+  }, []);
 
   const now = new Date();
   const todayDow = now.getUTCDay();
@@ -25,8 +32,11 @@ export function Brief({ profile, go, setProfile }: { profile: Profile; go: (t: s
   const dayBucket = ins?.byDay.find((b) => b.key === dayKey);
   const topLeak = ins?.leaks[0];
 
+  const spx = mkt?.find((m) => m.key === "SPX");
+  const tone = spx ? (spx.chg < -0.007 ? "risk-off — index down hard overnight, trade lighter" : spx.chg > 0.007 ? "risk-on — index up overnight" : "flat tape overnight") : null;
   const plan: { n: number; text: string }[] = [];
   if (tightest) plan.push({ n: 1, text: `Tightest account (${tightest.firm.firmBrand}) has ${usd(Math.max(0, tightest.distanceToBreach))} before breach — your hard ceiling on risk today.` });
+  if (spx && tone) plan.push({ n: plan.length + 1, text: `Tape check: S&P ${spx.chg >= 0 ? "+" : ""}${(spx.chg * 100).toFixed(1)}% over the last sessions — ${tone}.` });
   if (upcoming.length) { const e = upcoming[0]; plan.push({ n: plan.length + 1, text: `${e.title} at ${new Date(e.date).toUTCString().slice(17, 22)} UTC — no trades in the 5 minutes around it.` }); }
   if (dayBucket && dayBucket.trades >= 4) plan.push({ n: plan.length + 1, text: `Your ${DOW[todayDow]} win rate is ${pct(dayBucket.winRate)} historically${dayBucket.net < 0 ? " — trade smaller today" : " — a decent day for you"}.` });
   if (topLeak) plan.push({ n: plan.length + 1, text: `Watch your #1 leak: ${topLeak.title.toLowerCase()}. ${topLeak.fix}` });
@@ -41,6 +51,22 @@ export function Brief({ profile, go, setProfile }: { profile: Profile; go: (t: s
         title={<>{greeting}, <span className="grad-text">{profile.name}</span>.</>}
         sub="Everything that matters before you take a trade, in one glance."
         right={<span className="chip" style={{ borderColor: "#34D39955", color: "#34D399" }}><span className="w-1.5 h-1.5 rounded-full pulse" style={{ background: "#34D399" }} /> {risks.filter(r => r.status === "healthy").length}/{risks.length || 0} healthy</span>} />
+
+      {/* MARKETS STRIP */}
+      <div className="card p-3 relative overflow-hidden">
+        <div className="absolute top-0 left-3 right-3 h-px" style={{ background: "linear-gradient(90deg,#5B8CFF,transparent)" }} />
+        <div className="flex items-center gap-2 mb-2 px-1"><span className="lbl mb-0">Markets right now</span>{mkt === null && <span className="text-[.7rem] text-t3">loading…</span>}</div>
+        <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
+          {(mkt || []).map((m) => (
+            <div key={m.key} className="rounded-lg bg-white/[.03] px-3 py-2">
+              <div className="text-[.66rem] text-t3 uppercase tracking-wide truncate">{m.label}</div>
+              <div className="mono text-[.9rem] font-semibold">{m.last >= 1000 ? m.last.toLocaleString("en-US", { maximumFractionDigits: 0 }) : m.last.toFixed(2)}</div>
+              <div className="mono text-[.72rem]" style={{ color: m.chg >= 0 ? "#34D399" : "#F87171" }}>{m.chg >= 0 ? "▲" : "▼"} {Math.abs(m.chg * 100).toFixed(2)}%</div>
+            </div>
+          ))}
+          {mkt !== null && mkt.length === 0 && <div className="col-span-full text-center text-t3 text-sm py-2">Market feed unavailable right now.</div>}
+        </div>
+      </div>
 
       {/* HERO STAT ROW */}
       <div className="grid md:grid-cols-3 gap-4">
