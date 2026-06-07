@@ -22,6 +22,7 @@ import { ToolsTab } from "../../components/suite/ToolsTab";
 import { ChartsTab } from "../../components/suite/ChartsTab";
 import { MarketsTab } from "../../components/suite/MarketsTab";
 import { LiveFlowTab } from "../../components/suite/LiveFlowTab";
+import { ConnectTab } from "../../components/suite/ConnectTab";
 import { PreMortemTab } from "../../components/suite/PreMortemTab";
 import { ExecutionTab } from "../../components/suite/ExecutionTab";
 import { SizingTab } from "../../components/suite/SizingTab";
@@ -37,6 +38,7 @@ import { demoProfile } from "../../lib/profile";
 const TABS = [
   ["brief", "Daily Brief", "gauge"],
   ["today", "Today · Live", "bolt"],
+  ["connect", "Broker Link", "repeat"],
   ["markets", "Markets", "grid"],
   ["flow", "Order Flow", "bolt"],
   ["charts", "Charts", "chart"],
@@ -58,7 +60,7 @@ const TABS = [
 ] as const;
 
 const GROUPS: { label: string; ids: string[] }[] = [
-  { label: "Daily", ids: ["brief", "today"] },
+  { label: "Daily", ids: ["brief", "today", "connect"] },
   { label: "Markets", ids: ["markets", "flow", "charts", "news"] },
   { label: "Risk & Edge", ids: ["risk", "premortem", "insights", "execution", "sizing", "portfolio", "journal", "score"] },
   { label: "Pass & Plan", ids: ["challenge", "simulator", "payout", "plan", "tools"] },
@@ -176,6 +178,7 @@ export default function Suite() {
           {tab === "challenge" && <ChallengeTab profile={profile} />}
           {tab === "simulator" && <SimulatorTab profile={profile} />}
           {tab === "today" && <TodayTab profile={profile} setProfile={setProfile} />}
+          {tab === "connect" && <ConnectTab profile={profile} />}
           {tab === "plan" && <PlanTab profile={profile} setProfile={setProfile} />}
           {tab === "tools" && <ToolsTab profile={profile} />}
           {tab === "charts" && <ChartsTab profile={profile} />}
