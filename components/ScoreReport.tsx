@@ -165,7 +165,7 @@ function scoreCol(s: number) {
 }
 function Stat({ label, value, accent }: { label: string; value: string; accent?: string }) {
   return (
-    <div className="rounded-xl bg-white/[.03] border border-white/[.06] px-4 py-3">
+    <div className="rounded-xl bg-black/[.03] border border-black/[.06] px-4 py-3">
       <div className="text-[.7rem] uppercase tracking-wide text-t3">{label}</div>
       <div className="mono text-lg font-semibold mt-0.5" style={{ color: accent || "#F0F4FF" }}>{value}</div>
     </div>

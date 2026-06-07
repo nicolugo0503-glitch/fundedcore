@@ -55,7 +55,7 @@ export function CoachTab({ profile }: { profile: Profile }) {
         <div className="flex-1 space-y-3">
           {msgs.map((m, i) => (
             <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
-              <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-[.9rem] ${m.role === "user" ? "bg-acc/20 border border-acc/30" : "bg-white/[.04] border border-white/[.06]"}`}>{m.text}</div>
+              <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-[.9rem] ${m.role === "user" ? "bg-acc/20 border border-acc/30" : "bg-black/[.04] border border-black/[.06]"}`}>{m.text}</div>
             </div>
           ))}
           {busy && <div className="text-t3 text-sm">Coach is thinking…</div>}

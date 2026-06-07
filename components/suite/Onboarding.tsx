@@ -84,7 +84,7 @@ export function Onboarding({ onDone, initial }: { onDone: (p: Profile) => void; 
             {accounts.length > 0 && (
               <div className="mt-3 space-y-1.5">
                 {accounts.map((a) => (
-                  <div key={a.id} className="flex justify-between text-sm rounded-lg bg-white/[.03] px-3 py-2">
+                  <div key={a.id} className="flex justify-between text-sm rounded-lg bg-black/[.03] px-3 py-2">
                     <span>{a.label} · {FIRMS[a.firmKey].name}</span><span className="mono text-t2">{usd(a.balance)}</span>
                   </div>
                 ))}

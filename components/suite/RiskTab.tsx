@@ -41,7 +41,7 @@ export function RiskTab({ profile, setProfile }: { profile: Profile; setProfile:
               </div>
               <div className="text-[.7rem] uppercase text-t3 mt-3">Distance to breach</div>
               <div className="text-2xl font-bold mono" style={{ color: sm.color }}>{usd(Math.max(0, r.distanceToBreach))}</div>
-              <div className="h-2 rounded-full bg-white/[.06] overflow-hidden mt-2"><div className="h-full rounded-full" style={{ width: `${Math.max(0, Math.min(1, r.pctBuffer)) * 100}%`, background: sm.color }} /></div>
+              <div className="h-2 rounded-full bg-black/[.06] overflow-hidden mt-2"><div className="h-full rounded-full" style={{ width: `${Math.max(0, Math.min(1, r.pctBuffer)) * 100}%`, background: sm.color }} /></div>
               <div className="grid grid-cols-2 gap-2 mt-3">
                 <label className="block"><span className="lbl">Balance</span><input type="number" className="inp !py-1 text-sm" value={a.balance} onClick={(e) => e.stopPropagation()} onChange={(e) => update(a.id, { balance: +e.target.value })} /></label>
                 <label className="block"><span className="lbl">Today P&L</span><input type="number" className="inp !py-1 text-sm" value={a.todayPnL} onClick={(e) => e.stopPropagation()} onChange={(e) => update(a.id, { todayPnL: +e.target.value })} /></label>

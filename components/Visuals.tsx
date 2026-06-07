@@ -157,7 +157,7 @@ export function PnlBars({ data, width = 720, height = 90 }: { data: number[]; wi
 export function ScoreBar({ score }: { score: number }) {
   const color = scoreColor(score);
   return (
-    <div className="h-2 w-full rounded-full bg-white/[.06] overflow-hidden">
+    <div className="h-2 w-full rounded-full bg-black/[.06] overflow-hidden">
       <div
         className="h-full rounded-full"
         style={{ width: `${score}%`, background: color, boxShadow: `0 0 8px ${color}99`, transformOrigin: "left", animation: "grow .7s ease both" }}

@@ -102,7 +102,7 @@ function AccountCard({ a, selected, onSelect, onRemove }: { a: Account; selected
         <div className="text-[.72rem] text-t3 mt-0.5">
           binding: {r.bindingConstraint === "daily" ? "daily loss limit" : "trailing drawdown"} · {r.firm.drawdownType.replace("_", " ")}
         </div>
-        <div className="h-2 w-full rounded-full bg-white/[.06] overflow-hidden mt-2">
+        <div className="h-2 w-full rounded-full bg-black/[.06] overflow-hidden mt-2">
           <div className="h-full rounded-full" style={{ width: `${buf * 100}%`, background: sm.color, boxShadow: `0 0 8px ${sm.color}` }} />
         </div>
       </div>
@@ -116,7 +116,7 @@ function AccountCard({ a, selected, onSelect, onRemove }: { a: Account; selected
       {r.firm.profitTarget > 0 && (
         <div className="mt-3">
           <div className="flex justify-between text-[.7rem] text-t3"><span>to pass</span><span>{usd(r.toProfitTarget)} left</span></div>
-          <div className="h-1.5 w-full rounded-full bg-white/[.06] overflow-hidden mt-1">
+          <div className="h-1.5 w-full rounded-full bg-black/[.06] overflow-hidden mt-1">
             <div className="h-full rounded-full bg-acc" style={{ width: `${r.targetPct * 100}%` }} />
           </div>
         </div>
@@ -130,7 +130,7 @@ function AccountCard({ a, selected, onSelect, onRemove }: { a: Account; selected
 
 function Mini({ label, value, color }: { label: string; value: string; color?: string }) {
   return (
-    <div className="rounded-lg bg-white/[.03] py-1.5">
+    <div className="rounded-lg bg-black/[.03] py-1.5">
       <div className="text-[.62rem] uppercase text-t3">{label}</div>
       <div className="mono text-[.82rem] font-semibold" style={{ color: color || "#F0F4FF" }}>{value}</div>
     </div>
@@ -190,7 +190,7 @@ function Guardrail({ account, accounts, onPick }: { account: Account; accounts: 
           <div className="text-[.72rem] uppercase tracking-wide text-t3 mb-2">Rule checks</div>
           <div className="space-y-1.5">
             {res.checks.map((c, i) => (
-              <div key={i} className="flex items-center justify-between text-[.82rem] rounded-lg px-3 py-1.5 bg-white/[.025]">
+              <div key={i} className="flex items-center justify-between text-[.82rem] rounded-lg px-3 py-1.5 bg-black/[.025]">
                 <span className="text-t2">{c.l.replace(/_/g, " ")}</span>
                 <span className="mono" style={{ color: c.s === "ok" ? "#10B981" : c.s === "warn" ? "#F59E0B" : "#EF4444" }}
                   dangerouslySetInnerHTML={{ __html: c.v }} />
@@ -215,7 +215,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 function Stat({ label, value, color }: { label: string; value: string; color?: string }) {
   return (
-    <div className="rounded-lg bg-white/[.03] px-3 py-2">
+    <div className="rounded-lg bg-black/[.03] px-3 py-2">
       <div className="text-[.66rem] uppercase text-t3">{label}</div>
       <div className="mono text-lg font-semibold" style={{ color: color || "#F0F4FF" }}>{value}</div>
     </div>

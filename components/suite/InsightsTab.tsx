@@ -61,7 +61,7 @@ function BucketChart({ title, buckets }: { title: string; buckets: Bucket[] }) {
         {buckets.map((b) => (
           <div key={b.key} className="flex items-center gap-2 text-[.8rem]">
             <span className="w-12 text-t3 mono shrink-0">{b.key}</span>
-            <div className="flex-1 h-4 bg-white/[.04] rounded relative overflow-hidden">
+            <div className="flex-1 h-4 bg-black/[.04] rounded relative overflow-hidden">
               <div className="h-full rounded" style={{ width: `${(Math.abs(b.net) / max) * 100}%`, background: b.net >= 0 ? "#10B981" : "#EF4444", opacity: .8 }} />
             </div>
             <span className="w-16 text-right mono shrink-0" style={{ color: b.net >= 0 ? "#10B981" : "#EF4444" }}>{usd(b.net)}</span>

@@ -95,7 +95,7 @@ export function MarketsTab() {
                 const color = !q ? "#64748B" : q.chg >= 0 ? "#34D399" : "#F87171";
                 return (
                   <button key={c.key} onClick={() => q && setSel(c.key)}
-                    className={`rounded-xl border p-3 text-left flex items-center justify-between gap-2 transition ${sel === c.key ? "border-acc/50 bg-acc/[.06]" : "border-white/[.08] bg-white/[.02] hover:border-white/[.18]"}`}>
+                    className={`rounded-xl border p-3 text-left flex items-center justify-between gap-2 transition ${sel === c.key ? "border-acc/50 bg-acc/[.06]" : "border-black/[.08] bg-black/[.02] hover:border-black/[.18]"}`}>
                     <div className="min-w-0">
                       <div className="text-[.84rem] font-medium truncate">{c.label}</div>
                       {q ? <div className="mono text-[.82rem] text-t2">{fmtPrice(q.last)}</div> : <div className="text-[.72rem] text-t3">—</div>}

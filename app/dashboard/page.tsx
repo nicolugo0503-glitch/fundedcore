@@ -165,7 +165,7 @@ function KPI({ label, value }: { label: string; value: string }) {
 }
 function Progress({ frac, color }: { frac: number; color: string }) {
   return (
-    <div className="h-2 w-full rounded-full bg-white/[.06] overflow-hidden">
+    <div className="h-2 w-full rounded-full bg-black/[.06] overflow-hidden">
       <div className="h-full rounded-full" style={{ width: `${frac * 100}%`, background: color, boxShadow: `0 0 8px ${color}99` }} />
     </div>
   );

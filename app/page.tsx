@@ -77,7 +77,7 @@ function Hero() {
         <div className="card px-5 py-4 w-[200px] text-left">
           <div className="lbl">Distance to breach</div>
           <div className="mono text-2xl font-bold" style={{ color: "#34D399" }}>$1,820</div>
-          <div className="h-1.5 rounded-full bg-white/[.07] mt-2 overflow-hidden"><div className="h-full w-[68%] rounded-full" style={{ background: "linear-gradient(90deg,#34D399,#22D3EE)" }} /></div>
+          <div className="h-1.5 rounded-full bg-black/[.07] mt-2 overflow-hidden"><div className="h-full w-[68%] rounded-full" style={{ background: "linear-gradient(90deg,#34D399,#22D3EE)" }} /></div>
         </div>
       </div>
       <div className="hidden lg:block absolute right-[-26px] top-64 floaty" style={{ ["--tilt" as any]: "4deg", animationDelay: "1.2s" }}>
@@ -230,7 +230,7 @@ function Economics() {
               ["× 25%", "FundedCore's cut"],
               ["= $1.25B", "annual revenue"],
             ].map(([a, b], i) => (
-              <div key={i} className={`flex items-center justify-between rounded-xl px-4 py-3 border ${i >= 4 ? "border-acc/40 bg-acc/[.07]" : "border-white/[.06] bg-white/[.02]"}`}>
+              <div key={i} className={`flex items-center justify-between rounded-xl px-4 py-3 border ${i >= 4 ? "border-acc/40 bg-acc/[.07]" : "border-black/[.06] bg-black/[.02]"}`}>
                 <span className="mono text-lg font-semibold">{a}</span>
                 <span className="text-[.82rem] text-t2">{b}</span>
               </div>
@@ -261,9 +261,9 @@ function Compare() {
       <SectionHead eyebrow="The difference" title="We're not a better challenge. We removed the challenge." />
       <div className="card overflow-hidden mt-9">
         <div className="grid grid-cols-3 text-sm">
-          <div className="p-4 text-t3 font-medium border-b border-white/[.07]"></div>
-          <div className="p-4 font-semibold text-t2 border-b border-white/[.07] border-l border-white/[.05]">Traditional prop firm</div>
-          <div className="p-4 font-semibold border-b border-white/[.07] border-l border-white/[.05] text-acc">FundedCore</div>
+          <div className="p-4 text-t3 font-medium border-b border-black/[.07]"></div>
+          <div className="p-4 font-semibold text-t2 border-b border-black/[.07] border-l border-black/[.05]">Traditional prop firm</div>
+          <div className="p-4 font-semibold border-b border-black/[.07] border-l border-black/[.05] text-acc">FundedCore</div>
           {rows.map((r, i) => (
             <Row key={i} cells={r} last={i === rows.length - 1} />
           ))}
@@ -277,12 +277,12 @@ function Compare() {
   );
 }
 function Row({ cells, last }: { cells: string[]; last: boolean }) {
-  const b = last ? "" : "border-b border-white/[.05]";
+  const b = last ? "" : "border-b border-black/[.05]";
   return (
     <>
       <div className={`p-4 text-t2 ${b}`}>{cells[0]}</div>
-      <div className={`p-4 text-t3 border-l border-white/[.05] ${b}`}>{cells[1]}</div>
-      <div className={`p-4 text-t1 border-l border-white/[.05] bg-acc/[.04] ${b}`}>{cells[2]}</div>
+      <div className={`p-4 text-t3 border-l border-black/[.05] ${b}`}>{cells[1]}</div>
+      <div className={`p-4 text-t1 border-l border-black/[.05] bg-acc/[.04] ${b}`}>{cells[2]}</div>
     </>
   );
 }

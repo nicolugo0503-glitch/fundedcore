@@ -170,7 +170,7 @@ export default function ApplyPage() {
 function TabBtn({ on, onClick, children }: { on: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
     <button onClick={onClick}
-      className={`px-4 py-2 rounded-lg text-sm font-medium transition border ${on ? "bg-acc/15 border-acc/40 text-t1" : "border-white/10 text-t2 hover:text-t1"}`}>
+      className={`px-4 py-2 rounded-lg text-sm font-medium transition border ${on ? "bg-acc/15 border-acc/40 text-t1" : "border-black/10 text-t2 hover:text-t1"}`}>
       {children}
     </button>
   );

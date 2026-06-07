@@ -33,7 +33,7 @@ export function ChallengeTab({ profile }: { profile: Profile }) {
             <div className="flex justify-between items-start"><div><div className="font-semibold">{a.label}</div><div className="text-[.78rem] text-t3">{r.firm.name}</div></div>
               <span className="chip" style={{ borderColor: "#3B82F655", color: "#60A5FA" }} title={mcNote}>{prob}% survive odds</span></div>
             <div className="mt-4"><div className="flex justify-between text-[.8rem] text-t3"><span>profit target</span><span>{usd(Math.max(0, r.netPnL))} / {usd(target)}</span></div>
-              <div className="h-3 rounded-full bg-white/[.06] overflow-hidden mt-1"><div className="h-full rounded-full bg-acc" style={{ width: `${progress * 100}%` }} /></div></div>
+              <div className="h-3 rounded-full bg-black/[.06] overflow-hidden mt-1"><div className="h-full rounded-full bg-acc" style={{ width: `${progress * 100}%` }} /></div></div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-5">
               <Stat label="Remaining" value={usd(remaining)} />
               <Stat label="Days traded" value={String(a.daysTraded)} />
@@ -48,5 +48,5 @@ export function ChallengeTab({ profile }: { profile: Profile }) {
   );
 }
 function Stat({ label, value }: { label: string; value: string }) {
-  return <div className="rounded-lg bg-white/[.03] px-3 py-2"><div className="lbl">{label}</div><div className="mono font-semibold">{value}</div></div>;
+  return <div className="rounded-lg bg-black/[.03] px-3 py-2"><div className="lbl">{label}</div><div className="mono font-semibold">{value}</div></div>;
 }

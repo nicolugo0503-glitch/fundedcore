@@ -42,7 +42,7 @@ export function SettingsTab({ profile, setProfile }: { profile: Profile; setProf
       <section className="card p-5 space-y-3">
         <h3 className="font-semibold">Accounts</h3>
         {profile.accounts.map((a) => (
-          <div key={a.id} className="flex justify-between items-center text-sm rounded-lg bg-white/[.03] px-3 py-2">
+          <div key={a.id} className="flex justify-between items-center text-sm rounded-lg bg-black/[.03] px-3 py-2">
             <span>{a.label} · {FIRMS[a.firmKey].name} · {usd(a.balance)}</span>
             <button className="text-t3 hover:text-red text-xs" onClick={() => removeAccount(a.id)}>remove</button>
           </div>

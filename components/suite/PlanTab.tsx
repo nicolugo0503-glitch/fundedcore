@@ -38,7 +38,7 @@ export function PlanTab({ profile, setProfile }: { profile: Profile; setProfile:
           {profile.checklist.map((c, i) => (
             <div key={i} className="flex items-center gap-3 group">
               <button onClick={() => toggle(i)}
-                className={`w-6 h-6 rounded-md border shrink-0 flex items-center justify-center text-sm transition ${done.includes(i) ? "bg-grn/20 border-grn/60 text-grn" : "border-white/20 text-transparent hover:border-acc/60"}`}>✓</button>
+                className={`w-6 h-6 rounded-md border shrink-0 flex items-center justify-center text-sm transition ${done.includes(i) ? "bg-grn/20 border-grn/60 text-grn" : "border-black/20 text-transparent hover:border-acc/60"}`}>✓</button>
               <input className="inp !border-transparent !bg-transparent !px-1 focus:!border-white/10 flex-1" value={c}
                 onChange={(e) => setItem(i, e.target.value)} />
               <button className="text-t3 hover:text-red opacity-0 group-hover:opacity-100 transition" onClick={() => removeItem(i)}>✕</button>

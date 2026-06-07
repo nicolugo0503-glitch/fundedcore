@@ -30,7 +30,7 @@ function Card({ title, sub, children }: { title: string; sub: string; children: 
 }
 function Out({ label, value, color }: { label: string; value: string; color?: string }) {
   return (
-    <div className="rounded-lg bg-white/[.03] px-3 py-2">
+    <div className="rounded-lg bg-black/[.03] px-3 py-2">
       <div className="lbl">{label}</div>
       <div className="mono text-lg font-semibold" style={{ color: color || "#F0F4FF" }}>{value}</div>
     </div>

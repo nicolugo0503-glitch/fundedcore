@@ -10,7 +10,7 @@ export function SuiteHeader({ eyebrow, title, sub, right }: { eyebrow?: string; 
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           {eyebrow && <div className="eyebrow mb-1.5">{eyebrow}</div>}
-          <h1 className="display text-[1.35rem] md:text-[1.55rem] text-white leading-tight">{title}</h1>
+          <h1 className="display text-[1.35rem] md:text-[1.55rem] text-t1 leading-tight">{title}</h1>
           {sub && <p className="text-t2 text-[.86rem] mt-1 max-w-xl leading-relaxed">{sub}</p>}
         </div>
         {right}

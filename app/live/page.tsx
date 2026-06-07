@@ -149,7 +149,7 @@ export default function Live() {
                 </div>
               </div>
 
-              <div className="h-3 w-full rounded-full bg-white/[.06] overflow-hidden">
+              <div className="h-3 w-full rounded-full bg-black/[.06] overflow-hidden">
                 <div className="h-full rounded-full transition-all duration-300"
                   style={{ width: `${Math.max(0, Math.min(1, r.pctBuffer)) * 100}%`, background: sm.color, boxShadow: `0 0 12px ${sm.color}` }} />
               </div>
@@ -188,7 +188,7 @@ function Banner({ color, children }: { color: string; children: React.ReactNode 
 }
 function Mini({ label, value, color }: { label: string; value: string; color?: string }) {
   return (
-    <div className="rounded-lg bg-white/[.03] py-2">
+    <div className="rounded-lg bg-black/[.03] py-2">
       <div className="text-[.62rem] uppercase text-t3">{label}</div>
       <div className="mono text-[.92rem] font-semibold" style={{ color: color || "#F0F4FF" }}>{value}</div>
     </div>
