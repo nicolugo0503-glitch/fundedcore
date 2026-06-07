@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Logo } from "../../components/Nav";
+import { Icon } from "../../components/Icon";
 import { loadProfile, saveProfile, type Profile } from "../../lib/profile";
 import { Onboarding } from "../../components/suite/Onboarding";
 import { Brief } from "../../components/suite/Brief";
@@ -21,20 +22,20 @@ import { SettingsTab } from "../../components/suite/SettingsTab";
 import { AlertsBar } from "../../components/suite/AlertsBar";
 
 const TABS = [
-  ["brief", "Daily Brief", "◎"],
-  ["today", "Today · Live", "●"],
-  ["markets", "Markets", "▦"],
-  ["charts", "Charts", "◫"],
-  ["risk", "Risk", "🛡"],
-  ["insights", "Insights", "✦"],
-  ["news", "News", "◷"],
-  ["coach", "AI Coach", "✧"],
-  ["journal", "Journal & Score", "▤"],
-  ["challenge", "Challenge", "◆"],
-  ["simulator", "Firm Simulator", "⇄"],
-  ["plan", "Plan & Ritual", "✓"],
-  ["tools", "Calculators", "∑"],
-  ["settings", "Settings", "⚙"],
+  ["brief", "Daily Brief", "gauge"],
+  ["today", "Today · Live", "bolt"],
+  ["markets", "Markets", "grid"],
+  ["charts", "Charts", "chart"],
+  ["risk", "Risk", "shield"],
+  ["insights", "Insights", "spark"],
+  ["news", "News", "news"],
+  ["coach", "AI Coach", "brain"],
+  ["journal", "Journal & Score", "book"],
+  ["challenge", "Challenge", "target"],
+  ["simulator", "Firm Simulator", "repeat"],
+  ["plan", "Plan & Ritual", "check"],
+  ["tools", "Calculators", "calc"],
+  ["settings", "Settings", "settings"],
 ] as const;
 
 export default function Suite() {
@@ -71,7 +72,7 @@ export default function Suite() {
             {TABS.map(([id, label, icon]) => (
               <button key={id} onClick={() => setTab(id)}
                 className={`navitem whitespace-nowrap ${tab === id ? "active" : ""}`}>
-                <span className="opacity-90 text-[.95rem]">{icon}</span>
+                <Icon name={icon} size={17} className="opacity-90" />
                 <span className="hidden md:inline">{label}</span>
                 <span className="md:hidden">{label.split(" ")[0]}</span>
               </button>

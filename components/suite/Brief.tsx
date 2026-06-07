@@ -6,6 +6,7 @@ import { analyze } from "../../lib/insights";
 import { scoreTrades } from "../../lib/score";
 import { usd, pct, scoreColor } from "../../lib/format";
 import { SuiteHeader, Panel, Ring, EmptyState } from "./ui";
+import { Icon } from "../Icon";
 
 const DOW = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
@@ -54,7 +55,7 @@ export function Brief({ profile, go, setProfile }: { profile: Profile; go: (t: s
 
       {/* MARKETS STRIP */}
       <div className="card p-3 relative overflow-hidden">
-        <div className="absolute top-0 left-3 right-3 h-px" style={{ background: "linear-gradient(90deg,#5B8CFF,transparent)" }} />
+        
         <div className="flex items-center gap-2 mb-2 px-1"><span className="lbl mb-0">Markets right now</span>{mkt === null && <span className="text-[.7rem] text-t3">loading…</span>}</div>
         <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
           {(mkt || []).map((m) => (
@@ -72,7 +73,7 @@ export function Brief({ profile, go, setProfile }: { profile: Profile; go: (t: s
       <div className="grid md:grid-cols-3 gap-4">
         {/* tightest account ring */}
         <button onClick={() => go("risk")} className="card card-hover p-5 flex items-center gap-4 text-left relative overflow-hidden">
-          <div className="absolute top-0 left-5 right-5 h-px" style={{ background: `linear-gradient(90deg, ${tm?.color || "#5B8CFF"}, transparent)` }} />
+          
           {tightest ? (
             <>
               <Ring pct={Math.max(.04, Math.min(1, tightest.pctBuffer))} color={tm!.color} size={86}>
@@ -90,7 +91,7 @@ export function Brief({ profile, go, setProfile }: { profile: Profile; go: (t: s
 
         {/* score ring */}
         <button onClick={() => go("journal")} className="card card-hover p-5 flex items-center gap-4 text-left relative overflow-hidden">
-          <div className="absolute top-0 left-5 right-5 h-px" style={{ background: "linear-gradient(90deg,#8B5CF6,transparent)" }} />
+          
           {score ? (
             <>
               <Ring pct={score.traderScore / 100} color={scoreColor(score.traderScore)} size={86}>
@@ -105,7 +106,7 @@ export function Brief({ profile, go, setProfile }: { profile: Profile; go: (t: s
             </>
           ) : (
             <div className="flex items-center gap-4">
-              <Ring pct={0} color="#8B5CF6" size={86}><span className="text-t3 text-lg">?</span></Ring>
+              <Ring pct={0} color="var(--acc)" size={86}><span className="text-t3 text-lg">?</span></Ring>
               <div><div className="lbl mb-0.5">Trader Score</div><div className="text-[.82rem] text-t2">Add trades to unlock <span className="text-acc">→</span></div></div>
             </div>
           )}
@@ -113,8 +114,8 @@ export function Brief({ profile, go, setProfile }: { profile: Profile; go: (t: s
 
         {/* news */}
         <button onClick={() => go("news")} className="card card-hover p-5 text-left relative overflow-hidden">
-          <div className="absolute top-0 left-5 right-5 h-px" style={{ background: "linear-gradient(90deg,#FBBF24,transparent)" }} />
-          <div className="flex items-center gap-2.5 mb-3"><span className="w-8 h-8 rounded-[10px] flex items-center justify-center" style={{ background: "rgba(251,191,36,.16)", color: "#FBBF24", border: "1px solid #FBBF2440" }}>◷</span><span className="lbl mb-0">Next high-impact news</span></div>
+          
+          <div className="flex items-center gap-2.5 mb-3"><span className="w-8 h-8 rounded-[10px] flex items-center justify-center" style={{ background: "rgba(210,153,34,.14)", color: "#D29922", border: "1px solid rgba(210,153,34,.3)" }}><Icon name="news" size={15} /></span><span className="lbl mb-0">Next high-impact news</span></div>
           {news === null ? <div className="text-t3 text-sm">Loading…</div> : upcoming.length ? (
             <><div className="text-[1.05rem] font-semibold truncate">{upcoming[0].title}</div><div className="mono text-[.8rem] text-amb mt-0.5">{new Date(upcoming[0].date).toUTCString().slice(17, 22)} UTC · in {Math.max(0, Math.round((+new Date(upcoming[0].date) - now.getTime()) / 60000))}m</div></>
           ) : <div className="text-grn text-[1.05rem] font-semibold">Clear for now ✓</div>}
@@ -122,7 +123,7 @@ export function Brief({ profile, go, setProfile }: { profile: Profile; go: (t: s
       </div>
 
       {/* TODAY'S PLAN */}
-      <Panel title="Today's plan" icon="◆" accent="#5B8CFF">
+      <Panel title="Today's plan" icon={<Icon name="target" />} accent="#5B8CFF">
         <ol className="space-y-3">
           {plan.map((p) => (
             <li key={p.n} className="flex gap-3.5 items-start">
@@ -135,27 +136,27 @@ export function Brief({ profile, go, setProfile }: { profile: Profile; go: (t: s
 
       {/* LEAK + STRENGTH */}
       <div className="grid md:grid-cols-2 gap-4">
-        <Panel title="Your biggest leak" icon="▼" accent="#F87171" action={<button className="text-acc text-xs" onClick={() => go("insights")}>all insights →</button>}>
+        <Panel title="Your biggest leak" icon={<Icon name="down" />} accent="#F87171" action={<button className="text-acc text-xs" onClick={() => go("insights")}>all insights →</button>}>
           {topLeak ? (
             <div>
               <div className="font-semibold text-red text-[.98rem]">{topLeak.title}</div>
               <p className="text-[.85rem] text-t2 mt-1.5 leading-relaxed">{topLeak.detail}</p>
               <div className="mt-3 rounded-xl px-3.5 py-2.5 text-[.85rem] text-t1" style={{ background: "rgba(248,113,113,.08)", border: "1px solid rgba(248,113,113,.25)" }}>→ {topLeak.fix}</div>
             </div>
-          ) : <EmptyState icon="✦" title="No leaks yet" body="Add ~20+ trades and we'll rank the patterns costing you the most money — in dollars." cta={<div className="flex gap-2"><button onClick={() => go("journal")} className="btn btn-ghost text-sm">Add my trades</button>{setProfile && <button onClick={() => setProfile(demoProfile(profile))} className="btn btn-primary text-sm">Load demo data</button>}</div>} />}
+          ) : <EmptyState icon="spark" title="No leaks yet" body="Add ~20+ trades and we'll rank the patterns costing you the most money — in dollars." cta={<div className="flex gap-2"><button onClick={() => go("journal")} className="btn btn-ghost text-sm">Add my trades</button>{setProfile && <button onClick={() => setProfile(demoProfile(profile))} className="btn btn-primary text-sm">Load demo data</button>}</div>} />}
         </Panel>
-        <Panel title="What's working" icon="▲" accent="#34D399">
+        <Panel title="What's working" icon={<Icon name="up" />} accent="#34D399">
           {ins && ins.strengths.length ? (
             <ul className="space-y-2.5">{ins.strengths.slice(0, 3).map((s, i) => <li key={i} className="text-[.86rem] text-t2 flex gap-2.5 leading-relaxed"><span className="text-grn mt-0.5 shrink-0">▲</span>{s}</li>)}</ul>
-          ) : <EmptyState icon="◎" title="Your edge, surfaced" body="Once you add trades, your best hours, days, and setups show up here so you can lean into them." />}
+          ) : <EmptyState icon="gauge" title="Your edge, surfaced" body="Once you add trades, your best hours, days, and setups show up here so you can lean into them." />}
         </Panel>
       </div>
 
       {/* COACH CTA */}
       <button onClick={() => go("coach")} className="card card-hover p-5 w-full text-left flex items-center justify-between group relative overflow-hidden">
-        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition" style={{ background: "linear-gradient(90deg, rgba(91,140,255,.06), transparent)" }} />
+        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition" style={{ background: "rgba(255,255,255,.02)" }} />
         <div className="relative flex items-center gap-4">
-          <span className="w-11 h-11 rounded-xl flex items-center justify-center text-lg" style={{ background: "linear-gradient(135deg,#5B8CFF,#8B5CF6)", boxShadow: "0 0 24px -6px rgba(91,140,255,.7)" }}>✦</span>
+          <span className="w-11 h-11 rounded-xl flex items-center justify-center text-lg" style={{ background: "var(--acc-weak)", border: "1px solid var(--line2)", color: "var(--acc)" }}><Icon name="brain" size={18} /></span>
           <div><div className="font-semibold">Ask your AI coach</div><div className="text-[.84rem] text-t2">“What's my biggest flaw?” · “Will I blow this account?” · “What should I cut?”</div></div>
         </div>
         <span className="relative text-acc text-lg transition-transform group-hover:translate-x-1.5">→</span>

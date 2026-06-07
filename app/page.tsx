@@ -179,7 +179,7 @@ function ScoreSection() {
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 mt-9">
         {dims.map(([t, d, c]) => (
           <div key={t} className="card card-hover p-6">
-            <span className="inline-block w-9 h-9 rounded-lg mb-4" style={{ background: c as string, boxShadow: `0 0 22px -4px ${c}` }} />
+            <span className="inline-block w-9 h-9 rounded-lg mb-4" style={{ background: "var(--acc-weak)", border: "1px solid var(--line2)" }} />
             <h3 className="font-semibold">{t}</h3>
             <p className="text-[.85rem] text-t2 mt-2 leading-relaxed">{d}</p>
           </div>

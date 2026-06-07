@@ -1,5 +1,6 @@
 "use client";
 import { type ReactNode } from "react";
+import { Icon } from "../Icon";
 
 // ── Premium suite primitives ────────────────────────────────────────────────
 
@@ -45,10 +46,10 @@ export function StatTile({ icon, label, value, sub, accent = "#5B8CFF", onClick 
   const Comp: any = onClick ? "button" : "div";
   return (
     <Comp onClick={onClick} className={`card p-5 text-left relative overflow-hidden ${onClick ? "card-hover w-full" : ""}`}>
-      <div className="absolute top-0 left-5 right-5 h-px" style={{ background: `linear-gradient(90deg, ${accent}, transparent)` }} />
+      
       <div className="flex items-center gap-2.5 mb-3">
         {icon && <span className="w-8 h-8 rounded-[10px] flex items-center justify-center text-[.95rem]"
-          style={{ background: ACCENT_BG[accent] || "rgba(91,140,255,.16)", color: accent, border: `1px solid ${accent}40` }}>{icon}</span>}
+          style={{ background: "var(--acc-weak)", color: "var(--acc)", border: "1px solid var(--line2)" }}>{icon}</span>}
         <span className="lbl mb-0">{label}</span>
       </div>
       <div className="mono text-[1.7rem] font-bold leading-none" style={{ color: accent === "#5B8CFF" ? "#F4F7FF" : accent }}>{value}</div>
@@ -61,7 +62,7 @@ export function Panel({ title, icon, action, accent = "#5B8CFF", children, class
   { title?: string; icon?: ReactNode; action?: ReactNode; accent?: string; children: ReactNode; className?: string }) {
   return (
     <section className={`card p-6 relative overflow-hidden ${className}`}>
-      <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: `linear-gradient(90deg, ${accent}, ${accent}22 50%, transparent)` }} />
+      
       {title && (
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-semibold flex items-center gap-2 text-[1rem]">
@@ -78,8 +79,8 @@ export function Panel({ title, icon, action, accent = "#5B8CFF", children, class
 export function EmptyState({ icon, title, body, cta }: { icon: string; title: string; body: string; cta?: ReactNode }) {
   return (
     <div className="flex flex-col items-center text-center py-10 px-6">
-      <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl mb-4"
-        style={{ background: "linear-gradient(135deg, rgba(91,140,255,.18), rgba(139,92,246,.1))", border: "1px solid rgba(91,140,255,.3)", boxShadow: "0 0 30px -8px rgba(91,140,255,.5)" }}>{icon}</div>
+      <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4"
+        style={{ background: "var(--acc-weak)", border: "1px solid var(--line2)", color: "var(--acc)" }}><Icon name={icon} size={20} /></div>
       <div className="font-semibold text-t1">{title}</div>
       <p className="text-[.85rem] text-t2 mt-1.5 max-w-sm leading-relaxed">{body}</p>
       {cta && <div className="mt-4">{cta}</div>}
