@@ -9,6 +9,7 @@ import { SuiteHeader, Panel, Ring, EmptyState } from "./ui";
 import { ClearanceCard, EdgeClock } from "./Decision";
 import { KeyLevels, ConditionsEdge, type Levels } from "./Levels";
 import { conditionEdge } from "../../lib/conditions";
+import { preMortem } from "../../lib/premortem";
 import { rootSymbol } from "../../lib/market";
 import { Icon } from "../Icon";
 
@@ -158,6 +159,11 @@ export function Brief({ profile, go, setProfile }: { profile: Profile; go: (t: s
   if (cond) {
     if (cond.unfavorableCount >= 2) reasons.push({ tone: "amber", text: "Today's conditions are historically weak for you" });
     else if (cond.favorableCount >= 2) reasons.push({ tone: "green", text: "Today's conditions suit your edge" });
+  }
+  const pm = preMortem(profile.trades);
+  if (pm.ready) {
+    if (pm.riskBand === "high") reasons.push({ tone: "red", text: `Blow-up pattern active (${Math.round(pm.riskToday * 100)}%) — ${pm.active[0]?.label.toLowerCase() || "your danger setup"}` });
+    else if (pm.riskBand === "elevated") reasons.push({ tone: "amber", text: `Pre-Mortem: today trips ${pm.active.length} of your blow-up signals` });
   }
   { const r = reasons.filter(x => x.tone === "red").length, a = reasons.filter(x => x.tone === "amber").length; verdict = r > 0 ? "STAND DOWN" : a > 0 ? "CAUTION" : "GO"; }
 
