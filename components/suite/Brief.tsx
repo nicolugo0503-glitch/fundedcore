@@ -1,11 +1,12 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { type Profile, demoProfile } from "../../lib/profile";
-import { assessAccount, STATUS_META } from "../../lib/risk";
+import { assessAccount, STATUS_META, maxSizeNow } from "../../lib/risk";
 import { analyze } from "../../lib/insights";
 import { scoreTrades } from "../../lib/score";
 import { usd, pct, scoreColor } from "../../lib/format";
 import { SuiteHeader, Panel, Ring, EmptyState } from "./ui";
+import { ClearanceCard, EdgeClock } from "./Decision";
 import { Icon } from "../Icon";
 
 const DOW = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -77,6 +78,52 @@ export function Brief({ profile, go, setProfile }: { profile: Profile; go: (t: s
   const dayBucket = ins?.byDay.find((b) => b.key === dayKey);
   const topLeak = ins?.leaks[0];
 
+  // ── Decision layer ──
+  function dailyStreak(): { dir: number; len: number } {
+    const byDate = new Map<string, number>();
+    for (const t of profile.trades) { const d = new Date(t.timestamp).toISOString().slice(0, 10); byDate.set(d, (byDate.get(d) || 0) + t.pnl); }
+    const days = [...byDate.entries()].sort((a, b) => (a[0] < b[0] ? 1 : -1));
+    if (!days.length) return { dir: 0, len: 0 };
+    const sign = days[0][1] >= 0 ? 1 : -1; let len = 0;
+    for (const [, net] of days) { if ((net >= 0 ? 1 : -1) === sign) len++; else break; }
+    return { dir: sign, len };
+  }
+  // tightest actual account object
+  let tightAcct: typeof profile.accounts[number] | null = null;
+  if (profile.accounts.length) { let bi = 0; risks.forEach((r, i) => { if (r.distanceToBreach < risks[bi].distanceToBreach) bi = i; }); tightAcct = profile.accounts[bi]; }
+
+  const reasons: { tone: "red" | "amber" | "green"; text: string }[] = [];
+  if (tightest) {
+    if (tightest.status === "breached" || tightest.status === "danger") reasons.push({ tone: "red", text: `Only ${usd(Math.max(0, tightest.distanceToBreach))} to breach on ${tightest.firm.firmBrand}` });
+    else if (tightest.status === "caution") reasons.push({ tone: "amber", text: `Buffer thin — ${Math.round(tightest.pctBuffer * 100)}% left on ${tightest.firm.firmBrand}` });
+    else reasons.push({ tone: "green", text: `Accounts healthy (${risks.filter(r => r.status === "healthy").length}/${risks.length})` });
+  } else reasons.push({ tone: "amber", text: "No funded account connected yet" });
+  const streak = dailyStreak();
+  if (streak.dir < 0 && streak.len >= 3) reasons.push({ tone: "red", text: `${streak.len}-day losing streak — step back` });
+  else if (streak.dir < 0 && streak.len === 2) reasons.push({ tone: "amber", text: "2 red days in a row — size down" });
+  else if (streak.dir > 0 && streak.len >= 2) reasons.push({ tone: "green", text: `${streak.len}-day green streak — protect it` });
+  if (dayBucket && dayBucket.trades >= 4) {
+    if (dayBucket.net < 0) reasons.push({ tone: "amber", text: `${DOW[todayDow]} is historically weak for you (${pct(dayBucket.winRate)})` });
+    else reasons.push({ tone: "green", text: `${DOW[todayDow]} tends to be green for you (${pct(dayBucket.winRate)})` });
+  }
+  const newsSoon = (upcoming || []).find((e) => { const m = (+new Date(e.date) - now.getTime()) / 60000; return m >= 0 && m < 60; });
+  if (newsSoon) reasons.push({ tone: "amber", text: `${newsSoon.title} within the hour — wait it out` });
+
+  const reds = reasons.filter(r => r.tone === "red").length;
+  const ambers = reasons.filter(r => r.tone === "amber").length;
+  const verdict: "GO" | "CAUTION" | "STAND DOWN" = reds > 0 ? "STAND DOWN" : ambers > 0 ? "CAUTION" : "GO";
+
+  let budget: { dollars: number; perTrade: number; contracts: number; instrument: string; stop: number } | null = null;
+  if (tightAcct && tightest) {
+    const dollars = Math.max(0, Math.min(profile.settings.dailyLossStop, Math.round(tightest.distanceToBreach * 0.25)));
+    const stop = profile.settings.defaultStop;
+    const contracts = maxSizeNow(tightAcct, profile.settings.instrument, stop);
+    budget = { dollars, perTrade: dollars / 3, contracts, instrument: profile.settings.instrument, stop };
+  }
+
+  const clockBuckets = (ins?.byHour || []).filter((b) => b.trades >= 2).map((b) => ({ key: b.key, net: b.net, trades: b.trades, winRate: b.winRate }));
+  const nowKey = String(now.getUTCHours()).padStart(2, "0") + ":00";
+
   const spx = mkt?.find((m) => m.key === "SPX");
   const ndx = mkt?.find((m) => m.key === "NDX");
   const vix = mkt?.find((m) => m.key === "VIX");
@@ -143,6 +190,8 @@ export function Brief({ profile, go, setProfile }: { profile: Profile; go: (t: s
         title={<>{greeting}, <span className="grad-text">{profile.name}</span>.</>}
         sub="Your whole trading world before the bell — markets, news, AI read, and your risk in one screen."
         right={<span className="chip"><span className="w-1.5 h-1.5 rounded-full pulse" style={{ background: "var(--grn)" }} /> {risks.filter(r => r.status === "healthy").length}/{risks.length || 0} healthy</span>} />
+
+      <ClearanceCard verdict={verdict} reasons={reasons} budget={budget} />
 
       <div className="card p-4">
         <div className="flex items-center justify-between mb-3 px-1">
@@ -252,6 +301,12 @@ export function Brief({ profile, go, setProfile }: { profile: Profile; go: (t: s
 
       <div className="grid lg:grid-cols-12 gap-4 items-start">
         <div className="lg:col-span-8 space-y-4">
+          <Panel title="Your edge clock" icon={<Icon name="clock" />} action={<button className="text-acc text-xs" onClick={() => go("insights")}>insights →</button>}>
+            {clockBuckets.length ? (
+              <EdgeClock buckets={clockBuckets} best={ins?.bestWindow || null} worst={ins?.worstWindow || null} nowKey={nowKey} />
+            ) : <EmptyState icon="clock" title="When you trade best" body="Add trades and this clock shows your most and least profitable hours, with a live now-marker — so you know when to be at the screen." cta={setProfile && <button onClick={() => setProfile(demoProfile(profile))} className="btn btn-primary text-sm">Load demo data</button>} />}
+          </Panel>
+
           <Panel title="Today's plan" icon={<Icon name="target" />}>
             <ol className="space-y-3.5">
               {buildPlan().map((p, i) => (
