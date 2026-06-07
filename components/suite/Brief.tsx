@@ -45,7 +45,7 @@ export function Brief({ profile, go, setProfile }: { profile: Profile; go: (t: s
   const briefDone = useRef(false);
 
   useEffect(() => { fetch("/api/news").then((r) => r.json()).then((d) => setEvents(d.events || [])).catch(() => setEvents([])); }, []);
-  useEffect(() => { fetch("/api/headlines").then((r) => r.json()).then((d) => setHeads(d.items || [])).catch(() => setHeads([])); }, []);
+  useEffect(() => { fetch("/api/headlines?t=" + Date.now(), { cache: "no-store" }).then((r) => r.json()).then((d) => setHeads(d.items || [])).catch(() => setHeads([])); }, []);
   useEffect(() => {
     const wl = [["SPX", "S&P 500"], ["NDX", "Nasdaq"], ["VIX", "VIX"], ["GOLD", "Gold"], ["WTI", "Crude"], ["BTC", "Bitcoin"], ["US10Y", "10Y"], ["DXY", "Dollar"]];
     Promise.all(wl.map(async ([k, label]) => {

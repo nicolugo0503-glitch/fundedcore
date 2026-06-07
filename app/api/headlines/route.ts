@@ -2,7 +2,8 @@
 // headline + thumbnail + source, merges and sorts. Cached ~10 min.
 import { NextResponse } from "next/server";
 
-export const revalidate = 600;
+export const revalidate = 0;
+export const dynamic = "force-dynamic";
 
 type Item = { title: string; link: string; source: string; date: string; image: string | null; summary: string };
 
@@ -45,7 +46,7 @@ function findImage(block: string): string | null {
 
 async function pull(url: string, source: string): Promise<Item[]> {
   try {
-    const r = await fetch(url, { next: { revalidate: 600 }, headers: { "User-Agent": "Mozilla/5.0 (FundedCore)" } });
+    const r = await fetch(url, { cache: "no-store", headers: { "User-Agent": "Mozilla/5.0 (FundedCore)" } });
     if (!r.ok) return [];
     const xml = await r.text();
     const items = xml.split(/<item[\s>]/i).slice(1);
