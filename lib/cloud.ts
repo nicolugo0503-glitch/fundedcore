@@ -23,3 +23,5 @@ export function upsertProfile(userId: string, data: Profile) {
     supabase!.from("profiles").upsert({ user_id: userId, data, updated_at: new Date().toISOString() }).then(() => {});
   }, 700); // debounce so input edits don't hammer the DB
 }
+
+// build marker: force fresh build to inline NEXT_PUBLIC_SUPABASE_* env vars
