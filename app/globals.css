@@ -222,3 +222,14 @@ table.tbl tr:hover td { background: rgba(0,0,0,.025); }
 .side-link.on { box-shadow: inset 2px 0 0 var(--acc), 0 0 0 1px color-mix(in srgb, var(--acc) 18%, transparent) inset; }
 
 @media (prefers-reduced-motion: reduce){ .btn-primary::after, .suitebar-underline, .pulse::before { animation: none !important; } }
+
+/* magnetic + tilt motion smoothing */
+.btn { transition: background .16s, border-color .16s, opacity .16s, transform .18s cubic-bezier(.2,.7,.3,1); }
+.card-hover { will-change: transform; transform-style: preserve-3d; }
+
+/* load choreography: content reveals as a stagger on each tab switch */
+.content .fade > * { animation: rise .5s cubic-bezier(.21,.8,.35,1) both; }
+.content .fade > *:nth-child(1){animation-delay:.02s}.content .fade > *:nth-child(2){animation-delay:.09s}
+.content .fade > *:nth-child(3){animation-delay:.16s}.content .fade > *:nth-child(4){animation-delay:.23s}
+.content .fade > *:nth-child(5){animation-delay:.3s}.content .fade > *:nth-child(6){animation-delay:.37s}
+@media (prefers-reduced-motion: reduce){ .content .fade > * { animation: none; } .card-hover { transform: none !important; } }
