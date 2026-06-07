@@ -9,11 +9,12 @@ import { Icon } from "../Icon";
 import type { BrokerConnector, LiveAccount, LivePosition, LiveFill, ConnStatus } from "../../lib/connectors/types";
 import { MockConnector } from "../../lib/connectors/mock";
 import { TradovateConnector } from "../../lib/connectors/tradovate";
+import { RithmicConnector } from "../../lib/connectors/rithmic";
 
 const FIRM_KEYS = Object.keys(FIRMS);
 
 export function ConnectTab({ profile }: { profile: Profile }) {
-  const [provider, setProvider] = useState<"sim" | "tradovate">("sim");
+  const [provider, setProvider] = useState<"sim" | "tradovate" | "rithmic">("sim");
   const [status, setStatus] = useState<ConnStatus>("idle");
   const [statusMsg, setStatusMsg] = useState("");
   const [acct, setAcct] = useState<LiveAccount | null>(null);
@@ -21,12 +22,13 @@ export function ConnectTab({ profile }: { profile: Profile }) {
   const [fills, setFills] = useState<LiveFill[]>([]);
   const [firmKey, setFirmKey] = useState(profile.accounts[0]?.firmKey || FIRM_KEYS[0]);
   const [creds, setCreds] = useState({ name: "", password: "", cid: "", sec: "", live: false });
+  const [rith, setRith] = useState({ gateway: "", systemName: "", user: "", password: "" });
   const conn = useRef<BrokerConnector | null>(null);
 
   function connect() {
     conn.current?.disconnect();
     setAcct(null); setPositions([]); setFills([]); setStatusMsg("");
-    const c: BrokerConnector = provider === "sim" ? new MockConnector() : new TradovateConnector(creds);
+    const c: BrokerConnector = provider === "sim" ? new MockConnector() : provider === "rithmic" ? new RithmicConnector(rith) : new TradovateConnector(creds);
     conn.current = c;
     c.connect({
       onStatus: (s, m) => { setStatus(s); if (m) setStatusMsg(m); },
@@ -54,7 +56,7 @@ export function ConnectTab({ profile }: { profile: Profile }) {
 
       <div className="card p-5">
         <div className="flex flex-wrap items-center gap-2 mb-4">
-          {([["sim", "Simulated feed"], ["tradovate", "Tradovate"]] as const).map(([k, label]) => (
+          {([["sim", "Simulated feed"], ["tradovate", "Tradovate"], ["rithmic", "Rithmic"]] as const).map(([k, label]) => (
             <button key={k} onClick={() => setProvider(k)} className={`px-3.5 py-2 rounded-lg text-[.82rem] font-medium border transition ${provider === k ? "bg-acc/15 border-acc/40 text-t1" : "border-line2 text-t2 hover:text-t1"}`}>{label}</button>
           ))}
           <span className="ml-auto chip" style={{ color: live ? "var(--grn)" : status === "error" ? "var(--red)" : "var(--t3)" }}>
@@ -70,6 +72,15 @@ export function ConnectTab({ profile }: { profile: Profile }) {
             <label><span className="lbl">API Key (cid) · optional</span><input className="inp" value={creds.cid} onChange={(e) => setCreds({ ...creds, cid: e.target.value })} /></label>
             <label><span className="lbl">API Secret (sec) · optional</span><input className="inp" value={creds.sec} onChange={(e) => setCreds({ ...creds, sec: e.target.value })} /></label>
             <label className="flex items-center gap-2 text-[.82rem] text-t2 sm:col-span-2"><input type="checkbox" checked={creds.live} onChange={(e) => setCreds({ ...creds, live: e.target.checked })} /> Live account (uncheck for Tradovate demo)</label>
+          </div>
+        )}
+        {provider === "rithmic" && (
+          <div className="grid sm:grid-cols-2 gap-3 mb-4">
+            <label><span className="lbl">Gateway URL (wss)</span><input className="inp" value={rith.gateway} onChange={(e) => setRith({ ...rith, gateway: e.target.value })} placeholder="wss://rituz00100.rithmic.com:443" /></label>
+            <label><span className="lbl">System name</span><input className="inp" value={rith.systemName} onChange={(e) => setRith({ ...rith, systemName: e.target.value })} /></label>
+            <label><span className="lbl">User</span><input className="inp" value={rith.user} onChange={(e) => setRith({ ...rith, user: e.target.value })} autoComplete="off" /></label>
+            <label><span className="lbl">Password</span><input type="password" className="inp" value={rith.password} onChange={(e) => setRith({ ...rith, password: e.target.value })} autoComplete="off" /></label>
+            <div className="sm:col-span-2 text-[.74rem] text-t3 flex items-center gap-1.5"><Icon name="alert" size={12} /> Rithmic API requires an approved system via their conformance process + protobuf templates. This adapter is ready for them; it won&apos;t stream until those are in place.</div>
           </div>
         )}
         {provider === "tradovate" && <div className="text-[.74rem] text-t3 mb-3 flex items-center gap-1.5"><Icon name="shield" size={12} /> Credentials are sent once to fetch a token and are never stored. Tradovate covers Apex, Tradeify, TPT, Lucid, FundedNext, TradeDay, Alpha Futures and more.</div>}
