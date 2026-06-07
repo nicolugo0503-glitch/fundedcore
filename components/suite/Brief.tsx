@@ -42,6 +42,8 @@ export function Brief({ profile, go, setProfile }: { profile: Profile; go: (t: s
   const [mkt, setMkt] = useState<Mkt[] | null>(null);
   const [brief, setBrief] = useState<{ text: string; source: string } | null>(null);
   const [briefLoading, setBriefLoading] = useState(true);
+  const [tradeRead, setTradeRead] = useState<{ text: string; source: string } | null>(null);
+  const [tradeLoading, setTradeLoading] = useState(true);
   const briefDone = useRef(false);
 
   useEffect(() => { fetch("/api/news").then((r) => r.json()).then((d) => setEvents(d.events || [])).catch(() => setEvents([])); }, []);
@@ -91,9 +93,25 @@ export function Brief({ profile, go, setProfile }: { profile: Profile; go: (t: s
     fetch("/api/brief", { method: "POST", headers, body: JSON.stringify({ context: ctx }) })
       .then((r) => r.json()).then((d) => setBrief({ text: d.text, source: d.source })).catch(() => setBrief(null)).finally(() => setBriefLoading(false));
   }
+  function loadTradeRead() {
+    setTradeLoading(true);
+    const movers = (mkt || []).filter((m) => m.key !== "VIX");
+    const mover = movers.length ? movers.reduce((a, b) => (Math.abs(b.chg) > Math.abs(a.chg) ? b : a)) : null;
+    const ev = upcoming[0] ? { title: upcoming[0].title, time: new Date(upcoming[0].date).toUTCString().slice(17, 22) } : null;
+    const ctx = {
+      tone: tone || undefined, spxPct: spx?.chg, ndxPct: ndx?.chg, vix: vix?.last,
+      mover: mover ? { label: mover.label, chg: mover.chg } : null,
+      headlines: (heads || []).slice(0, 5).map((h) => h.title),
+      event: ev, instrument: profile.settings.instrument,
+    };
+    const headers: any = { "content-type": "application/json" };
+    if (profile.settings.anthropicKey) headers["x-anthropic-key"] = profile.settings.anthropicKey;
+    fetch("/api/tradeplan", { method: "POST", headers, body: JSON.stringify({ context: ctx }) })
+      .then((r) => r.json()).then((d) => setTradeRead({ text: d.text, source: d.source })).catch(() => setTradeRead(null)).finally(() => setTradeLoading(false));
+  }
   useEffect(() => {
     if (briefDone.current) return;
-    if (mkt !== null && heads !== null) { briefDone.current = true; loadBrief(); }
+    if (mkt !== null && heads !== null) { briefDone.current = true; loadBrief(); loadTradeRead(); }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mkt, heads]);
 
@@ -138,6 +156,24 @@ export function Brief({ profile, go, setProfile }: { profile: Profile; go: (t: s
         )}
         {brief && brief.source !== "claude" && (
           <div className="mt-3 text-[.72rem] text-t3 flex items-center gap-1.5"><Icon name="bolt" size={12} /> Add your Anthropic key in Settings for a live, fully-reasoned daily briefing.</div>
+        )}
+      </div>
+
+      <div className="card p-5 relative overflow-hidden" style={{ borderColor: "color-mix(in srgb, var(--acc) 30%, var(--line2))" }}>
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2.5">
+            <span className="w-8 h-8 rounded-[10px] flex items-center justify-center" style={{ background: "var(--acc-weak)", color: "var(--acc)", border: "1px solid var(--line2)" }}><Icon name="target" size={16} /></span>
+            <div>
+              <div className="font-semibold text-[.96rem] leading-tight">Today's trade read</div>
+              <div className="text-[.68rem] text-t3">{tradeRead?.source === "claude" ? "AI strategist · from today's news & tape" : "From today's news & tape"}</div>
+            </div>
+          </div>
+          <button onClick={loadTradeRead} className="btn btn-ghost !py-1.5 !px-3 text-[.75rem]" disabled={tradeLoading}><Icon name="repeat" size={13} /> {tradeLoading ? "Reading…" : "Refresh"}</button>
+        </div>
+        {tradeLoading && !tradeRead ? (
+          <div className="space-y-2"><div className="skeleton" style={{ height: 13, width: "94%" }} /><div className="skeleton" style={{ height: 13, width: "88%" }} /><div className="skeleton" style={{ height: 13, width: "70%" }} /></div>
+        ) : (
+          <p className="text-[.95rem] text-t1 leading-relaxed">{tradeRead?.text || "Trade read unavailable — tap refresh."}</p>
         )}
       </div>
 
