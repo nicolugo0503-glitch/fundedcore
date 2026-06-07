@@ -54,3 +54,35 @@ export function syntheticCandles(symbol: string, n = 120, intervalMin = 5): Cand
   }
   return out;
 }
+
+// ── Broad market catalog for the Markets dashboard (real Yahoo tickers) ──────
+export type CatItem = { key: string; yahoo: string; label: string; cat: string; price?: boolean };
+export const MARKET_CATALOG: CatItem[] = [
+  // Indices
+  { key: "SPX", yahoo: "^GSPC", label: "S&P 500", cat: "Indices" },
+  { key: "NDX", yahoo: "^NDX", label: "Nasdaq 100", cat: "Indices" },
+  { key: "DJI", yahoo: "^DJI", label: "Dow Jones", cat: "Indices" },
+  { key: "RUT", yahoo: "^RUT", label: "Russell 2000", cat: "Indices" },
+  { key: "VIX", yahoo: "^VIX", label: "Volatility (VIX)", cat: "Indices" },
+  { key: "FTSE", yahoo: "^FTSE", label: "FTSE 100", cat: "Indices" },
+  { key: "DAX", yahoo: "^GDAXI", label: "DAX", cat: "Indices" },
+  { key: "N225", yahoo: "^N225", label: "Nikkei 225", cat: "Indices" },
+  // Crypto
+  { key: "BTC", yahoo: "BTC-USD", label: "Bitcoin", cat: "Crypto" },
+  { key: "ETH", yahoo: "ETH-USD", label: "Ethereum", cat: "Crypto" },
+  { key: "SOL", yahoo: "SOL-USD", label: "Solana", cat: "Crypto" },
+  // Commodities
+  { key: "GOLD", yahoo: "GC=F", label: "Gold", cat: "Commodities" },
+  { key: "WTI", yahoo: "CL=F", label: "Crude Oil (WTI)", cat: "Commodities" },
+  { key: "NGAS", yahoo: "NG=F", label: "Natural Gas", cat: "Commodities" },
+  { key: "SILVER", yahoo: "SI=F", label: "Silver", cat: "Commodities" },
+  // Rates & FX
+  { key: "US10Y", yahoo: "^TNX", label: "US 10-Year Yield", cat: "Rates & FX" },
+  { key: "DXY", yahoo: "DX-Y.NYB", label: "US Dollar Index", cat: "Rates & FX" },
+  { key: "EURUSD", yahoo: "EURUSD=X", label: "EUR / USD", cat: "Rates & FX" },
+];
+export const CAT_ORDER = ["Indices", "Crypto", "Commodities", "Rates & FX"];
+export function catYahoo(key: string): string | null {
+  const c = MARKET_CATALOG.find((x) => x.key === key);
+  return c ? c.yahoo : null;
+}

@@ -1,7 +1,7 @@
 // Live candles via Yahoo Finance's public chart API (no key), cached ~60s.
 // Falls back to deterministic synthetic candles so the chart never dies.
 import { NextResponse } from "next/server";
-import { MARKET_SYMBOLS, syntheticCandles, type Candle } from "../../../lib/market";
+import { MARKET_SYMBOLS, MARKET_CATALOG, syntheticCandles, type Candle } from "../../../lib/market";
 
 export const revalidate = 60;
 
@@ -10,7 +10,9 @@ export async function GET(req: Request) {
   const sym = (url.searchParams.get("symbol") || "NQ").toUpperCase();
   const interval = url.searchParams.get("interval") || "5m";
   const range = url.searchParams.get("range") || "1d";
-  const meta = MARKET_SYMBOLS[sym] || MARKET_SYMBOLS.NQ;
+  const rawY = url.searchParams.get("y");
+  const cat = MARKET_CATALOG.find((c) => c.key === sym);
+  const meta = MARKET_SYMBOLS[sym] || (cat ? { yahoo: cat.yahoo, label: cat.label, base: 100 } : null) || (rawY ? { yahoo: rawY, label: sym, base: 100 } : MARKET_SYMBOLS.NQ);
 
   try {
     const y = await fetch(
