@@ -3,13 +3,14 @@ import { useEffect, useRef, useState } from "react";
 import { SuiteHeader } from "./ui";
 
 type Trade = { id: number; price: number; qty: number; sell: boolean; t: number };
-type Level = [number, number]; // [price, qty]
+type Level = [number, number];
 
-const SYMS: { key: string; label: string; stream: string; dp: number }[] = [
-  { key: "BTC", label: "BTC / USDT", stream: "btcusdt", dp: 1 },
-  { key: "ETH", label: "ETH / USDT", stream: "ethusdt", dp: 2 },
-  { key: "SOL", label: "SOL / USDT", stream: "solusdt", dp: 2 },
+const SYMS: { key: string; label: string; bn: string; cb: string; dp: number }[] = [
+  { key: "BTC", label: "BTC / USD", bn: "btcusdt", cb: "BTC-USD", dp: 1 },
+  { key: "ETH", label: "ETH / USD", bn: "ethusdt", cb: "ETH-USD", dp: 2 },
+  { key: "SOL", label: "SOL / USD", bn: "solusdt", cb: "SOL-USD", dp: 2 },
 ];
+const BN_HOSTS = ["stream.binance.com:9443", "stream.binance.us:9443"]; // .com geo-blocked in US -> .us
 
 function fmt(n: number, dp: number) { return n.toLocaleString("en-US", { minimumFractionDigits: dp, maximumFractionDigits: dp }); }
 function qty(n: number) { return n >= 1 ? n.toFixed(3) : n.toFixed(4); }
@@ -21,55 +22,73 @@ export function LiveFlowTab() {
   const [asks, setAsks] = useState<Level[]>([]);
   const [last, setLast] = useState<number | null>(null);
   const [dir, setDir] = useState<"up" | "dn" | null>(null);
-  const [connected, setConnected] = useState(false);
+  const [bookOn, setBookOn] = useState(false);
+  const [tapeOn, setTapeOn] = useState(false);
   const idRef = useRef(0);
-  const prev = useRef<number | null>(null);
 
+  // ── Order book: Binance depth (com -> us fallback) ──
   useEffect(() => {
-    setTrades([]); setBids([]); setAsks([]); setLast(null); setConnected(false);
-    let ws: WebSocket | null = null; let retry: any;
-    const streams = `${sym.stream}@aggTrade/${sym.stream}@depth20@100ms`;
-    const HOSTS = ["stream.binance.com:9443", "stream.binance.us:9443"]; // .us fallback (US geo-block)
-    let hostIdx = 0;
+    setBids([]); setAsks([]); setBookOn(false);
+    let ws: WebSocket | null = null, retry: any, hostIdx = 0;
     function connect() {
-      ws = new WebSocket(`wss://${HOSTS[hostIdx]}/stream?streams=${streams}`);
-      ws.onopen = () => setConnected(true);
-      ws.onclose = () => { setConnected(false); hostIdx = (hostIdx + 1) % HOSTS.length; retry = setTimeout(connect, 2000); };
-      ws.onerror = () => { try { ws?.close(); } catch {} };
-      ws.onmessage = (ev) => {
-        try {
-          const m = JSON.parse(ev.data); const d = m?.data; if (!d) return;
-          if (m.stream.endsWith("@aggTrade")) {
-            const price = parseFloat(d.p), q = parseFloat(d.q), sell = !!d.m;
-            setLast((p) => { if (p != null) setDir(price > p ? "up" : price < p ? "dn" : dir); return price; });
-            prev.current = price;
-            setTrades((t) => [{ id: idRef.current++, price, qty: q, sell, t: d.T }, ...t].slice(0, 28));
-          } else {
-            // depth20: partial book snapshot
+      try {
+        ws = new WebSocket(`wss://${BN_HOSTS[hostIdx]}/stream?streams=${sym.bn}@depth20@100ms`);
+        ws.onopen = () => setBookOn(true);
+        ws.onclose = () => { setBookOn(false); hostIdx = (hostIdx + 1) % BN_HOSTS.length; retry = setTimeout(connect, 2000); };
+        ws.onerror = () => { try { ws?.close(); } catch {} };
+        ws.onmessage = (ev) => {
+          try {
+            const d = JSON.parse(ev.data)?.data; if (!d) return;
             if (d.bids) setBids((d.bids as string[][]).map((b) => [parseFloat(b[0]), parseFloat(b[1])] as Level).filter((x) => x[1] > 0).slice(0, 12));
             if (d.asks) setAsks((d.asks as string[][]).map((a) => [parseFloat(a[0]), parseFloat(a[1])] as Level).filter((x) => x[1] > 0).slice(0, 12));
-          }
-        } catch { /* ignore */ }
-      };
+          } catch {}
+        };
+      } catch {}
     }
     connect();
     return () => { clearTimeout(retry); try { ws?.close(); } catch {} };
   }, [sym]);
 
-  // cumulative depth for bar widths
+  // ── Trades + last price: Coinbase matches (US-friendly, liquid) ──
+  useEffect(() => {
+    setTrades([]); setLast(null); setTapeOn(false);
+    let ws: WebSocket | null = null, retry: any, prev: number | null = null;
+    function connect() {
+      try {
+        ws = new WebSocket("wss://ws-feed.exchange.coinbase.com");
+        ws.onopen = () => { setTapeOn(true); ws!.send(JSON.stringify({ type: "subscribe", product_ids: [sym.cb], channels: ["matches"] })); };
+        ws.onclose = () => { setTapeOn(false); retry = setTimeout(connect, 3000); };
+        ws.onerror = () => { try { ws?.close(); } catch {} };
+        ws.onmessage = (ev) => {
+          try {
+            const m = JSON.parse(ev.data);
+            if (m.type !== "match" && m.type !== "last_match") return;
+            const price = parseFloat(m.price), q = parseFloat(m.size);
+            const sell = m.side === "buy"; // maker side buy => taker sold (seller aggressor)
+            if (prev != null && price !== prev) setDir(price > prev ? "up" : "dn");
+            prev = price; setLast(price);
+            setTrades((t) => [{ id: idRef.current++, price, qty: q, sell, t: new Date(m.time).getTime() || Date.now() }, ...t].slice(0, 28));
+          } catch {}
+        };
+      } catch {}
+    }
+    connect();
+    return () => { clearTimeout(retry); try { ws?.close(); } catch {} };
+  }, [sym]);
+
   const cum = (levels: Level[]) => { let s = 0; return levels.map((l) => { s += l[0] * l[1]; return s; }); };
   const bidCum = cum(bids), askCum = cum(asks);
   const maxCum = Math.max(bidCum[bidCum.length - 1] || 0, askCum[askCum.length - 1] || 0, 1);
   const asksView = asks.slice().reverse(); const asksCumView = askCum.slice().reverse();
-
   const spread = asks[0] && bids[0] ? asks[0][0] - bids[0][0] : null;
+  const liveAll = bookOn && tapeOn;
 
   return (
     <div>
       <SuiteHeader
         eyebrow="Real-time order flow"
-        title={<>Live Order Flow {connected ? <span className="text-grn text-[.7rem] align-middle ml-1">● LIVE</span> : <span className="text-amb text-[.7rem] align-middle ml-1">○ connecting…</span>}</>}
-        sub="Every print and every resting order, streaming tick-by-tick from Binance — real exchange data, no delay."
+        title={<>Live Order Flow {liveAll ? <span className="text-grn text-[.7rem] align-middle ml-1">● LIVE</span> : <span className="text-amb text-[.7rem] align-middle ml-1">○ connecting…</span>}</>}
+        sub="Every print and every resting order, streaming live — book from Binance, trades from Coinbase."
         right={
           <div className="flex gap-1.5">
             {SYMS.map((s) => (
@@ -90,14 +109,13 @@ export function LiveFlowTab() {
       </div>
 
       <div className="grid lg:grid-cols-2 gap-5">
-        {/* ORDER BOOK */}
         <section className="card p-0 overflow-hidden">
           <div className="px-5 py-3 flex items-center justify-between" style={{ borderBottom: "1px solid var(--line)" }}>
             <h3 className="font-semibold text-[.92rem]">Order book</h3>
-            <span className="text-[.66rem] text-t3 uppercase tracking-wide">price · size · total</span>
+            <span className="text-[.66rem] text-t3 uppercase tracking-wide">price · size</span>
           </div>
           <div className="p-2 text-[.76rem] mono">
-            {asks.length === 0 && <div className="py-10 text-center text-t3">Waiting for book…</div>}
+            {asks.length === 0 && <div className="py-10 text-center text-t3">Connecting to book…</div>}
             {asksView.map((l, i) => {
               const w = (asksCumView[i] / maxCum) * 100;
               return (
@@ -126,14 +144,13 @@ export function LiveFlowTab() {
           </div>
         </section>
 
-        {/* TIME & SALES */}
         <section className="card p-0 overflow-hidden">
           <div className="px-5 py-3 flex items-center justify-between" style={{ borderBottom: "1px solid var(--line)" }}>
             <h3 className="font-semibold text-[.92rem]">Time &amp; sales</h3>
             <span className="text-[.66rem] text-t3 uppercase tracking-wide">price · size · time</span>
           </div>
           <div className="p-2 text-[.76rem] mono">
-            {trades.length === 0 && <div className="py-10 text-center text-t3">Waiting for prints…</div>}
+            {trades.length === 0 && <div className="py-10 text-center text-t3">Connecting to tape…</div>}
             {trades.map((t) => (
               <div key={t.id} className="relative flex justify-between px-3 py-[3px] tradein">
                 <div className="absolute inset-0" style={{ background: t.sell ? "rgba(220,38,38,.06)" : "rgba(22,163,74,.06)" }} />
