@@ -15,7 +15,7 @@ export function SuiteHeader({ eyebrow, title, sub, right }: { eyebrow?: string; 
         </div>
         {right}
       </div>
-      <div className="mt-4 h-px w-full" style={{ background: "var(--line)" }} />
+      <div className="mt-4 suitebar-underline w-full" />
     </div>
   );
 }
