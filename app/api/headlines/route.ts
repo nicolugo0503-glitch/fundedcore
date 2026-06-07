@@ -7,11 +7,19 @@ export const revalidate = 600;
 type Item = { title: string; link: string; source: string; date: string; image: string | null; summary: string };
 
 const FEEDS: { url: string; source: string }[] = [
-  { url: "https://www.cnbc.com/id/100003114/device/rss/rss.html", source: "CNBC" },
   { url: "https://www.cnbc.com/id/10000664/device/rss/rss.html", source: "CNBC Markets" },
-  { url: "https://feeds.content.dowjones.io/public/rss/mw_topstories", source: "MarketWatch" },
-  { url: "https://finance.yahoo.com/news/rssindex", source: "Yahoo Finance" },
+  { url: "https://www.cnbc.com/id/15839135/device/rss/rss.html", source: "CNBC Economy" },
+  { url: "https://feeds.content.dowjones.io/public/rss/mw_marketpulse", source: "MarketWatch" },
+  { url: "https://feeds.content.dowjones.io/public/rss/mw_bulletins", source: "MarketWatch" },
+  { url: "https://www.investing.com/rss/news_25.rss", source: "Investing.com" },
+  { url: "https://www.investing.com/rss/news_1.rss", source: "Forex" },
+  { url: "https://www.investing.com/rss/news_11.rss", source: "Commodities" },
+  { url: "https://www.forexlive.com/feed/news/", source: "ForexLive" },
 ];
+
+// keep only markets/trading-relevant stories
+const REL = /\b(stock|stocks|share|shares|equit|market|markets|index|indices|s&p|s\&p|nasdaq|dow|russell|futures|treasur|yield|bond|rate|rates|fed|fomc|powell|inflation|cpi|ppi|jobs|payroll|gdp|earnings|guidance|rally|sell-?off|selloff|bull|bear|volatil|vix|dollar|forex|fx|currenc|euro|yen|oil|crude|wti|brent|gold|silver|copper|commodit|bitcoin|crypto|ether|recession|economy|trade|trading|hike|cut|tariff|opec)\b/i;
+function relevant(t: string, sum: string) { return REL.test(t) || REL.test(sum); }
 
 function decode(s: string) {
   return (s || "")
@@ -60,7 +68,9 @@ export async function GET() {
   const all = (await Promise.all(FEEDS.map((f) => pull(f.url, f.source)))).flat();
   // de-dupe by title, prefer items with images, sort by date desc
   const seen = new Set<string>();
-  const uniq = all.filter((i) => { const k = i.title.toLowerCase().slice(0, 60); if (seen.has(k)) return false; seen.add(k); return true; });
+  let uniq = all.filter((i) => { const k = i.title.toLowerCase().slice(0, 60); if (seen.has(k)) return false; seen.add(k); return true; });
+  const rel = uniq.filter((i) => relevant(i.title, i.summary));
+  if (rel.length >= 6) uniq = rel;
   uniq.sort((a, b) => {
     const ai = a.image ? 1 : 0, bi = b.image ? 1 : 0;
     const ad = +new Date(a.date) || 0, bd = +new Date(b.date) || 0;
