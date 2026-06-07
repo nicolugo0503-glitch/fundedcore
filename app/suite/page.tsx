@@ -38,6 +38,15 @@ const TABS = [
   ["settings", "Settings", "settings"],
 ] as const;
 
+const GROUPS: { label: string; ids: string[] }[] = [
+  { label: "Daily", ids: ["brief", "today"] },
+  { label: "Markets", ids: ["markets", "charts", "news"] },
+  { label: "Risk & Edge", ids: ["risk", "insights", "journal", "score"] },
+  { label: "Pass & Plan", ids: ["challenge", "simulator", "plan", "tools"] },
+  { label: "AI", ids: ["coach"] },
+];
+const TAB_MAP = Object.fromEntries(TABS.map((t) => [t[0], { label: t[1], icon: t[2] }]));
+
 export default function Suite() {
   const [profile, setProfileState] = useState<Profile | null>(null);
   const [tab, setTab] = useState<string>("brief");
@@ -56,41 +65,46 @@ export default function Suite() {
     return <Onboarding onDone={(p) => { setProfile({ ...p, onboarded: true }); setTab("brief"); }} initial={profile} />;
   }
 
+  const title = (TAB_MAP[tab] && TAB_MAP[tab].label) || "FundedCore";
+
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="sticky top-0 z-30 backdrop-blur-md bg-bg/70 border-b border-white/[.06]">
-        <div className="max-w-7xl mx-auto px-5 h-14 flex items-center justify-between">
-          <Link href="/"><Logo size={24} /></Link>
-          <div className="text-sm text-t2 hidden sm:block">Hi, <span className="text-t1 font-medium">{profile.name}</span> · {profile.accounts.length} account{profile.accounts.length !== 1 ? "s" : ""} · {profile.trades.length} trades</div>
-          <span className="chip" style={{ borderColor: "#34D39955", color: "#34D399" }}><span className="w-1.5 h-1.5 rounded-full pulse" style={{ background: "#34D399" }} /> live · all systems</span>
-        </div>
-      </header>
-
-      <div className="max-w-7xl mx-auto w-full px-4 flex-1 grid md:grid-cols-[200px_1fr] gap-5 py-5">
-        <nav className="md:sticky md:top-20 md:self-start">
-          <div className="navrail flex md:flex-col gap-1 overflow-x-auto">
-            {TABS.map(([id, label, icon]) => (
-              <button key={id} onClick={() => setTab(id)}
-                className={`navitem whitespace-nowrap ${tab === id ? "active" : ""}`}>
-                <Icon name={icon} size={17} className="opacity-90" />
-                <span className="hidden md:inline">{label}</span>
-                <span className="md:hidden">{label.split(" ")[0]}</span>
-              </button>
-            ))}
-          </div>
-          <div className="hidden md:flex items-center gap-2.5 mt-3 px-3 py-2.5 navrail">
-            <span className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0"
-              style={{ background: "linear-gradient(135deg,#5B8CFF,#8B5CF6)", boxShadow: "0 0 18px -4px rgba(91,140,255,.7)" }}>
-              {profile.name.charAt(0).toUpperCase()}
-            </span>
-            <div className="min-w-0">
-              <div className="text-[.8rem] font-medium truncate">{profile.name}</div>
-              <div className="text-[.65rem] text-t3">Pro · $5/mo</div>
+    <div className="appframe">
+      {/* SIDEBAR */}
+      <aside className="sidebar">
+        <div className="px-1.5 mb-3 hidden md:block"><Link href="/"><Logo size={22} /></Link></div>
+        <div className="flex-1 overflow-y-auto md:space-y-1 flex md:block gap-1">
+          {GROUPS.map((g) => (
+            <div key={g.label} className="md:mb-2">
+              <div className="side-sec hidden md:block">{g.label}</div>
+              {g.ids.filter((id) => TAB_MAP[id]).map((id) => (
+                <button key={id} onClick={() => setTab(id)} className={`side-link ${tab === id ? "on" : ""}`}>
+                  <Icon name={TAB_MAP[id].icon} size={16} className="opacity-90" />
+                  <span className="hidden md:inline">{TAB_MAP[id].label}</span>
+                </button>
+              ))}
             </div>
-          </div>
-        </nav>
+          ))}
+        </div>
+        <button onClick={() => setTab("settings")} className="side-link mt-2 hidden md:flex">
+          <span className="w-6 h-6 rounded-full flex items-center justify-center text-[.7rem] font-semibold shrink-0" style={{ background: "var(--acc-weak)", color: "var(--acc)", border: "1px solid var(--line2)" }}>{profile.name.charAt(0).toUpperCase()}</span>
+          <span className="truncate">{profile.name} · Pro</span>
+        </button>
+      </aside>
 
-        <main className="min-w-0">
+      {/* MAIN */}
+      <div className="min-w-0">
+        <header className="topbar">
+          <div className="flex items-center gap-2.5">
+            <span className="md:hidden"><Logo size={20} /></span>
+            <h2 className="display text-[1.02rem] text-t1">{title}</h2>
+          </div>
+          <div className="flex items-center gap-2.5">
+            <span className="chip"><span className="w-1.5 h-1.5 rounded-full pulse" style={{ background: "var(--grn)" }} /> live</span>
+            <Link href="/" className="text-t3 hover:text-t1 transition text-sm hidden sm:block">Exit</Link>
+          </div>
+        </header>
+
+        <main className="content">
           <AlertsBar profile={profile} />
           {tab === "brief" && <Brief profile={profile} go={setTab} setProfile={setProfile} />}
           {tab === "risk" && <RiskTab profile={profile} setProfile={setProfile} />}

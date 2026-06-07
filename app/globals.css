@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;450;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -10,32 +10,29 @@
 ──────────────────────────────────────────────────────────────────────────── */
 :root {
   color-scheme: dark;
-  --bg:      #0B0A09;   /* warm black */
-  --panel:   #131210;
-  --panel2:  #1A1815;
-  --line:    rgba(214,193,156,.12);   /* warm hairline */
-  --line2:   rgba(214,193,156,.20);
-  --t1:      #EFEAE1;   /* warm white */
-  --t2:      #A39C8E;   /* warm muted */
-  --t3:      #6B655A;
-  --acc:     #C8A96A;   /* champagne gold */
-  --acc-weak:rgba(200,169,106,.12);
-  --grn:     #6BBF8A;   /* muted sage */
-  --red:     #D98873;   /* muted terracotta */
-  --amb:     #D9B45B;
+  --bg:      #0B0D11;
+  --panel:   #141821;
+  --panel2:  #1B202B;
+  --line:    rgba(255,255,255,.07);
+  --line2:   rgba(255,255,255,.12);
+  --t1:      #E6E9EF;
+  --t2:      #97A1B0;
+  --t3:      #5C6675;
+  --acc:     #5B9CFF;
+  --acc-weak:rgba(91,156,255,.12);
+  --grn:     #4ADE80;
+  --red:     #F87171;
+  --amb:     #FBBF24;
 }
 html, body { background: var(--bg); color: var(--t1); }
 body { font-family: "Inter", system-ui, sans-serif; -webkit-font-smoothing: antialiased; font-size: 14px; line-height: 1.55; letter-spacing: -0.008em; }
-h1,h2,h3,h4,.display { font-family: "Fraunces", Georgia, serif; font-weight: 500; letter-spacing: -0.01em; }
+h1,h2,h3,h4,.display { font-family: "Inter", system-ui, sans-serif; font-weight: 600; letter-spacing: -0.022em; }
 .mono { font-family: "JetBrains Mono", monospace; font-variant-numeric: tabular-nums; }
 ::selection { background: rgba(200,169,106,.3); color: #fff; }
 
 /* faint warm vignette + paper-grain texture (very subtle) */
 .grid-bg { position: fixed; inset: 0; z-index: 0; pointer-events: none;
-  background:
-    radial-gradient(120% 60% at 50% -10%, rgba(200,169,106,.06), transparent 55%),
-    repeating-linear-gradient(0deg, rgba(255,255,255,.012) 0, rgba(255,255,255,.012) 1px, transparent 1px, transparent 3px);
-  opacity:.7; }
+  background: radial-gradient(120% 55% at 50% -10%, rgba(91,156,255,.05), transparent 55%); }
 .glow { display:none; }
 
 @keyframes fade { from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:translateY(0)} }
@@ -52,15 +49,15 @@ h1,h2,h3,h4,.display { font-family: "Fraunces", Georgia, serif; font-weight: 500
 /* buttons: gold, dark ink (reads expensive) */
 .btn { display:inline-flex; align-items:center; gap:.5rem; justify-content:center; font-weight:550; border-radius:10px; padding:.64rem 1.15rem; font-size:.9rem; transition: background .16s, border-color .16s, opacity .16s; cursor:pointer; border:1px solid transparent; }
 .btn:active { transform: translateY(.5px); }
-.btn-primary { background: linear-gradient(180deg, #D7BC83, #C19A52); color:#1A1305; font-weight:600; box-shadow: inset 0 1px 0 rgba(255,255,255,.25); }
-.btn-primary:hover { filter: brightness(1.06); }
+.btn-primary { background: var(--acc); color:#06101F; font-weight:600; }
+.btn-primary:hover { filter: brightness(1.08); }
 .btn-ghost { background: transparent; border-color: var(--line2); color: var(--t1); }
 .btn-ghost:hover { background: rgba(214,193,156,.06); border-color: var(--acc); }
 
 /* accents */
 .chip { display:inline-flex; align-items:center; gap:.4rem; font-size:.72rem; font-weight:500; padding:.28rem .62rem; border-radius:7px; border:1px solid var(--line2); background:rgba(214,193,156,.04); color: var(--t2); }
-.eyebrow { font-size:.68rem; font-weight:600; letter-spacing:.18em; text-transform:uppercase; color: var(--acc); }
-.grad-text { color: var(--acc); font-style: italic; }   /* serif italic gold — signature */
+.eyebrow { font-size:.68rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color: var(--t3); }
+.grad-text { color: var(--t1); }
 .divider { height:1px; background: var(--line); }
 
 /* ticker */
@@ -101,3 +98,15 @@ table.tbl tr:hover td { background: rgba(214,193,156,.03); }
 ::-webkit-scrollbar-thumb:hover{background:rgba(200,169,106,.32)}
 ::-webkit-scrollbar-track{background:transparent}
 @media (prefers-reduced-motion: reduce){ .ticker,.pulse{animation:none} }
+
+/* ── app frame: fixed sidebar + topbar + scroll content ─────────────────── */
+.appframe { display:grid; grid-template-columns: 232px 1fr; min-height:100vh; }
+@media (max-width: 860px){ .appframe { grid-template-columns: 1fr; } }
+.sidebar { position:sticky; top:0; height:100vh; border-right:1px solid var(--line); background: #0E1117; display:flex; flex-direction:column; padding:14px 12px; }
+@media (max-width: 860px){ .sidebar { position:relative; height:auto; border-right:0; border-bottom:1px solid var(--line); flex-direction:row; overflow-x:auto; gap:6px; align-items:center; } }
+.topbar { position:sticky; top:0; z-index:20; height:56px; display:flex; align-items:center; justify-content:space-between; padding:0 22px; border-bottom:1px solid var(--line); background: rgba(11,13,17,.72); backdrop-filter: blur(12px); }
+.content { padding:22px; max-width:1180px; margin:0 auto; width:100%; }
+.side-link { display:flex; align-items:center; gap:.65rem; padding:.5rem .65rem; border-radius:9px; font-size:.85rem; color:var(--t2); white-space:nowrap; transition:color .15s, background .15s; }
+.side-link:hover { color:var(--t1); background:rgba(255,255,255,.04); }
+.side-link.on { color:var(--t1); background:rgba(91,156,255,.1); box-shadow: inset 2px 0 0 var(--acc); }
+.side-sec { font-size:.62rem; text-transform:uppercase; letter-spacing:.12em; color:var(--t3); padding:.4rem .65rem .25rem; }
