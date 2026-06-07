@@ -6,7 +6,7 @@
 import type { Trade } from "./score";
 
 const PNL_KEYS = ["pnl", "p/l", "p&l", "netpnl", "net", "profit", "realizedpnl", "realized", "gain", "result", "netprofit", "pl"];
-const DATE_KEYS = ["date", "closedate", "closetime", "exittime", "exitdate", "time", "datetime", "closed", "opentime", "opendate"];
+const DATE_KEYS = ["date", "closedate", "closetime", "exittime", "exitdate", "time", "datetime", "closed", "opentime", "opendate", "tradeday", "exitedat", "enteredat"];
 const SYMBOL_KEYS = ["symbol", "ticker", "instrument", "market", "contract", "asset", "pair"];
 const SIDE_KEYS = ["side", "direction", "type", "position", "buysell", "longshort"];
 const SIZE_KEYS = ["size", "qty", "quantity", "contracts", "lots", "shares", "volume", "units"];
