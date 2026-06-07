@@ -1,0 +1,55 @@
+"use client";
+import { Icon } from "../Icon";
+
+export type Levels = {
+  root: string; cur: number; open: number; PDH: number; PDL: number; PDC: number;
+  dayH: number; dayL: number; gap: number; atr: number;
+};
+
+function fmt(n: number) { return n >= 1000 ? n.toLocaleString("en-US", { maximumFractionDigits: 0 }) : n.toFixed(2); }
+
+export function KeyLevels({ lv }: { lv: Levels }) {
+  // reference levels, de-duped, sorted high -> low, with current inserted
+  const rows = [
+    { label: "Prior day high", price: lv.PDH, kind: "res" },
+    { label: "Overnight high", price: lv.dayH, kind: "res" },
+    { label: "Today's open", price: lv.open, kind: "piv" },
+    { label: "Prior close", price: lv.PDC, kind: "piv" },
+    { label: "Overnight low", price: lv.dayL, kind: "sup" },
+    { label: "Prior day low", price: lv.PDL, kind: "sup" },
+  ].filter((r) => isFinite(r.price));
+  const all = [...rows, { label: "▸ Current", price: lv.cur, kind: "cur" as const }]
+    .sort((a, b) => b.price - a.price);
+  const gapUp = lv.gap >= 0;
+  return (
+    <div>
+      <div className="flex flex-wrap gap-2 mb-3">
+        <span className="chip">Expected range <span className="mono text-t1 ml-1">±{fmt(lv.atr / 2)} pts</span></span>
+        <span className="chip" style={{ color: gapUp ? "var(--grn)" : "var(--red)", borderColor: "color-mix(in srgb, " + (gapUp ? "var(--grn)" : "var(--red)") + " 30%, transparent)" }}>
+          Gap {gapUp ? "▲" : "▼"} {fmt(Math.abs(lv.gap))} pts
+        </span>
+        <span className="chip">ATR <span className="mono text-t1 ml-1">{fmt(lv.atr)}</span></span>
+      </div>
+      <div className="rounded-lg overflow-hidden" style={{ border: "1px solid var(--line)" }}>
+        {all.map((r, i) => {
+          const isCur = r.kind === "cur";
+          const dist = r.price - lv.cur;
+          const col = r.kind === "res" ? "var(--red)" : r.kind === "sup" ? "var(--grn)" : r.kind === "cur" ? "var(--acc)" : "var(--t2)";
+          return (
+            <div key={i} className="flex items-center justify-between px-3.5 py-2 text-[.82rem]"
+              style={{ borderTop: i ? "1px solid var(--line)" : "none", background: isCur ? "var(--acc-weak)" : "transparent" }}>
+              <span className="flex items-center gap-2" style={{ color: isCur ? "var(--t1)" : "var(--t2)", fontWeight: isCur ? 600 : 400 }}>
+                <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: col }} />{r.label}
+              </span>
+              <span className="flex items-center gap-3">
+                <span className="mono" style={{ color: "var(--t1)", fontWeight: isCur ? 700 : 500 }}>{fmt(r.price)}</span>
+                {!isCur && <span className="mono text-[.7rem] w-16 text-right" style={{ color: dist >= 0 ? "var(--red)" : "var(--grn)" }}>{dist >= 0 ? "+" : ""}{fmt(dist)}</span>}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+      <div className="text-[.72rem] text-t3 mt-2 flex items-center gap-1.5"><Icon name="alert" size={12} /> {lv.root} continuous · reference levels for context, not signals.</div>
+    </div>
+  );
+}

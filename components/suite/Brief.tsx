@@ -7,6 +7,8 @@ import { scoreTrades } from "../../lib/score";
 import { usd, pct, scoreColor } from "../../lib/format";
 import { SuiteHeader, Panel, Ring, EmptyState } from "./ui";
 import { ClearanceCard, EdgeClock } from "./Decision";
+import { KeyLevels, type Levels } from "./Levels";
+import { rootSymbol } from "../../lib/market";
 import { Icon } from "../Icon";
 
 const DOW = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -47,6 +49,7 @@ export function Brief({ profile, go, setProfile }: { profile: Profile; go: (t: s
   const [events, setEvents] = useState<any[] | null>(null);
   const [heads, setHeads] = useState<Head[] | null>(null);
   const [mkt, setMkt] = useState<Mkt[] | null>(null);
+  const [levels, setLevels] = useState<Levels | null>(null);
   const [brief, setBrief] = useState<{ text: string; source: string } | null>(null);
   const [briefLoading, setBriefLoading] = useState(true);
   const [tradeRead, setTradeRead] = useState<{ text: string; source: string } | null>(null);
@@ -65,6 +68,17 @@ export function Brief({ profile, go, setProfile }: { profile: Profile; go: (t: s
       } catch { return null; }
     })).then((r) => setMkt(r.filter(Boolean) as Mkt[]));
   }, []);
+  useEffect(() => {
+    const root = rootSymbol(profile.settings.instrument) || "NQ";
+    fetch("/api/market?symbol=" + root + "&interval=1d&range=2mo").then((r) => r.json()).then((d) => {
+      const cs: any[] = d.candles || [];
+      if (cs.length < 16) { setLevels(null); return; }
+      const today = cs[cs.length - 1], prior = cs[cs.length - 2];
+      let trSum = 0; for (let i = cs.length - 14; i < cs.length; i++) { const c = cs[i], p = cs[i - 1]; trSum += Math.max(c.h - c.l, Math.abs(c.h - p.c), Math.abs(c.l - p.c)); }
+      const atr = trSum / 14;
+      setLevels({ root, cur: today.c, open: today.o, PDH: prior.h, PDL: prior.l, PDC: prior.c, dayH: today.h, dayL: today.l, gap: today.o - prior.c, atr });
+    }).catch(() => setLevels(null));
+  }, [profile.settings.instrument]);
 
   const now = new Date();
   const todayDow = now.getUTCDay();
@@ -123,6 +137,15 @@ export function Brief({ profile, go, setProfile }: { profile: Profile; go: (t: s
 
   const clockBuckets = (ins?.byHour || []).filter((b) => b.trades >= 2).map((b) => ({ key: b.key, net: b.net, trades: b.trades, winRate: b.winRate }));
   const nowKey = String(now.getUTCHours()).padStart(2, "0") + ":00";
+
+  // Your number today — typical green day + walk-away
+  let dayTarget: number | null = null;
+  if (profile.trades.length >= 8) {
+    const byDate = new Map<string, number>();
+    for (const t of profile.trades) { const d = new Date(t.timestamp).toISOString().slice(0, 10); byDate.set(d, (byDate.get(d) || 0) + t.pnl); }
+    const greens = [...byDate.values()].filter((n) => n > 0).sort((a, b) => a - b);
+    if (greens.length >= 3) { const med = greens[Math.floor(greens.length / 2)]; dayTarget = Math.round(med / 10) * 10; }
+  }
 
   const spx = mkt?.find((m) => m.key === "SPX");
   const ndx = mkt?.find((m) => m.key === "NDX");
@@ -301,6 +324,10 @@ export function Brief({ profile, go, setProfile }: { profile: Profile; go: (t: s
 
       <div className="grid lg:grid-cols-12 gap-4 items-start">
         <div className="lg:col-span-8 space-y-4">
+          <Panel title="Key levels in play" icon={<Icon name="chart" />} action={<button className="text-acc text-xs" onClick={() => go("charts")}>charts →</button>}>
+            {levels ? <KeyLevels lv={levels} /> : <EmptyState icon="chart" title="Levels loading" body="Prior-day high/low/close, the overnight range, today's gap and expected range for your instrument — the map every day trader reads before the open." />}
+          </Panel>
+
           <Panel title="Your edge clock" icon={<Icon name="clock" />} action={<button className="text-acc text-xs" onClick={() => go("insights")}>insights →</button>}>
             {clockBuckets.length ? (
               <EdgeClock buckets={clockBuckets} best={ins?.bestWindow || null} worst={ins?.worstWindow || null} nowKey={nowKey} />
@@ -361,6 +388,17 @@ export function Brief({ profile, go, setProfile }: { profile: Profile; go: (t: s
               </>
             ) : <><Ring pct={0} color="var(--acc)" size={72}><span className="text-t3">?</span></Ring><div><div className="lbl mb-0.5">Trader Score</div><div className="text-[.82rem] text-t2">Add trades →</div></div></>}
           </button>
+
+          {dayTarget != null && (
+            <div className="card p-5">
+              <div className="lbl mb-2">Your number today</div>
+              <div className="flex items-center justify-between">
+                <div><div className="text-[.7rem] text-t3">Aim for</div><div className="mono text-lg font-bold" style={{ color: "var(--grn)" }}>+{usd(dayTarget)}</div></div>
+                <div className="text-right"><div className="text-[.7rem] text-t3">Walk away at</div><div className="mono text-lg font-bold" style={{ color: "var(--red)" }}>{usd(-profile.settings.dailyLossStop)}</div></div>
+              </div>
+              <div className="text-[.72rem] text-t3 mt-2.5 leading-relaxed">Your typical green day. Bank it and stop — chasing past your number is how green days turn red.</div>
+            </div>
+          )}
 
           <Panel title="High-impact calendar" icon={<Icon name="clock" />} action={<button className="text-acc text-xs" onClick={() => go("news")}>all →</button>}>
             {events === null ? <div className="space-y-2">{Array.from({ length: 3 }).map((_, i) => <div key={i} className="skeleton" style={{ height: 36 }} />)}</div>
