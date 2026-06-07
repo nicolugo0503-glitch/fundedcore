@@ -75,6 +75,18 @@ export type ParseResult = {
   mapped: { pnl?: string; date?: string; symbol?: string; side?: string; size?: string };
 };
 
+function parseDateValue(raw: string): number {
+  if (!raw) return NaN;
+  const s = raw.trim();
+  let d = new Date(s);
+  if (!isNaN(d.getTime())) return d.getTime();
+  d = new Date(s.replace(/([+-]\d{2}):(\d{2})\b/, "$1$2")); // -05:00 -> -0500
+  if (!isNaN(d.getTime())) return d.getTime();
+  const m = s.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?/); // MM/DD/YYYY [HH:MM:SS]
+  if (m) { const dt = new Date(Date.UTC(+m[3], +m[1] - 1, +m[2], +(m[4] || 0), +(m[5] || 0), +(m[6] || 0))); if (!isNaN(dt.getTime())) return dt.getTime(); }
+  return NaN;
+}
+
 export function parseTradesCsv(text: string): ParseResult {
   const warnings: string[] = [];
   const lines = text.replace(/\r/g, "").split("\n").filter((l) => l.trim().length);
@@ -115,11 +127,8 @@ export function parseTradesCsv(text: string): ParseResult {
     let timestamp = NaN;
     let date = "";
     if (iDate >= 0 && cells[iDate]) {
-      const d = new Date(cells[iDate]);
-      if (!isNaN(d.getTime())) {
-        timestamp = d.getTime();
-        date = d.toISOString().slice(0, 10);
-      }
+      const ts = parseDateValue(cells[iDate]);
+      if (!isNaN(ts)) { timestamp = ts; date = new Date(ts).toISOString().slice(0, 10); }
     }
     if (isNaN(timestamp)) {
       // No usable date — synthesize a sequential daily timeline so ordering/DD still work.
