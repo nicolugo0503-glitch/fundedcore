@@ -25,3 +25,5 @@ export function upsertProfile(userId: string, data: Profile) {
 }
 
 // build marker: force fresh build to inline NEXT_PUBLIC_SUPABASE_* env vars
+
+// rebuild marker 1780861541
