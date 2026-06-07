@@ -22,6 +22,9 @@ import { MarketsTab } from "../../components/suite/MarketsTab";
 import { LiveFlowTab } from "../../components/suite/LiveFlowTab";
 import { PreMortemTab } from "../../components/suite/PreMortemTab";
 import { ExecutionTab } from "../../components/suite/ExecutionTab";
+import { SizingTab } from "../../components/suite/SizingTab";
+import { PortfolioTab } from "../../components/suite/PortfolioTab";
+import { PayoutTab } from "../../components/suite/PayoutTab";
 import { SettingsTab } from "../../components/suite/SettingsTab";
 import { AlertsBar } from "../../components/suite/AlertsBar";
 import { CommandPalette, type Command } from "../../components/suite/CommandPalette";
@@ -39,6 +42,9 @@ const TABS = [
   ["premortem", "Pre-Mortem", "alert"],
   ["insights", "Insights", "spark"],
   ["execution", "Execution", "target"],
+  ["sizing", "Optimal Sizing", "calc"],
+  ["portfolio", "Multi-Account", "grid"],
+  ["payout", "Payout Planner", "check"],
   ["news", "News", "news"],
   ["coach", "AI Coach", "brain"],
   ["journal", "Journal & Score", "book"],
@@ -52,8 +58,8 @@ const TABS = [
 const GROUPS: { label: string; ids: string[] }[] = [
   { label: "Daily", ids: ["brief", "today"] },
   { label: "Markets", ids: ["markets", "flow", "charts", "news"] },
-  { label: "Risk & Edge", ids: ["risk", "premortem", "insights", "execution", "journal", "score"] },
-  { label: "Pass & Plan", ids: ["challenge", "simulator", "plan", "tools"] },
+  { label: "Risk & Edge", ids: ["risk", "premortem", "insights", "execution", "sizing", "portfolio", "journal", "score"] },
+  { label: "Pass & Plan", ids: ["challenge", "simulator", "payout", "plan", "tools"] },
   { label: "AI", ids: ["coach"] },
 ];
 const TAB_MAP = Object.fromEntries(TABS.map((t) => [t[0], { label: t[1], icon: t[2] }]));
@@ -135,6 +141,9 @@ export default function Suite() {
           {tab === "premortem" && <PreMortemTab profile={profile} setProfile={setProfile} />}
           {tab === "insights" && <InsightsTab profile={profile} />}
           {tab === "execution" && <ExecutionTab profile={profile} setProfile={setProfile} />}
+          {tab === "sizing" && <SizingTab profile={profile} />}
+          {tab === "portfolio" && <PortfolioTab profile={profile} />}
+          {tab === "payout" && <PayoutTab profile={profile} />}
           {tab === "news" && <NewsTab />}
           {tab === "coach" && <CoachTab profile={profile} />}
           {tab === "journal" && <JournalTab profile={profile} setProfile={setProfile} />}
