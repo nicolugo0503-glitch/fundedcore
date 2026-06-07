@@ -69,11 +69,13 @@ export function LiveTicker() {
   useEffect(() => {
     const labels: Record<string, string> = { BTC: "Bitcoin", ETH: "Ethereum", SOL: "Solana" };
     const streams = Object.values(BINANCE).map((s) => `${s}@ticker`).join("/");
+    const HOSTS = ["stream.binance.com:9443", "stream.binance.us:9443"]; // .us fallback (US geo-block)
+    let hostIdx = 0;
     let ws: WebSocket | null = null;
     let retry: any;
     function connect() {
       try {
-        ws = new WebSocket(`wss://stream.binance.com:9443/stream?streams=${streams}`);
+        ws = new WebSocket(`wss://${HOSTS[hostIdx]}/stream?streams=${streams}`);
         ws.onopen = () => { streamingRef.current = true; setStreaming(true); };
         ws.onmessage = (ev) => {
           try {
@@ -85,7 +87,7 @@ export function LiveTicker() {
             ingest(key, labels[key] || key, parseFloat(d.c), parseFloat(d.P), "live");
           } catch { /* ignore */ }
         };
-        ws.onclose = () => { streamingRef.current = false; setStreaming(false); retry = setTimeout(connect, 4000); };
+        ws.onclose = () => { streamingRef.current = false; setStreaming(false); hostIdx = (hostIdx + 1) % HOSTS.length; retry = setTimeout(connect, 2000); };
         ws.onerror = () => { try { ws?.close(); } catch {} };
       } catch { /* ignore */ }
     }

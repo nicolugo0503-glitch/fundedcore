@@ -29,10 +29,12 @@ export function LiveFlowTab() {
     setTrades([]); setBids([]); setAsks([]); setLast(null); setConnected(false);
     let ws: WebSocket | null = null; let retry: any;
     const streams = `${sym.stream}@aggTrade/${sym.stream}@depth20@100ms`;
+    const HOSTS = ["stream.binance.com:9443", "stream.binance.us:9443"]; // .us fallback (US geo-block)
+    let hostIdx = 0;
     function connect() {
-      ws = new WebSocket(`wss://stream.binance.com:9443/stream?streams=${streams}`);
+      ws = new WebSocket(`wss://${HOSTS[hostIdx]}/stream?streams=${streams}`);
       ws.onopen = () => setConnected(true);
-      ws.onclose = () => { setConnected(false); retry = setTimeout(connect, 4000); };
+      ws.onclose = () => { setConnected(false); hostIdx = (hostIdx + 1) % HOSTS.length; retry = setTimeout(connect, 2000); };
       ws.onerror = () => { try { ws?.close(); } catch {} };
       ws.onmessage = (ev) => {
         try {
