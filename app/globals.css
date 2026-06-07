@@ -170,3 +170,19 @@ table.tbl tr:hover td { background: rgba(0,0,0,.025); }
 .livetape .ticker { display: inline-flex; gap: 2rem; white-space: nowrap; padding: .42rem 1rem; animation: marquee 70s linear infinite; }
 .livetape:hover .ticker { animation-play-state: paused; }
 @media (prefers-reduced-motion: reduce){ .livetape .ticker{ animation: none; } }
+
+/* ── Living ambient background (breathing aurora) ────────────────────────── */
+.aura { position: fixed; inset: -20% -10% -10% -10%; z-index: 0; pointer-events: none; overflow: hidden; }
+.aura span { position: absolute; border-radius: 50%; filter: blur(70px); opacity: .5; will-change: transform; }
+.aura .a1 { width: 46vw; height: 46vw; left: -8vw; top: -10vw; background: radial-gradient(circle, var(--acc), transparent 65%); opacity: .14; animation: drift1 26s ease-in-out infinite; }
+.aura .a2 { width: 40vw; height: 40vw; right: -6vw; top: 8vh; background: radial-gradient(circle, #5B9CFF, transparent 65%); opacity: .10; animation: drift2 32s ease-in-out infinite; }
+.aura .a3 { width: 38vw; height: 38vw; left: 28vw; bottom: -14vw; background: radial-gradient(circle, #8B5CF6, transparent 65%); opacity: .08; animation: drift3 38s ease-in-out infinite; }
+:root[data-theme="dark"] .aura .a1 { opacity: .22; } :root[data-theme="dark"] .aura .a2 { opacity: .16; } :root[data-theme="dark"] .aura .a3 { opacity: .14; }
+@keyframes drift1 { 0%,100% { transform: translate(0,0) scale(1); } 33% { transform: translate(6vw,4vh) scale(1.12); } 66% { transform: translate(-4vw,6vh) scale(.95); } }
+@keyframes drift2 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-7vw,5vh) scale(1.15); } }
+@keyframes drift3 { 0%,100% { transform: translate(0,0) scale(1); } 40% { transform: translate(5vw,-5vh) scale(1.1); } 75% { transform: translate(-6vw,-3vh) scale(.92); } }
+@media (prefers-reduced-motion: reduce){ .aura span { animation: none !important; } }
+
+/* LIVE badge on the tape */
+.livedot { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); z-index: 2; display: inline-flex; align-items: center; gap: 5px; font-size: .58rem; font-weight: 700; letter-spacing: .12em; color: var(--grn); padding: 2px 7px 2px 6px; border-radius: 6px; background: var(--bg); border: 1px solid var(--line); }
+.livetape .ticker { padding-left: 64px; }

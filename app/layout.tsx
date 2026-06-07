@@ -18,8 +18,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         <div className="grid-bg" />
-        <div className="glow glow-1" />
-        <div className="glow glow-2" />
+        <div className="aura"><span className="a1" /><span className="a2" /><span className="a3" /></div>
         <div className="relative z-10">{children}</div>
       </body>
     </html>
