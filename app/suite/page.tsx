@@ -19,6 +19,7 @@ import { PlanTab } from "../../components/suite/PlanTab";
 import { ToolsTab } from "../../components/suite/ToolsTab";
 import { ChartsTab } from "../../components/suite/ChartsTab";
 import { MarketsTab } from "../../components/suite/MarketsTab";
+import { LiveFlowTab } from "../../components/suite/LiveFlowTab";
 import { SettingsTab } from "../../components/suite/SettingsTab";
 import { AlertsBar } from "../../components/suite/AlertsBar";
 import { CommandPalette, type Command } from "../../components/suite/CommandPalette";
@@ -30,6 +31,7 @@ const TABS = [
   ["brief", "Daily Brief", "gauge"],
   ["today", "Today · Live", "bolt"],
   ["markets", "Markets", "grid"],
+  ["flow", "Order Flow", "bolt"],
   ["charts", "Charts", "chart"],
   ["risk", "Risk", "shield"],
   ["insights", "Insights", "spark"],
@@ -45,7 +47,7 @@ const TABS = [
 
 const GROUPS: { label: string; ids: string[] }[] = [
   { label: "Daily", ids: ["brief", "today"] },
-  { label: "Markets", ids: ["markets", "charts", "news"] },
+  { label: "Markets", ids: ["markets", "flow", "charts", "news"] },
   { label: "Risk & Edge", ids: ["risk", "insights", "journal", "score"] },
   { label: "Pass & Plan", ids: ["challenge", "simulator", "plan", "tools"] },
   { label: "AI", ids: ["coach"] },
@@ -137,6 +139,7 @@ export default function Suite() {
           {tab === "tools" && <ToolsTab profile={profile} />}
           {tab === "charts" && <ChartsTab profile={profile} />}
           {tab === "markets" && <MarketsTab />}
+          {tab === "flow" && <LiveFlowTab />}
           {tab === "settings" && <SettingsTab profile={profile} setProfile={setProfile} />}
           </div>
         </main>
