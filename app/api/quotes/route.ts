@@ -3,7 +3,7 @@
 import { NextResponse } from "next/server";
 import { MARKET_CATALOG } from "../../../lib/market";
 
-export const revalidate = 30;
+export const revalidate = 15;
 
 const BASKET = ["SPX", "NDX", "DJI", "RUT", "VIX", "BTC", "ETH", "GOLD", "WTI", "US10Y", "DXY", "EURUSD"];
 
