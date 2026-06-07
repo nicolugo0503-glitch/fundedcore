@@ -22,6 +22,8 @@ import { MarketsTab } from "../../components/suite/MarketsTab";
 import { SettingsTab } from "../../components/suite/SettingsTab";
 import { AlertsBar } from "../../components/suite/AlertsBar";
 import { CommandPalette, type Command } from "../../components/suite/CommandPalette";
+import { LiveTicker } from "../../components/suite/LiveTicker";
+import { SessionClock } from "../../components/suite/SessionClock";
 import { demoProfile } from "../../lib/profile";
 
 const TABS = [
@@ -110,12 +112,14 @@ export default function Suite() {
             <h2 className="display text-[1.02rem] text-t1">{title}</h2>
           </div>
           <div className="flex items-center gap-2.5">
-            <span className="chip"><span className="w-1.5 h-1.5 rounded-full pulse" style={{ background: "var(--grn)" }} /> live</span>
+            <SessionClock />
             <button onClick={() => { const e = new KeyboardEvent("keydown", { key: "k", metaKey: true }); window.dispatchEvent(e); }} className="hidden md:inline-flex items-center gap-1.5 chip hover:text-t1 transition" title="Command palette"><Icon name="spark" size={13} /> <span className="cmdk-kbd">⌘K</span></button>
             <ThemeToggle />
             <Link href="/" className="text-t3 hover:text-t1 transition text-sm hidden sm:block">Exit</Link>
           </div>
         </header>
+
+        <LiveTicker />
 
         <main className="content">
           <AlertsBar profile={profile} />

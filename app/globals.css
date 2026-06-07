@@ -163,3 +163,10 @@ table.tbl tr:hover td { background: rgba(0,0,0,.025); }
 /* tactile lift on interactive cards */
 .card-hover { transition: border-color .18s, box-shadow .18s, transform .18s; }
 .card-hover:hover { transform: translateY(-2px); }
+
+/* ── Live ticker tape (always-on market motion) ──────────────────────────── */
+.livetape { position: sticky; top: 56px; z-index: 15; overflow: hidden; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--panel) 88%, transparent); backdrop-filter: blur(10px);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent); mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent); }
+.livetape .ticker { display: inline-flex; gap: 2rem; white-space: nowrap; padding: .42rem 1rem; animation: marquee 70s linear infinite; }
+.livetape:hover .ticker { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce){ .livetape .ticker{ animation: none; } }
