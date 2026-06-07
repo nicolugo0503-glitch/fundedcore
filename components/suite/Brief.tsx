@@ -36,6 +36,12 @@ function Spark({ pts, up }: { pts: number[]; up: boolean }) {
   );
 }
 
+function NewsImg({ src, className }: { src: string | null; className: string }) {
+  const [ok, setOk] = useState(true);
+  if (!src || !ok) return <div className={className + " flex items-center justify-center"} style={{ background: "var(--panel2)" }}><Icon name="news" size={22} className="text-t3" /></div>;
+  return <img src={src} alt="" className={className} loading="lazy" referrerPolicy="no-referrer" onError={() => setOk(false)} />;
+}
+
 export function Brief({ profile, go, setProfile }: { profile: Profile; go: (t: string) => void; setProfile?: (p: Profile) => void }) {
   const [events, setEvents] = useState<any[] | null>(null);
   const [heads, setHeads] = useState<Head[] | null>(null);
@@ -186,28 +192,28 @@ export function Brief({ profile, go, setProfile }: { profile: Profile; go: (t: s
 
           <Panel title="Market news" icon={<Icon name="news" />} action={<button className="text-acc text-xs" onClick={() => go("news")}>economic calendar →</button>}>
             {heads === null ? (
-              <div className="grid sm:grid-cols-2 gap-3">{Array.from({ length: 4 }).map((_, i) => <div key={i} className="skeleton" style={{ height: 96 }} />)}</div>
+              <div className="grid sm:grid-cols-2 gap-4">{Array.from({ length: 4 }).map((_, i) => <div key={i} className="skeleton" style={{ height: 180 }} />)}</div>
             ) : topHeads.length === 0 && restHeads.length === 0 ? (
               <EmptyState icon="news" title="News feed unavailable" body="The live headline feed couldn't be reached right now. The economic calendar is still in the News tab." />
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {topHeads[0] && (
-                  <a href={topHeads[0].link} target="_blank" rel="noopener noreferrer" className="card card-hover overflow-hidden grid sm:grid-cols-[200px_1fr] group">
-                    {topHeads[0].image && <div className="h-36 sm:h-full bg-cover bg-center" style={{ backgroundImage: "url(" + topHeads[0].image + ")", minHeight: 120 }} />}
+                  <a href={topHeads[0].link} target="_blank" rel="noopener noreferrer" className="card card-hover overflow-hidden block group">
+                    <NewsImg src={topHeads[0].image} className="w-full h-60 object-cover" />
                     <div className="p-4">
-                      <div className="flex items-center gap-2 mb-1.5"><span className="chip !py-0.5">{topHeads[0].source}</span><span className="text-[.7rem] text-t3">{ago(topHeads[0].date)}</span></div>
-                      <div className="font-semibold text-[1rem] leading-snug group-hover:text-acc transition">{topHeads[0].title}</div>
-                      {topHeads[0].summary && <p className="text-[.82rem] text-t2 mt-1.5 leading-relaxed line-clamp-2">{topHeads[0].summary}</p>}
+                      <div className="flex items-center gap-2 mb-1.5"><span className="chip !py-0.5">{topHeads[0].source}</span><span className="text-[.72rem] text-t3">{ago(topHeads[0].date)}</span></div>
+                      <div className="font-semibold text-[1.1rem] leading-snug group-hover:text-acc transition">{topHeads[0].title}</div>
+                      {topHeads[0].summary && <p className="text-[.85rem] text-t2 mt-1.5 leading-relaxed line-clamp-2">{topHeads[0].summary}</p>}
                     </div>
                   </a>
                 )}
-                <div className="grid sm:grid-cols-2 gap-3">
+                <div className="grid sm:grid-cols-2 gap-4">
                   {topHeads.slice(1, 5).map((h, i) => (
                     <a key={i} href={h.link} target="_blank" rel="noopener noreferrer" className="card card-hover overflow-hidden group flex flex-col">
-                      {h.image && <div className="h-24 bg-cover bg-center" style={{ backgroundImage: "url(" + h.image + ")" }} />}
+                      <NewsImg src={h.image} className="w-full h-44 object-cover" />
                       <div className="p-3.5 flex-1">
-                        <div className="flex items-center gap-2 mb-1"><span className="text-[.66rem] text-acc font-medium">{h.source}</span><span className="text-[.66rem] text-t3">{ago(h.date)}</span></div>
-                        <div className="font-medium text-[.88rem] leading-snug group-hover:text-acc transition line-clamp-3">{h.title}</div>
+                        <div className="flex items-center gap-2 mb-1"><span className="text-[.7rem] text-acc font-medium">{h.source}</span><span className="text-[.7rem] text-t3">{ago(h.date)}</span></div>
+                        <div className="font-medium text-[.95rem] leading-snug group-hover:text-acc transition line-clamp-2">{h.title}</div>
                       </div>
                     </a>
                   ))}
@@ -215,9 +221,9 @@ export function Brief({ profile, go, setProfile }: { profile: Profile; go: (t: s
                 {restHeads.length > 0 && (
                   <div>
                     {restHeads.map((h, i) => (
-                      <a key={i} href={h.link} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between gap-3 py-2.5 group" style={{ borderTop: i ? "1px solid var(--line)" : "1px solid var(--line)" }}>
-                        <span className="text-[.85rem] text-t1 group-hover:text-acc transition line-clamp-1">{h.title}</span>
-                        <span className="text-[.68rem] text-t3 shrink-0 whitespace-nowrap">{h.source} · {ago(h.date)}</span>
+                      <a key={i} href={h.link} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between gap-3 py-2.5 group" style={{ borderTop: "1px solid var(--line)" }}>
+                        <span className="text-[.86rem] text-t1 group-hover:text-acc transition line-clamp-1">{h.title}</span>
+                        <span className="text-[.7rem] text-t3 shrink-0 whitespace-nowrap">{h.source} · {ago(h.date)}</span>
                       </a>
                     ))}
                   </div>
