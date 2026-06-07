@@ -5,6 +5,8 @@ import { Logo } from "../../components/Nav";
 import { ThemeToggle } from "../../components/ThemeToggle";
 import { Icon } from "../../components/Icon";
 import { loadProfile, saveProfile, type Profile } from "../../lib/profile";
+import { cloudEnabled, supabase, fetchProfile, upsertProfile } from "../../lib/cloud";
+import { Auth } from "../../components/Auth";
 import { Onboarding } from "../../components/suite/Onboarding";
 import { Brief } from "../../components/suite/Brief";
 import { RiskTab } from "../../components/suite/RiskTab";
@@ -67,14 +69,37 @@ const TAB_MAP = Object.fromEntries(TABS.map((t) => [t[0], { label: t[1], icon: t
 export default function Suite() {
   const [profile, setProfileState] = useState<Profile | null>(null);
   const [tab, setTab] = useState<string>("brief");
+  const [session, setSession] = useState<any>(null);
+  const [authReady, setAuthReady] = useState<boolean>(!cloudEnabled);
 
   useEffect(() => {
-    setProfileState(loadProfile());
     if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(() => {});
+    if (!cloudEnabled || !supabase) { setProfileState(loadProfile()); return; }
+    supabase.auth.getSession().then(({ data }) => { setSession(data.session); setAuthReady(true); });
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, sess) => setSession(sess));
+    return () => sub.subscription.unsubscribe();
   }, []);
 
-  function setProfile(p: Profile) { setProfileState(p); saveProfile(p); }
+  // cloud: load this user's profile when signed in
+  useEffect(() => {
+    if (!cloudEnabled) return;
+    if (session?.user) {
+      fetchProfile(session.user.id).then((p) => setProfileState(p || loadProfile()));
+    } else { setProfileState(null); }
+  }, [session]);
 
+  function setProfile(p: Profile) {
+    setProfileState(p); saveProfile(p);
+    if (cloudEnabled && session?.user) upsertProfile(session.user.id, p);
+  }
+  async function signOut() { if (supabase) await supabase.auth.signOut(); }
+
+  if (cloudEnabled && !authReady) {
+    return <div className="min-h-screen flex items-center justify-center text-t3">Loading…</div>;
+  }
+  if (cloudEnabled && !session) {
+    return <Auth />;
+  }
   if (!profile) {
     return <div className="min-h-screen flex items-center justify-center text-t3">Loading your suite…</div>;
   }
@@ -127,6 +152,7 @@ export default function Suite() {
             <SessionClock />
             <button onClick={() => { const e = new KeyboardEvent("keydown", { key: "k", metaKey: true }); window.dispatchEvent(e); }} className="hidden md:inline-flex items-center gap-1.5 chip hover:text-t1 transition" title="Command palette"><Icon name="spark" size={13} /> <span className="cmdk-kbd">⌘K</span></button>
             <ThemeToggle />
+            {cloudEnabled && session && <button onClick={signOut} className="text-t3 hover:text-t1 transition text-sm hidden sm:block">Sign out</button>}
             <Link href="/" className="text-t3 hover:text-t1 transition text-sm hidden sm:block">Exit</Link>
           </div>
         </header>
