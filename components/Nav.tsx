@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ThemeToggle } from "./ThemeToggle";
 
 export function Logo({ size = 26 }: { size?: number }) {
   return (
@@ -32,11 +33,14 @@ export function Nav({ cta = true }: { cta?: boolean }) {
           <Link href="/apply" className="hover:text-t1 transition">Trader Score</Link>
           <a href="/#how" className="hover:text-t1 transition">How it works</a>
         </nav>
-        {cta && (
-          <Link href="/suite" className="btn btn-primary !py-2 !px-4 text-sm">
-            Open the suite
-          </Link>
-        )}
+        <div className="flex items-center gap-2.5">
+          <ThemeToggle />
+          {cta && (
+            <Link href="/suite" className="btn btn-primary !py-2 !px-4 text-sm">
+              Open the suite
+            </Link>
+          )}
+        </div>
       </div>
     </header>
   );

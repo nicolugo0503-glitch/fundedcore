@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Logo } from "../../components/Nav";
+import { ThemeToggle } from "../../components/ThemeToggle";
 import { Icon } from "../../components/Icon";
 import { loadProfile, saveProfile, type Profile } from "../../lib/profile";
 import { Onboarding } from "../../components/suite/Onboarding";
@@ -100,6 +101,7 @@ export default function Suite() {
           </div>
           <div className="flex items-center gap-2.5">
             <span className="chip"><span className="w-1.5 h-1.5 rounded-full pulse" style={{ background: "var(--grn)" }} /> live</span>
+            <ThemeToggle />
             <Link href="/" className="text-t3 hover:text-t1 transition text-sm hidden sm:block">Exit</Link>
           </div>
         </header>
