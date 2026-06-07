@@ -21,6 +21,8 @@ import { ChartsTab } from "../../components/suite/ChartsTab";
 import { MarketsTab } from "../../components/suite/MarketsTab";
 import { SettingsTab } from "../../components/suite/SettingsTab";
 import { AlertsBar } from "../../components/suite/AlertsBar";
+import { CommandPalette, type Command } from "../../components/suite/CommandPalette";
+import { demoProfile } from "../../lib/profile";
 
 const TABS = [
   ["brief", "Daily Brief", "gauge"],
@@ -66,10 +68,18 @@ export default function Suite() {
     return <Onboarding onDone={(p) => { setProfile({ ...p, onboarded: true }); setTab("brief"); }} initial={profile} />;
   }
 
+  const commands: Command[] = [
+    ...TABS.map((t) => ({ id: "go-" + t[0], label: "Go to " + t[1], section: "Navigate", icon: t[2], run: () => setTab(t[0]) })),
+    { id: "demo", label: "Load demo data", section: "Action", icon: "bolt", run: () => setProfile(demoProfile(profile)) },
+    { id: "theme", label: "Toggle light / dark mode", section: "Action", icon: "spark", run: () => { const r = document.documentElement; const n = r.getAttribute("data-theme") === "dark" ? "light" : "dark"; r.setAttribute("data-theme", n); try { localStorage.setItem("fc-theme", n); } catch {} } },
+    { id: "exit", label: "Exit to homepage", section: "Action", icon: "arrow", run: () => { window.location.href = "/"; } },
+  ];
+
   const title = (TAB_MAP[tab] && TAB_MAP[tab].label) || "FundedCore";
 
   return (
     <div className="appframe">
+      <CommandPalette commands={commands} />
       {/* SIDEBAR */}
       <aside className="sidebar">
         <div className="px-1.5 mb-3 hidden md:block"><Link href="/"><Logo size={22} /></Link></div>
@@ -101,6 +111,7 @@ export default function Suite() {
           </div>
           <div className="flex items-center gap-2.5">
             <span className="chip"><span className="w-1.5 h-1.5 rounded-full pulse" style={{ background: "var(--grn)" }} /> live</span>
+            <button onClick={() => { const e = new KeyboardEvent("keydown", { key: "k", metaKey: true }); window.dispatchEvent(e); }} className="hidden md:inline-flex items-center gap-1.5 chip hover:text-t1 transition" title="Command palette"><Icon name="spark" size={13} /> <span className="cmdk-kbd">⌘K</span></button>
             <ThemeToggle />
             <Link href="/" className="text-t3 hover:text-t1 transition text-sm hidden sm:block">Exit</Link>
           </div>
@@ -108,6 +119,7 @@ export default function Suite() {
 
         <main className="content">
           <AlertsBar profile={profile} />
+          <div key={tab} className="fade">
           {tab === "brief" && <Brief profile={profile} go={setTab} setProfile={setProfile} />}
           {tab === "risk" && <RiskTab profile={profile} setProfile={setProfile} />}
           {tab === "insights" && <InsightsTab profile={profile} />}
@@ -122,6 +134,7 @@ export default function Suite() {
           {tab === "charts" && <ChartsTab profile={profile} />}
           {tab === "markets" && <MarketsTab />}
           {tab === "settings" && <SettingsTab profile={profile} setProfile={setProfile} />}
+          </div>
         </main>
       </div>
     </div>

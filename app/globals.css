@@ -142,3 +142,24 @@ table.tbl tr:hover td { background: rgba(0,0,0,.025); }
 .side-link:hover { color:var(--t1); background:rgba(0,0,0,.04); }
 .side-link.on { color:var(--t1); background:rgba(16,163,127,.1); box-shadow: inset 2px 0 0 var(--acc); }
 .side-sec { font-size:.62rem; text-transform:uppercase; letter-spacing:.12em; color:var(--t3); padding:.4rem .65rem .25rem; }
+
+/* ── Premium polish (count-up, skeletons, command palette) ───────────────── */
+@keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+.skeleton { background: linear-gradient(90deg, var(--panel2) 25%, rgba(127,127,127,.14) 37%, var(--panel2) 63%); background-size: 200% 100%; animation: shimmer 1.4s ease infinite; border-radius: 8px; min-height: 14px; }
+
+@keyframes rise { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: translateY(0); } }
+.rise { animation: rise .5s cubic-bezier(.21,.8,.35,1) both; }
+.rise:nth-child(1){animation-delay:.02s}.rise:nth-child(2){animation-delay:.07s}.rise:nth-child(3){animation-delay:.12s}
+.rise:nth-child(4){animation-delay:.17s}.rise:nth-child(5){animation-delay:.22s}.rise:nth-child(6){animation-delay:.27s}
+@media (prefers-reduced-motion: reduce){ .rise{animation:none} .skeleton{animation:none} }
+
+.cmdk-overlay { position: fixed; inset: 0; z-index: 90; background: rgba(0,0,0,.42); backdrop-filter: blur(4px); display: flex; align-items: flex-start; justify-content: center; padding-top: 13vh; }
+.cmdk { width: min(620px, 92vw); background: var(--panel); border: 1px solid var(--line2); border-radius: 16px; box-shadow: 0 28px 70px rgba(0,0,0,.4); overflow: hidden; }
+.cmdk-input { width: 100%; background: transparent; border: 0; outline: none; padding: 17px 8px 17px 10px; font-size: 1rem; color: var(--t1); }
+.cmdk-item { display: flex; align-items: center; gap: 12px; padding: 11px 16px; cursor: pointer; color: var(--t2); }
+.cmdk-item.on { background: var(--acc-weak); color: var(--t1); box-shadow: inset 2px 0 0 var(--acc); }
+.cmdk-kbd { font-family: "JetBrains Mono", monospace; font-size: .62rem; border: 1px solid var(--line2); border-radius: 5px; padding: 1px 5px; color: var(--t3); }
+
+/* tactile lift on interactive cards */
+.card-hover { transition: border-color .18s, box-shadow .18s, transform .18s; }
+.card-hover:hover { transform: translateY(-2px); }
