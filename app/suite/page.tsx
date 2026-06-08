@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Logo } from "../../components/Nav";
 import { ThemeToggle } from "../../components/ThemeToggle";
@@ -82,12 +82,17 @@ export default function Suite() {
     return () => sub.subscription.unsubscribe();
   }, []);
 
-  // cloud: load this user's profile when signed in
+  // cloud: load this user's profile ONCE when they sign in.
+  // (Supabase fires a new session object on token refresh / tab focus; without
+  // this guard each one reloads the cloud profile and clobbers in-session edits.)
+  const loadedFor = useRef<string | null>(null);
   useEffect(() => {
     if (!cloudEnabled) return;
-    if (session?.user) {
-      fetchProfile(session.user.id).then((p) => setProfileState(p || loadProfile()));
-    } else { setProfileState(null); }
+    const uid = session?.user?.id || null;
+    if (!uid) { setProfileState(null); loadedFor.current = null; return; }
+    if (loadedFor.current === uid) return; // already loaded for this user — don't overwrite their changes
+    loadedFor.current = uid;
+    fetchProfile(uid).then((p) => setProfileState(p || loadProfile()));
   }, [session]);
 
   function setProfile(p: Profile) {
