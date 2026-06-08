@@ -14,6 +14,7 @@ export type Profile = {
     dailyLossStop: number; // self-imposed $ stop
     anthropicKey?: string;
   };
+  demo?: boolean;
   plan: string;                 // the trader's written trading plan
   checklist: string[];          // pre-session checklist items
   checklistDone: { date: string; done: number[] }; // today's checked items
@@ -84,5 +85,6 @@ export function demoProfile(base: Profile): Profile {
     accounts: accts,
     trades,
     onboarded: true,
+    demo: true,
   };
 }

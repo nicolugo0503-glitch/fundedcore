@@ -12,7 +12,13 @@ export function JournalTab({ profile, setProfile }: { profile: Profile; setProfi
   const fileRef = useRef<HTMLInputElement>(null);
   function onFile(f: File) {
     const r = new FileReader();
-    r.onload = () => { const res = parseTradesCsv(String(r.result || "")); if (res.trades.length) setProfile({ ...profile, trades: res.trades }); };
+    r.onload = () => {
+      const res = parseTradesCsv(String(r.result || ""));
+      if (!res.trades.length) return;
+      // uploading your own trades clears any demo/sample accounts so nothing pretends to be your account
+      const realAccounts = profile.accounts.filter((a) => !["a1", "a2", "a3"].includes(a.id));
+      setProfile({ ...profile, trades: res.trades, accounts: profile.demo ? [] : realAccounts, demo: false });
+    };
     r.readAsText(f);
   }
   const recent = [...profile.trades].slice(-15).reverse();
