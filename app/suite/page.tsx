@@ -162,6 +162,12 @@ export default function Suite() {
         <LiveTicker />
 
         <main className="content">
+          {profile.demo && (
+            <div className="card p-3 mb-3 flex items-center justify-between gap-3 flex-wrap" style={{ borderColor: "color-mix(in srgb, var(--amb) 45%, var(--line2))", background: "color-mix(in srgb, var(--amb) 7%, transparent)" }}>
+              <span className="text-[.84rem] text-t1"><b style={{ color: "var(--amb)" }}>You're viewing demo data.</b> These are sample trades and accounts — not yours. Upload your own to make the whole app yours.</span>
+              <button onClick={() => setTab("journal")} className="btn btn-primary !py-1.5 !px-3.5 text-[.78rem] shrink-0">Upload my trades →</button>
+            </div>
+          )}
           <AlertsBar profile={profile} />
           <div key={tab} className="fade">
           {tab === "brief" && <Brief profile={profile} go={setTab} setProfile={setProfile} />}
