@@ -65,7 +65,7 @@ export function Onboarding({ onDone, initial }: { onDone: (p: Profile) => void; 
             <label className="lbl">What should we call you?</label>
             <input className="inp" value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name or handle" />
             <button className="btn btn-primary w-full mt-5" onClick={() => setStep(1)}>Continue →</button>
-            <button className="btn btn-ghost w-full mt-2 text-sm" onClick={() => onDone(demoProfile({ ...initial, name: name || "Maya" }))}>Skip — explore with demo data</button>
+            <div className="text-center mt-3"><button className="text-t3 hover:text-t2 text-[.78rem] underline" onClick={() => onDone(demoProfile({ ...initial, name: name || "Maya" }))}>or explore with sample data first</button></div>
           </>
         )}
 

@@ -369,13 +369,13 @@ export function Brief({ profile, go, setProfile }: { profile: Profile; go: (t: s
           </Panel>
 
           <Panel title="Conditions × your edge" icon={<Icon name="spark" />} action={<button className="text-acc text-xs" onClick={() => go("insights")}>insights →</button>}>
-            {cond ? <ConditionsEdge res={cond} /> : <EmptyState icon="spark" title="Which markets suit you" body="Once you have ~10 trading days, this cross-references your P&L with each day's gap, tape, and volatility — revealing the conditions you actually make money in, matched to today." cta={setProfile && <button onClick={() => setProfile(demoProfile(profile))} className="btn btn-primary text-sm">Load demo data</button>} />}
+            {cond ? <ConditionsEdge res={cond} /> : <EmptyState icon="spark" title="Which markets suit you" body="Once you have ~10 trading days, this cross-references your P&L with each day's gap, tape, and volatility — revealing the conditions you actually make money in, matched to today." cta={<button onClick={() => go("journal")} className="btn btn-primary text-sm">Upload your trades →</button>} />}
           </Panel>
 
           <Panel title="Your edge clock" icon={<Icon name="clock" />} action={<button className="text-acc text-xs" onClick={() => go("insights")}>insights →</button>}>
             {clockBuckets.length ? (
               <EdgeClock buckets={clockBuckets} best={ins?.bestWindow || null} worst={ins?.worstWindow || null} nowKey={nowKey} />
-            ) : <EmptyState icon="clock" title="When you trade best" body="Add trades and this clock shows your most and least profitable hours, with a live now-marker — so you know when to be at the screen." cta={setProfile && <button onClick={() => setProfile(demoProfile(profile))} className="btn btn-primary text-sm">Load demo data</button>} />}
+            ) : <EmptyState icon="clock" title="When you trade best" body="Add trades and this clock shows your most and least profitable hours, with a live now-marker — so you know when to be at the screen." cta={<button onClick={() => go("journal")} className="btn btn-primary text-sm">Upload your trades →</button>} />}
           </Panel>
 
           <Panel title="Today's plan" icon={<Icon name="target" />}>
@@ -400,7 +400,7 @@ export function Brief({ profile, go, setProfile }: { profile: Profile; go: (t: s
                     <span className="mono font-bold text-red text-[.95rem] shrink-0 ml-3">{usd(-topLeak.cost)}</span>
                   </div>
                 </div>
-              ) : <EmptyState icon="spark" title="No leaks yet" body="Add ~20+ trades and we'll rank what's costing you the most." cta={setProfile && <button onClick={() => setProfile(demoProfile(profile))} className="btn btn-primary text-sm">Load demo data</button>} />}
+              ) : <EmptyState icon="spark" title="No leaks yet" body="Add ~20+ trades and we'll rank what's costing you the most." cta={<button onClick={() => go("journal")} className="btn btn-primary text-sm">Upload your trades →</button>} />}
             </Panel>
             <Panel title="What's working" icon={<Icon name="up" />}>
               {ins && ins.strengths.length ? (

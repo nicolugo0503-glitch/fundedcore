@@ -12,7 +12,7 @@ const DSTATUS: Record<string, { color: string; label: string }> = {
   improving: { color: "var(--grn)", label: "IMPROVING" },
 };
 
-export function ExecutionTab({ profile, setProfile }: { profile: Profile; setProfile?: (p: Profile) => void }) {
+export function ExecutionTab({ profile, setProfile, go }: { profile: Profile; setProfile?: (p: Profile) => void; go?: (t: string) => void }) {
   const m = execMetrics(profile.trades);
   const decay = edgeDecay(profile.trades);
 
@@ -20,7 +20,7 @@ export function ExecutionTab({ profile, setProfile }: { profile: Profile; setPro
     return (
       <div className="fade">
         <SuiteHeader eyebrow="Execution analytics" title="Exit efficiency & edge decay" sub="The tier that sees what you can't — how much of each move you capture, and which setups are dying." />
-        <div className="card"><EmptyState icon="target" title="Needs entry & exit prices" body="Upload a trade history with entry, exit, high (MFE) and low (MAE) columns — most broker/journal exports include them. Then this engine shows your exit efficiency and which edges are decaying." cta={setProfile && <button onClick={() => setProfile(demoProfile(profile))} className="btn btn-primary text-sm">Load demo data</button>} /></div>
+        <div className="card"><EmptyState icon="target" title="Needs entry & exit prices" body="Upload a trade history with entry, exit, high (MFE) and low (MAE) columns — most broker/journal exports include them. Then this engine shows your exit efficiency and which edges are decaying." cta={<button onClick={() => go && go("journal")} className="btn btn-primary text-sm">Upload your trades →</button>} /></div>
       </div>
     );
   }

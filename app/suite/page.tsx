@@ -184,9 +184,9 @@ export default function Suite() {
           <div key={tab} className="fade">
           {tab === "brief" && <Brief profile={profile} go={setTab} setProfile={setProfile} />}
           {tab === "risk" && <RiskTab profile={profile} setProfile={setProfile} />}
-          {tab === "premortem" && <PreMortemTab profile={profile} setProfile={setProfile} />}
+          {tab === "premortem" && <PreMortemTab profile={profile} setProfile={setProfile} go={setTab} />}
           {tab === "insights" && <InsightsTab profile={profile} />}
-          {tab === "execution" && <ExecutionTab profile={profile} setProfile={setProfile} />}
+          {tab === "execution" && <ExecutionTab profile={profile} setProfile={setProfile} go={setTab} />}
           {tab === "sizing" && <SizingTab profile={profile} />}
           {tab === "portfolio" && <PortfolioTab profile={profile} />}
           {tab === "payout" && <PayoutTab profile={profile} />}

@@ -10,13 +10,13 @@ const BAND: Record<string, { color: string; label: string; verb: string }> = {
   low: { color: "var(--grn)", label: "LOW", verb: "None of your destructive patterns are active today." },
 };
 
-export function PreMortemTab({ profile, setProfile }: { profile: Profile; setProfile?: (p: Profile) => void }) {
+export function PreMortemTab({ profile, setProfile, go }: { profile: Profile; setProfile?: (p: Profile) => void; go?: (t: string) => void }) {
   const pm = preMortem(profile.trades);
   if (!pm.ready) {
     return (
       <div className="fade">
         <SuiteHeader eyebrow="Pre-Mortem · behavioral early-warning" title="Your blow-up fingerprint" sub="The specific way you destroy accounts — learned from your own worst sessions, and matched to today before you trade." />
-        <div className="card"><EmptyState icon="alert" title="Need a bit more history" body="Pre-Mortem learns from at least ~12 trading days. Once it has them, it mines your worst sessions, finds what they had in common, and warns you when today matches." cta={setProfile && <button onClick={() => setProfile(demoProfile(profile))} className="btn btn-primary text-sm">Load demo data</button>} /></div>
+        <div className="card"><EmptyState icon="alert" title="Need a bit more history" body="Pre-Mortem learns from at least ~12 trading days. Once it has them, it mines your worst sessions, finds what they had in common, and warns you when today matches." cta={<button onClick={() => go && go("journal")} className="btn btn-primary text-sm">Upload your trades →</button>} /></div>
       </div>
     );
   }

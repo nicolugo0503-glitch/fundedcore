@@ -30,7 +30,7 @@ export function JournalTab({ profile, setProfile }: { profile: Profile; setProfi
         <SuiteHeader eyebrow="Journal & Score" title="Your verified edge" />
         <div className="flex gap-2">
           <button className="btn btn-ghost text-sm" onClick={() => fileRef.current?.click()}>↑ Upload CSV</button>
-          <button className="btn btn-ghost text-sm" onClick={() => { const s = sampleById("maya")!; setProfile({ ...profile, trades: s.trades }); }}>Use sample</button>
+          <button className="btn btn-ghost text-sm" onClick={() => { if (profile.trades.length && !confirm("Replace your loaded trades with the sample trader?")) return; const s = sampleById("maya")!; setProfile({ ...profile, trades: s.trades, demo: true }); }}>Use sample</button>
           {score && <button className="btn btn-primary text-sm" onClick={() => downloadCard(profile.name, score)}>⤓ Score card</button>}
           <input ref={fileRef} type="file" accept=".csv" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) onFile(f); }} />
         </div>

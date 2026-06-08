@@ -64,7 +64,7 @@ export function SettingsTab({ profile, setProfile }: { profile: Profile; setProf
       <section className="card p-5">
         <h3 className="font-semibold mb-2">Demo data</h3>
         <p className="text-[.8rem] text-t2 mb-2">Fill the whole suite with a realistic funded trader to see every tool alive.</p>
-        <button className="btn btn-primary text-sm" onClick={() => setProfile(demoProfile(profile))}>Load demo data</button>
+        <button className="btn btn-primary text-sm" onClick={() => { if ((profile.trades.length || profile.accounts.length) && !confirm("This replaces your accounts and trades with sample data. Continue?")) return; setProfile(demoProfile(profile)); }}>Load sample data</button>
       </section>
 
       <section className="card p-5">
