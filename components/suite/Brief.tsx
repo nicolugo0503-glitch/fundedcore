@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { type Profile, demoProfile } from "../../lib/profile";
 import { assessAccount, STATUS_META, maxSizeNow } from "../../lib/risk";
+import { FIRMS } from "../../lib/firms";
 import { analyze } from "../../lib/insights";
 import { scoreTrades } from "../../lib/score";
 import { usd, pct, scoreColor } from "../../lib/format";
@@ -58,6 +59,13 @@ export function Brief({ profile, go, setProfile }: { profile: Profile; go: (t: s
   const [tradeRead, setTradeRead] = useState<{ text: string; source: string } | null>(null);
   const [tradeLoading, setTradeLoading] = useState(true);
   const briefDone = useRef(false);
+  const [setupFirm, setSetupFirm] = useState("topstep50");
+  const [setupBal, setSetupBal] = useState(50000);
+  function addMyAccount() {
+    if (!setProfile) return;
+    const firm = FIRMS[setupFirm]; if (!firm) return;
+    setProfile({ ...profile, demo: false, accounts: [{ id: "u" + Date.now(), label: firm.firmBrand, firmKey: setupFirm, startBalance: firm.start, balance: setupBal || firm.start, peakEquity: Math.max(setupBal || firm.start, firm.start), todayPnL: 0, daysTraded: 1 }] });
+  }
 
   useEffect(() => { fetch("/api/news").then((r) => r.json()).then((d) => setEvents(d.events || [])).catch(() => setEvents([])); }, []);
   useEffect(() => { fetch("/api/headlines?t=" + Date.now(), { cache: "no-store" }).then((r) => r.json()).then((d) => setHeads(d.items || [])).catch(() => setHeads([])); }, []);
@@ -235,6 +243,18 @@ export function Brief({ profile, go, setProfile }: { profile: Profile; go: (t: s
         right={<span className="chip"><span className="w-1.5 h-1.5 rounded-full pulse" style={{ background: "var(--grn)" }} /> {risks.filter(r => r.status === "healthy").length}/{risks.length || 0} healthy</span>} />
 
       <ClearanceCard verdict={verdict} reasons={reasons} budget={budget} />
+
+      {!profile.accounts.length && setProfile && (
+        <div className="card p-5" style={{ borderColor: "color-mix(in srgb, var(--acc) 35%, var(--line2))" }}>
+          <div className="flex items-center gap-2 mb-1"><Icon name="shield" size={16} className="text-acc" /><span className="font-semibold text-[.96rem]">Connect your funded account</span></div>
+          <p className="text-[.84rem] text-t2 mb-3 leading-relaxed">Your trades are loaded. Add your account so Clearance, Risk Budget and Distance-to-Breach guard your <i>real</i> risk — it only takes the firm and your current balance.</p>
+          <div className="flex gap-2 flex-wrap items-end">
+            <label><span className="lbl">Firm</span><select className="inp" value={setupFirm} onChange={(e) => { setSetupFirm(e.target.value); setSetupBal(FIRMS[e.target.value].start); }}>{Object.keys(FIRMS).map((k) => <option key={k} value={k}>{FIRMS[k].name}</option>)}</select></label>
+            <label><span className="lbl">Current balance</span><input type="number" className="inp" value={setupBal} onChange={(e) => setSetupBal(+e.target.value)} /></label>
+            <button onClick={addMyAccount} className="btn btn-primary">Add account</button>
+          </div>
+        </div>
+      )}
 
       <div className="card p-4">
         <div className="flex items-center justify-between mb-3 px-1">
