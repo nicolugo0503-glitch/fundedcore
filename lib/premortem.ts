@@ -1,6 +1,7 @@
 // Pre-Mortem — learns a trader's personal blow-up fingerprint from their own
 // worst sessions, then scores TODAY against it. The behavioral moat.
 import type { Trade } from "./score";
+import { analyze } from "./insights";
 
 export type Signal = {
   key: string; label: string;
@@ -13,7 +14,7 @@ export type Signal = {
 export type PreMortem = {
   ready: boolean; sessions: number; badDays: number; threshold: number;
   fingerprint: Signal[]; riskToday: number; riskBand: "low" | "elevated" | "high";
-  summary: string; active: Signal[]; watch: Signal[];
+  summary: string; active: Signal[]; watch: Signal[]; preliminary: boolean;
 };
 
 const DOW = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -32,13 +33,14 @@ export function preMortem(trades: Trade[], now: Date = new Date()): PreMortem {
     return { date, ts, net, trades: ts.length, avgSize: sizes.reduce((s, x) => s + x, 0) / sizes.length, dow: new Date(ts[0].timestamp).getUTCDay() };
   }).sort((a, b) => (a.date < b.date ? -1 : 1));
 
-  const base: PreMortem = { ready: false, sessions: days.length, badDays: 0, threshold: 0, fingerprint: [], riskToday: 0, riskBand: "low", summary: "", active: [], watch: [] };
-  if (days.length < 12) return base;
+  const base: PreMortem = { ready: false, sessions: days.length, badDays: 0, threshold: 0, fingerprint: [], riskToday: 0, riskBand: "low", summary: "", active: [], watch: [], preliminary: false };
+  if (trades.length < 12) return base;
+  if (days.length < 12) return preliminaryPreMortem(trades, days.length, now);
 
   const nets = days.map((d) => d.net);
   const threshold = Math.min(0, quantile(nets, 0.25));
   const bad = new Set(days.filter((d) => d.net <= threshold).map((d) => d.date));
-  if (bad.size < 3) return base;
+  if (bad.size < 1) return base;
 
   const overallAvgSize = days.reduce((s, d) => s + d.avgSize * d.trades, 0) / sorted.length;
   const medTrades = quantile(days.map((d) => d.trades), 0.5);
@@ -99,5 +101,37 @@ export function preMortem(trades: Trade[], now: Date = new Date()): PreMortem {
     ? `Today trips ${active.length} of your ${fp.length} blow-up signals — led by “${top.label.toLowerCase()}” (${top.lift.toFixed(1)}× your normal bad-day rate).`
     : fp.length ? `Your blow-up pattern centers on “${fp[0].label.toLowerCase()}” — none of your danger signals are active today.` : "Not enough signal yet.";
 
-  return { ready: true, sessions: days.length, badDays: bad.size, threshold, fingerprint: fp, riskToday, riskBand, summary, active, watch };
+  return { ready: true, sessions: days.length, badDays: bad.size, threshold, fingerprint: fp, riskToday, riskBand, summary, active, watch, preliminary: false };
+}
+
+
+// Preliminary fingerprint from trade-level behavior — works with few sessions.
+function preliminaryPreMortem(trades: Trade[], sessions: number, now: Date): PreMortem {
+  const ins = analyze(trades);
+  const todayDow = DOW[now.getUTCDay()];
+  const todayHour = String(now.getUTCHours()).padStart(2, "0") + ":00";
+  const mk = (key: string, label: string, kind: "static" | "live", active: boolean | null, lift: number, support: number, bad: number): Signal =>
+    ({ key, label, badRate: 0, baseRate: 0, lift, support, badSupport: bad, kind, activeToday: active, weight: 0 });
+  const sig: Signal[] = [];
+  if (ins.afterLoss.trades >= 3 && ins.afterLoss.net < 0) sig.push(mk("afterloss", "Trading right after a loss bleeds you", "live", null, 1.9, ins.afterLoss.trades, ins.afterLoss.trades));
+  if (ins.afterLoss.avgSizeMult > 1.1) sig.push(mk("sizeup", "Sizing up after losses", "live", null, 1.6, ins.totals.trades, 0));
+  if (ins.worstWindow && ins.worstWindow.net < 0 && ins.worstWindow.trades >= 3) sig.push(mk("hour", "Your worst hour: " + ins.worstWindow.key + " UTC", "static", todayHour === ins.worstWindow.key, 1.7, ins.worstWindow.trades, ins.worstWindow.trades));
+  const wd = [...ins.byDay].filter((b) => b.trades >= 2 && b.net < 0).sort((a, b) => a.net - b.net)[0];
+  if (wd) sig.push(mk(wd.key, wd.key + " is your worst day", "static", todayDow === wd.key, 1.5, wd.trades, wd.trades));
+  const ws = [...ins.bySymbol].filter((b) => b.trades >= 4 && b.net < 0).sort((a, b) => a.net - b.net)[0];
+  if (ws) sig.push(mk("sym" + ws.key, ws.key + " keeps losing you money", "static", null, 1.4, ws.trades, ws.trades));
+
+  const fp = sig.slice(0, 5);
+  const wsum = fp.reduce((s, x) => s + x.lift, 0) || 1;
+  fp.forEach((x) => (x.weight = x.lift / wsum));
+  const active = fp.filter((x) => x.activeToday === true);
+  const watch = fp.filter((x) => x.activeToday !== true);
+  const riskToday = active.reduce((s, x) => s + x.weight, 0);
+  const riskBand: "low" | "elevated" | "high" = riskToday >= 0.6 ? "high" : riskToday >= 0.3 ? "elevated" : "low";
+  const summary = fp.length
+    ? (active.length
+      ? `Preliminary read: today trips ${active.length} of your early danger signals — watch “${active[0].label.toLowerCase()}”.`
+      : `Early danger signals from your record: ${fp.slice(0, 2).map((f) => f.label.toLowerCase()).join(", ")}. None active today yet.`)
+    : "Keep logging trades — your blow-up fingerprint sharpens with a few more sessions.";
+  return { ready: fp.length > 0, sessions, badDays: 0, threshold: 0, fingerprint: fp, riskToday, riskBand, summary, active, watch, preliminary: true };
 }

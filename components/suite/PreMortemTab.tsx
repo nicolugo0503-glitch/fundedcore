@@ -35,13 +35,13 @@ export function PreMortemTab({ profile, setProfile }: { profile: Profile; setPro
             </Ring>
             <div>
               <div className="lbl mb-1">Today's reading</div>
-              <div className="display text-[1.5rem] font-bold leading-none" style={{ color: b.color }}>{b.label}</div>
+              <div className="flex items-center gap-2"><div className="display text-[1.5rem] font-bold leading-none" style={{ color: b.color }}>{b.label}</div>{pm.preliminary && <span className="chip" style={{ color: "var(--amb)", borderColor: "color-mix(in srgb, var(--amb) 35%, transparent)" }}>preliminary</span>}</div>
               <div className="text-[.78rem] text-t3 mt-1.5 max-w-[12rem]">{b.verb}</div>
             </div>
           </div>
           <div>
             <p className="text-[.95rem] text-t1 leading-relaxed">{pm.summary}</p>
-            <div className="text-[.72rem] text-t3 mt-3">Learned from {pm.sessions} sessions · {pm.badDays} flagged as blow-up days (worst quartile, below {Math.round(pm.threshold)}).</div>
+            <div className="text-[.72rem] text-t3 mt-3">{pm.preliminary ? `Preliminary read from ${pm.sessions} session(s) of trades — these sharpen into a full per-session fingerprint once you have ~12 trading days.` : `Learned from ${pm.sessions} sessions · ${pm.badDays} flagged as blow-up days (worst quartile, below ${Math.round(pm.threshold)}).`}</div>
           </div>
         </div>
       </div>
