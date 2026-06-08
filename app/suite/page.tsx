@@ -92,7 +92,14 @@ export default function Suite() {
     if (!uid) { setProfileState(null); loadedFor.current = null; return; }
     if (loadedFor.current === uid) return; // already loaded for this user — don't overwrite their changes
     loadedFor.current = uid;
-    fetchProfile(uid).then((p) => setProfileState(p || loadProfile()));
+    fetchProfile(uid).then((cloudP) => {
+      const localP = loadProfile();
+      let p = cloudP || localP;
+      // if local has more trades than cloud, the cloud copy is stale — keep the user's real upload
+      if (cloudP && localP && (localP.trades?.length || 0) > (cloudP.trades?.length || 0)) p = localP;
+      setProfileState(p);
+      if (p && cloudEnabled) upsertProfile(uid, p); // re-sync the winning copy back to cloud
+    });
   }, [session]);
 
   function setProfile(p: Profile) {

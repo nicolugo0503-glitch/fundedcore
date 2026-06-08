@@ -19,9 +19,10 @@ let timer: any = null;
 export function upsertProfile(userId: string, data: Profile) {
   if (!supabase) return;
   clearTimeout(timer);
-  timer = setTimeout(() => {
-    supabase!.from("profiles").upsert({ user_id: userId, data, updated_at: new Date().toISOString() }).then(() => {});
-  }, 700); // debounce so input edits don't hammer the DB
+  timer = setTimeout(async () => {
+    const { error } = await supabase!.from("profiles").upsert({ user_id: userId, data, updated_at: new Date().toISOString() });
+    if (error) console.error("[FundedCore] cloud save failed:", error.message);
+  }, 400);
 }
 
 // build marker: force fresh build to inline NEXT_PUBLIC_SUPABASE_* env vars
