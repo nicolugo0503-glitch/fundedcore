@@ -11,11 +11,12 @@ import { MockConnector } from "../../lib/connectors/mock";
 import { TradovateConnector } from "../../lib/connectors/tradovate";
 import { RithmicConnector } from "../../lib/connectors/rithmic";
 import { WebhookConnector } from "../../lib/connectors/webhook";
+import { ProjectXConnector } from "../../lib/connectors/projectx";
 
 const FIRM_KEYS = Object.keys(FIRMS);
 
 export function ConnectTab({ profile }: { profile: Profile }) {
-  const [provider, setProvider] = useState<"sim" | "tradovate" | "rithmic" | "webhook">("sim");
+  const [provider, setProvider] = useState<"sim" | "tradovate" | "rithmic" | "webhook" | "projectx">("sim");
   const [status, setStatus] = useState<ConnStatus>("idle");
   const [statusMsg, setStatusMsg] = useState("");
   const [acct, setAcct] = useState<LiveAccount | null>(null);
@@ -24,6 +25,7 @@ export function ConnectTab({ profile }: { profile: Profile }) {
   const [firmKey, setFirmKey] = useState(profile.accounts[0]?.firmKey || FIRM_KEYS[0]);
   const [creds, setCreds] = useState({ name: "", password: "", cid: "", sec: "", live: false });
   const [rith, setRith] = useState({ gateway: "", systemName: "", user: "", password: "" });
+  const [px, setPx] = useState({ userName: "", apiKey: "" });
   const [hookKey] = useState(() => { try { const k = localStorage.getItem("fc-hook-key"); if (k) return k; const n = "fc_" + Math.random().toString(36).slice(2, 12); localStorage.setItem("fc-hook-key", n); return n; } catch { return "fc_demo"; } });
   const conn = useRef<BrokerConnector | null>(null);
 
@@ -37,7 +39,7 @@ export function ConnectTab({ profile }: { profile: Profile }) {
   function connect() {
     conn.current?.disconnect();
     setAcct(null); setPositions([]); setFills([]); setStatusMsg("");
-    const c: BrokerConnector = provider === "sim" ? new MockConnector() : provider === "rithmic" ? new RithmicConnector(rith) : provider === "webhook" ? new WebhookConnector(hookKey) : new TradovateConnector(creds);
+    const c: BrokerConnector = provider === "sim" ? new MockConnector() : provider === "projectx" ? new ProjectXConnector(px) : provider === "rithmic" ? new RithmicConnector(rith) : provider === "webhook" ? new WebhookConnector(hookKey) : new TradovateConnector(creds);
     conn.current = c;
     c.connect({
       onStatus: (s, m) => { setStatus(s); if (m) setStatusMsg(m); },
@@ -65,7 +67,7 @@ export function ConnectTab({ profile }: { profile: Profile }) {
 
       <div className="card p-5">
         <div className="flex flex-wrap items-center gap-2 mb-4">
-          {([["sim", "Simulated feed"], ["webhook", "Webhook (any firm)"], ["tradovate", "Tradovate"], ["rithmic", "Rithmic"]] as const).map(([k, label]) => (
+          {([["sim", "Simulated feed"], ["projectx", "TopStep"], ["webhook", "Webhook (any firm)"], ["tradovate", "Tradovate"], ["rithmic", "Rithmic"]] as const).map(([k, label]) => (
             <button key={k} onClick={() => setProvider(k)} className={`px-3.5 py-2 rounded-lg text-[.82rem] font-medium border transition ${provider === k ? "bg-acc/15 border-acc/40 text-t1" : "border-line2 text-t2 hover:text-t1"}`}>{label}</button>
           ))}
           <span className="ml-auto chip" style={{ color: live ? "var(--grn)" : status === "error" ? "var(--red)" : "var(--t3)" }}>
@@ -81,6 +83,13 @@ export function ConnectTab({ profile }: { profile: Profile }) {
             <label><span className="lbl">API Key (cid) · optional</span><input className="inp" value={creds.cid} onChange={(e) => setCreds({ ...creds, cid: e.target.value })} /></label>
             <label><span className="lbl">API Secret (sec) · optional</span><input className="inp" value={creds.sec} onChange={(e) => setCreds({ ...creds, sec: e.target.value })} /></label>
             <label className="flex items-center gap-2 text-[.82rem] text-t2 sm:col-span-2"><input type="checkbox" checked={creds.live} onChange={(e) => setCreds({ ...creds, live: e.target.checked })} /> Live account (uncheck for Tradovate demo)</label>
+          </div>
+        )}
+        {provider === "projectx" && (
+          <div className="grid sm:grid-cols-2 gap-3 mb-4">
+            <label><span className="lbl">TopstepX username</span><input className="inp" value={px.userName} onChange={(e) => setPx({ ...px, userName: e.target.value })} autoComplete="off" /></label>
+            <label><span className="lbl">API key</span><input type="password" className="inp" value={px.apiKey} onChange={(e) => setPx({ ...px, apiKey: e.target.value })} autoComplete="off" /></label>
+            <div className="sm:col-span-2 text-[.74rem] text-t3 flex items-center gap-1.5"><Icon name="shield" size={12} /> Get your key in TopstepX: Settings → API → Link Account → generate. Requires the ProjectX API subscription. Your key is sent once for a token and never stored.</div>
           </div>
         )}
         {provider === "webhook" && (
