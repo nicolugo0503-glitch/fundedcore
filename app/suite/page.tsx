@@ -26,6 +26,7 @@ import { ConnectTab } from "../../components/suite/ConnectTab";
 import { PreMortemTab } from "../../components/suite/PreMortemTab";
 import { GateTab } from "../../components/suite/GateTab";
 import { GuardTab } from "../../components/suite/GuardTab";
+import { FundedScoreTab } from "../../components/suite/FundedScoreTab";
 import { ExecutionTab } from "../../components/suite/ExecutionTab";
 import { SizingTab } from "../../components/suite/SizingTab";
 import { PortfolioTab } from "../../components/suite/PortfolioTab";
@@ -48,6 +49,7 @@ const TABS = [
   ["risk", "Risk", "shield"],
   ["premortem", "Pre-Mortem", "alert"],
   ["gate", "Pre-Trade Gate", "check"],
+  ["fundedscore", "FundedScore", "gauge"],
   ["insights", "Insights", "spark"],
   ["execution", "Execution", "target"],
   ["sizing", "Optimal Sizing", "calc"],
@@ -66,7 +68,7 @@ const TABS = [
 const GROUPS: { label: string; ids: string[] }[] = [
   { label: "Daily", ids: ["brief", "today", "guard", "connect"] },
   { label: "Markets", ids: ["markets", "flow", "charts", "news"] },
-  { label: "Risk & Edge", ids: ["risk", "premortem", "gate", "insights", "execution", "sizing", "portfolio", "journal", "score"] },
+  { label: "Risk & Edge", ids: ["risk", "premortem", "gate", "fundedscore", "insights", "execution", "sizing", "portfolio", "journal", "score"] },
   { label: "Pass & Plan", ids: ["challenge", "simulator", "payout", "plan", "tools"] },
   { label: "AI", ids: ["coach"] },
 ];
@@ -191,6 +193,7 @@ export default function Suite() {
           {tab === "premortem" && <PreMortemTab profile={profile} setProfile={setProfile} go={setTab} />}
           {tab === "gate" && <GateTab profile={profile} />}
           {tab === "guard" && <GuardTab profile={profile} setProfile={setProfile} />}
+          {tab === "fundedscore" && <FundedScoreTab profile={profile} />}
           {tab === "insights" && <InsightsTab profile={profile} />}
           {tab === "execution" && <ExecutionTab profile={profile} setProfile={setProfile} go={setTab} />}
           {tab === "sizing" && <SizingTab profile={profile} />}
