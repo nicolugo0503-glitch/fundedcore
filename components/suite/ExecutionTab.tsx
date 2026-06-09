@@ -3,6 +3,7 @@ import { type Profile, demoProfile } from "../../lib/profile";
 import { execMetrics, edgeDecay } from "../../lib/execution";
 import { usd } from "../../lib/format";
 import { SuiteHeader, Panel, Ring, EmptyState } from "./ui";
+import { AIRead } from "./AIRead";
 import { Icon } from "../Icon";
 
 const DSTATUS: Record<string, { color: string; label: string }> = {
@@ -29,6 +30,7 @@ export function ExecutionTab({ profile, setProfile, go }: { profile: Profile; se
   return (
     <div className="fade space-y-5">
       <SuiteHeader eyebrow="Execution analytics" title="Exit efficiency & edge decay" sub="How much of the move you actually capture — and which of your setups are dying." />
+      <AIRead module="Execution" facts={`Capture ${Math.round(m.winnersCaptured*100)}% of the move on winners, $${Math.round(m.totalLeftOnTable)} left on the table, ${m.avgHeatPts.toFixed(0)}pts avg heat, ${Math.round(m.loserMfeRate*100)}% of losers were green first.${decay.ready?` ${decay.summary}`:""}`} />
 
       {/* EXIT EFFICIENCY */}
       <div className="card p-6">

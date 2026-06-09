@@ -5,6 +5,7 @@ import { INSTRUMENTS } from "../../lib/firms";
 import { kellySizing } from "../../lib/sizing";
 import { usd, pct } from "../../lib/format";
 import { SuiteHeader, Panel, Ring, StatTile } from "./ui";
+import { AIRead } from "./AIRead";
 import { Icon } from "../Icon";
 const INSTR = Object.keys(INSTRUMENTS);
 
@@ -19,6 +20,7 @@ export function SizingTab({ profile }: { profile: Profile }) {
   return (
     <div className="fade space-y-5">
       <SuiteHeader eyebrow="Optimal sizing" title="Kelly-optimal position size" sub="The mathematically optimal size from your real edge — bankrolled by your breach room, not your balance, and de-risked to survive variance." />
+      <AIRead module="Optimal Sizing" facts={k.ready ? `Win rate ${Math.round(k.winRate*100)}%, payoff ${k.payoff.toFixed(2)}, expectancy $${Math.round(k.expectancy)}/trade. Full Kelly ${Math.round(k.fullKelly*100)}%; recommended ${k.recommendContracts} ${instrument} (~$${Math.round(k.recommendRiskUsd)}/trade).` : ""} />
       {!k.ready ? <div className="card"><div className="p-8 text-center text-t3">Add ~15+ trades so the engine can measure your edge.</div></div> : (
         <>
           <div className="grid sm:grid-cols-3 gap-3">

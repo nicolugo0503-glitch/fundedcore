@@ -5,6 +5,7 @@ import { INSTRUMENTS } from "../../lib/firms";
 import { portfolioRisk } from "../../lib/portfolio";
 import { usd } from "../../lib/format";
 import { SuiteHeader, Panel, Ring, EmptyState } from "./ui";
+import { AIRead } from "./AIRead";
 import { Icon } from "../Icon";
 const INSTR = Object.keys(INSTRUMENTS);
 
@@ -23,6 +24,8 @@ export function PortfolioTab({ profile }: { profile: Profile }) {
         </div>} />
 
       <div className="card p-5"><p className="text-[.92rem] text-t1 leading-relaxed">{p.summary}</p></div>
+
+      <AIRead module="Multi-Account" facts={`${p.n} accounts, ${p.totalDeployable} ${instrument} deployable total, weakest account breaches at $${Math.round(p.weakestBuffer)}.${p.survival ? ` Correlated survival over 20 days: keep all ${Math.round(p.survival.keepAll*100)}%, lose all ${Math.round(p.survival.loseAll*100)}%.` : ""}`} />
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {p.accounts.map((a) => (

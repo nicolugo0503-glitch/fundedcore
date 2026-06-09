@@ -2,6 +2,7 @@
 import { type Profile, demoProfile } from "../../lib/profile";
 import { preMortem, type Signal } from "../../lib/premortem";
 import { SuiteHeader, Panel, Ring, EmptyState } from "./ui";
+import { AIRead } from "./AIRead";
 import { Icon } from "../Icon";
 
 const BAND: Record<string, { color: string; label: string; verb: string }> = {
@@ -25,6 +26,7 @@ export function PreMortemTab({ profile, setProfile, go }: { profile: Profile; se
   return (
     <div className="fade space-y-5">
       <SuiteHeader eyebrow="Pre-Mortem · behavioral early-warning" title="Your blow-up fingerprint" sub="Mined from your own worst sessions, scored against today — before you trade." />
+      <AIRead module="Pre-Mortem" facts={`Blow-up risk ${Math.round(pm.riskToday*100)}% (${pm.riskBand})${pm.preliminary?", preliminary":""}. Signals: ${pm.fingerprint.map(f=>f.label).join("; ")||"none yet"}. ${pm.summary}`} />
 
       {/* RISK DIAL */}
       <div className="card p-6">

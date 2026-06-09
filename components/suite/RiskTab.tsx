@@ -6,6 +6,7 @@ import { assessAccount, guardrail, maxSizeNow, worstCaseLoss, STATUS_META, type 
 import { monteCarlo } from "../../lib/montecarlo";
 import { usd } from "../../lib/format";
 import { SuiteHeader, Panel, Ring } from "./ui";
+import { AIRead } from "./AIRead";
 import { Icon } from "./../Icon";
 
 const INSTR = Object.keys(INSTRUMENTS);
@@ -42,6 +43,7 @@ export function RiskTab({ profile, setProfile }: { profile: Profile; setProfile:
   return (
     <div className="space-y-5 fade">
       <SuiteHeader eyebrow="Risk engine" title="Distance to breach, survival odds & guardrail" sub="Live breach distance, a Monte-Carlo read on whether your edge survives this account, and the largest size you can take right now." />
+      <AIRead module="Risk" facts={r ? `${account.label} on ${r.firm.firmBrand}: $${Math.round(Math.max(0,r.distanceToBreach))} to breach (${Math.round(r.pctBuffer*100)}% buffer, ${r.status}).${mc?` Survival: ${Math.round(mc.survive*100)}% survive / ${Math.round(mc.blow*100)}% breach over 80 trades.`:""} ${losersToBreach} straight losers at ${size} ${instrument} ends it; max ${maxNow} now.` : ""} />
 
       {/* ACCOUNT GAUGES */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">

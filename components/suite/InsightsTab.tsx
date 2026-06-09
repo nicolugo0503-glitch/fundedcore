@@ -3,6 +3,7 @@ import { type Profile } from "../../lib/profile";
 import { analyze, type Bucket } from "../../lib/insights";
 import { usd, pct } from "../../lib/format";
 import { SuiteHeader } from "./ui";
+import { AIRead } from "./AIRead";
 
 export function InsightsTab({ profile }: { profile: Profile }) {
   if (profile.trades.length < 5) return <div className="card p-8 text-center text-t3">Add at least ~20 trades (Journal tab) to unlock your personalized insights.</div>;
@@ -12,6 +13,7 @@ export function InsightsTab({ profile }: { profile: Profile }) {
   return (
     <div className="space-y-5 fade">
       <SuiteHeader eyebrow="Insights" title="What's costing you — and what's working" sub="Your leaks, ranked by the dollars they cost you. Your strengths, ready to scale." />
+      <AIRead module="Insights" facts={`Net $${Math.round(ins.totals.net)}, win rate ${Math.round(ins.totals.winRate*100)}%. Leaks: ${ins.leaks.map(l=>l.title+" -$"+Math.round(l.cost)).join("; ")||"none"}. Best window ${ins.bestWindow?.key||"n/a"}; worst ${ins.worstWindow?.key||"n/a"}.`} />
 
       <section className="space-y-3">
         <h3 className="font-semibold">Your leaks, ranked by what they cost you</h3>

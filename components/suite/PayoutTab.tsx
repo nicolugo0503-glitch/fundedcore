@@ -4,6 +4,7 @@ import { type Profile } from "../../lib/profile";
 import { payoutPlan } from "../../lib/payout";
 import { usd, pct } from "../../lib/format";
 import { SuiteHeader, Panel, StatTile } from "./ui";
+import { AIRead } from "./AIRead";
 import { Icon } from "../Icon";
 
 export function PayoutTab({ profile }: { profile: Profile }) {
@@ -20,6 +21,8 @@ export function PayoutTab({ profile }: { profile: Profile }) {
           <select className="inp !py-1.5 text-sm" value={account.id} onChange={(e) => setSel(e.target.value)}>{profile.accounts.map((a) => <option key={a.id} value={a.id}>{a.label}</option>)}</select>
           <label className="inp !py-1.5 text-sm flex items-center gap-1">split <input type="number" className="bg-transparent outline-none w-10" value={split} onChange={(e) => setSplit(Math.max(50, Math.min(100, +e.target.value)))} />%</label>
         </div>} />
+
+      <AIRead module="Payout Planner" facts={`Profit $${Math.round(p.profit)}. ${p.eligible ? `Eligible — recommended withdrawal $${p.recommendedWithdrawal}, net $${Math.round(p.netToTrader)} after split.` : `Not eligible: ${p.blockers.join(" ")}`}${p.consistencyLimit ? ` Consistency ${Math.round(p.consistencyPct*100)}%/${Math.round(p.consistencyLimit*100)}% ${p.consistencyOk?"ok":"FAIL"}.` : ""}`} />
 
       <div className="card p-6">
         <div className="flex items-center gap-3 mb-3">

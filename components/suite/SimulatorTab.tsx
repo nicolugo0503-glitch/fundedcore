@@ -3,6 +3,7 @@ import { type Profile } from "../../lib/profile";
 import { simulateAll } from "../../lib/simulator";
 import { usd } from "../../lib/format";
 import { SuiteHeader } from "./ui";
+import { AIRead } from "./AIRead";
 
 const OUT: Record<string, { label: string; color: string }> = {
   passed: { label: "PASSED", color: "#10B981" },
@@ -18,6 +19,8 @@ export function SimulatorTab({ profile }: { profile: Profile }) {
   return (
     <div className="space-y-5 fade">
       <SuiteHeader eyebrow="Firm Simulator" title="Which firm would your trading actually survive?" sub={`Your real ${profile.trades.length} trades, replayed against every rulebook.`} />
+
+      <AIRead module="Firm Simulator" facts={results.length ? `Replayed ${profile.trades.length} trades vs ${results.length} firms; ${results.filter(r=>r.outcome!=="breached").length} you would pass or survive.${best && best.outcome!=="breached" ? ` Best fit: ${best.firm.name} (${best.outcome}).` : " You would breach every firm tested — tighten risk first."}` : ""} />
 
       {best && best.outcome !== "breached" && (
         <div className="card p-5" style={{ borderColor: "#10B98155" }}>
