@@ -7,22 +7,27 @@ const MODEL = process.env.OPENAI_MODEL || "gpt-4o-mini"; // cheap + good
 
 // In-memory limiter (per warm instance). For a beta this is a soft guard; the
 // real hard cap is a monthly budget limit set in your OpenAI dashboard.
-const PER_IP_PER_HOUR = Number(process.env.AI_PER_IP_HOUR || 15);
-const GLOBAL_PER_DAY = Number(process.env.AI_GLOBAL_DAY || 800);
-const ipHits = new Map<string, { count: number; reset: number }>();
+const PER_IP_PER_HOUR = Number(process.env.AI_PER_IP_HOUR || 12);  // per tester / hour
+const PER_IP_PER_DAY  = Number(process.env.AI_PER_IP_DAY  || 50);  // per tester / day
+const GLOBAL_PER_DAY  = Number(process.env.AI_GLOBAL_DAY  || 800); // everyone / day
+const ipHits = new Map<string, { h: number; hr: number; d: number; dr: number }>();
 let dayCount = 0;
 let dayReset = Date.now() + 86_400_000;
 
 export function aiEnabled() { return !!KEY; }
 
+// Allow a call only if under: this tester's hourly cap, this tester's daily cap,
+// and the global daily cap. Otherwise the feature falls back to rule-based.
 export function rateAllow(ip: string): boolean {
   const now = Date.now();
   if (now > dayReset) { dayCount = 0; dayReset = now + 86_400_000; }
   if (dayCount >= GLOBAL_PER_DAY) return false;
-  const h = ipHits.get(ip);
-  if (!h || now > h.reset) { ipHits.set(ip, { count: 1, reset: now + 3_600_000 }); }
-  else { if (h.count >= PER_IP_PER_HOUR) return false; h.count++; }
-  dayCount++;
+  let e = ipHits.get(ip);
+  if (!e) { e = { h: 0, hr: now + 3_600_000, d: 0, dr: now + 86_400_000 }; ipHits.set(ip, e); }
+  if (now > e.hr) { e.h = 0; e.hr = now + 3_600_000; }
+  if (now > e.dr) { e.d = 0; e.dr = now + 86_400_000; }
+  if (e.h >= PER_IP_PER_HOUR || e.d >= PER_IP_PER_DAY) return false;
+  e.h++; e.d++; dayCount++;
   return true;
 }
 
