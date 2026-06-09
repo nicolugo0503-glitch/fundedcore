@@ -1,6 +1,7 @@
 // Daily AI briefing. Uses Anthropic when a key exists (env or header), else
 // composes a personalized briefing from the structured context (never generic).
 import { NextResponse } from "next/server";
+import { openaiChat, aiEnabled, rateAllow, clientIp } from "../../../lib/openai";
 export const runtime = "nodejs";
 
 type Ctx = {
@@ -17,31 +18,22 @@ const usd = (n: number) => (n < 0 ? "-$" : "$") + Math.abs(Math.round(n)).toLoca
 export async function POST(req: Request) {
   const { context } = (await req.json().catch(() => ({}))) as { context?: Ctx };
   const c = context || {};
-  const key = req.headers.get("x-anthropic-key") || process.env.ANTHROPIC_API_KEY;
-
-  if (key) {
-    try {
-      const prompt = [
-        `Trader: ${c.name || "trader"} · ${c.dow || ""}`,
-        `Market: S&P ${fmtPct(c.spxPct)}, Nasdaq ${fmtPct(c.ndxPct)}, VIX ${c.vix ?? "?"} (${c.tone || "n/a"})`,
-        c.headlines?.length ? `Top headlines: ${c.headlines.slice(0, 4).join(" | ")}` : "",
-        c.tightest ? `Tightest funded account: ${c.tightest.firm}, ${usd(c.tightest.dtb)} to breach (${Math.round((c.tightest.pctBuffer || 0) * 100)}% buffer, ${c.tightest.status})` : "No funded accounts connected.",
-        c.score ? `Trader Score: ${c.score.value} (${c.score.grade}, ${c.score.decision})` : "",
-        c.topLeak ? `Biggest leak: ${c.topLeak.title}, costing ${usd(c.topLeak.cost)}` : "",
-        c.dayWinRate != null ? `Historical win rate on ${c.dow}: ${Math.round(c.dayWinRate * 100)}%` : "",
-        `Limits: max ${c.maxTrades} trades, stop at ${usd(c.dailyStop || 0)}.`,
-      ].filter(Boolean).join("\n");
-      const r = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: { "content-type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01" },
-        body: JSON.stringify({
-          model: "claude-3-5-haiku-latest", max_tokens: 420,
-          system: "You are FundedCore's personal briefing engine for funded futures traders. Write a sharp, specific 4-5 sentence briefing about THIS TRADER (not the market — markets are covered elsewhere). Cover: the state of their funded account(s) and risk room, their edge/score, the single behavioral leak to watch today, and one concrete focus. Mention the market only in a brief half-sentence if relevant. ONLY use the data given; no invented numbers, no disclaimers. Second person.",
-          messages: [{ role: "user", content: prompt }],
-        }),
-      });
-      if (r.ok) { const j = await r.json(); const text = j?.content?.[0]?.text; if (text) return NextResponse.json({ source: "claude", text }); }
-    } catch { /* fall through */ }
+  if (aiEnabled() && rateAllow(clientIp(req))) {
+    const prompt = [
+      `Trader: ${c.name || "trader"} · ${c.dow || ""}`,
+      `Market: S&P ${fmtPct(c.spxPct)}, Nasdaq ${fmtPct(c.ndxPct)}, VIX ${c.vix ?? "?"} (${c.tone || "n/a"})`,
+      c.headlines?.length ? `Top headlines: ${c.headlines.slice(0, 4).join(" | ")}` : "",
+      c.tightest ? `Tightest funded account: ${c.tightest.firm}, ${usd(c.tightest.dtb)} to breach (${Math.round((c.tightest.pctBuffer || 0) * 100)}% buffer, ${c.tightest.status})` : "No funded accounts connected.",
+      c.score ? `Trader Score: ${c.score.value} (${c.score.grade}, ${c.score.decision})` : "",
+      c.topLeak ? `Biggest leak: ${c.topLeak.title}, costing ${usd(c.topLeak.cost)}` : "",
+      c.dayWinRate != null ? `Historical win rate on ${c.dow}: ${Math.round(c.dayWinRate * 100)}%` : "",
+      `Limits: max ${c.maxTrades} trades, stop at ${usd(c.dailyStop || 0)}.`,
+    ].filter(Boolean).join("\n");
+    const text = await openaiChat(
+      "You are FundedCore's personal briefing engine for funded futures traders. Write a sharp, specific 4-5 sentence briefing about THIS TRADER (not the market). Cover: the state of their funded account(s) and risk room, their edge/score, the single behavioral leak to watch today, and one concrete focus. Mention the market only in a brief half-sentence if relevant. ONLY use the data given; no invented numbers, no disclaimers. Second person.",
+      prompt, 420
+    );
+    if (text) return NextResponse.json({ source: "openai", text });
   }
   return NextResponse.json({ source: "composed", text: compose(c) });
 }

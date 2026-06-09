@@ -1,6 +1,7 @@
 // Today's news-driven trade read. Claude when a key exists, else a deterministic
 // read composed from the real market move + headlines + event risk.
 import { NextResponse } from "next/server";
+import { openaiChat, aiEnabled, rateAllow, clientIp } from "../../../lib/openai";
 export const runtime = "nodejs";
 
 type Ctx = {
@@ -15,28 +16,19 @@ const fp = (n?: number) => (n == null ? "?" : (n >= 0 ? "+" : "") + (n * 100).to
 export async function POST(req: Request) {
   const { context } = (await req.json().catch(() => ({}))) as { context?: Ctx };
   const c = context || {};
-  const key = req.headers.get("x-anthropic-key") || process.env.ANTHROPIC_API_KEY;
-
-  if (key) {
-    try {
-      const prompt = [
-        `Market today: S&P ${fp(c.spxPct)}, Nasdaq ${fp(c.ndxPct)}, VIX ${c.vix ?? "?"} (${c.tone || "n/a"}).`,
-        c.mover ? `Biggest mover: ${c.mover.label} ${fp(c.mover.chg)}.` : "",
-        c.headlines?.length ? `Headlines: ${c.headlines.slice(0, 5).join(" | ")}` : "",
-        c.event ? `High-impact event today: ${c.event.title} at ${c.event.time} UTC.` : "No high-impact event today.",
-        `Trader's main instrument: ${c.instrument || "MNQ"}.`,
-      ].filter(Boolean).join("\n");
-      const r = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: { "content-type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01" },
-        body: JSON.stringify({
-          model: "claude-3-5-haiku-latest", max_tokens: 320,
-          system: "You are a futures day-trading strategist for funded (prop) traders. From today's market move and news, give a concise, actionable trade read: (1) directional bias, (2) which instruments are in play, (3) what to avoid, (4) event risk. 3-4 sentences, specific, second person. Use ONLY the data given; never invent levels or numbers. This is education, not financial advice.",
-          messages: [{ role: "user", content: prompt }],
-        }),
-      });
-      if (r.ok) { const j = await r.json(); const text = j?.content?.[0]?.text; if (text) return NextResponse.json({ source: "claude", text }); }
-    } catch { /* fall through */ }
+  if (aiEnabled() && rateAllow(clientIp(req))) {
+    const prompt = [
+      `Market today: S&P ${fp(c.spxPct)}, Nasdaq ${fp(c.ndxPct)}, VIX ${c.vix ?? "?"} (${c.tone || "n/a"}).`,
+      c.mover ? `Biggest mover: ${c.mover.label} ${fp(c.mover.chg)}.` : "",
+      c.headlines?.length ? `Headlines: ${c.headlines.slice(0, 5).join(" | ")}` : "",
+      c.event ? `High-impact event today: ${c.event.title} at ${c.event.time} UTC.` : "No high-impact event today.",
+      `Trader's main instrument: ${c.instrument || "MNQ"}.`,
+    ].filter(Boolean).join("\n");
+    const text = await openaiChat(
+      "You are a futures day-trading strategist for funded (prop) traders. From today's market move and news, give a concise, actionable trade read: (1) directional bias, (2) which instruments are in play, (3) what to avoid, (4) event risk. 3-4 sentences, specific, second person. Use ONLY the data given; never invent levels or numbers. Education, not financial advice.",
+      prompt, 320
+    );
+    if (text) return NextResponse.json({ source: "openai", text });
   }
   return NextResponse.json({ source: "composed", text: compose(c) });
 }
