@@ -24,6 +24,7 @@ import { MarketsTab } from "../../components/suite/MarketsTab";
 import { LiveFlowTab } from "../../components/suite/LiveFlowTab";
 import { ConnectTab } from "../../components/suite/ConnectTab";
 import { PreMortemTab } from "../../components/suite/PreMortemTab";
+import { GateTab } from "../../components/suite/GateTab";
 import { ExecutionTab } from "../../components/suite/ExecutionTab";
 import { SizingTab } from "../../components/suite/SizingTab";
 import { PortfolioTab } from "../../components/suite/PortfolioTab";
@@ -44,6 +45,7 @@ const TABS = [
   ["charts", "Charts", "chart"],
   ["risk", "Risk", "shield"],
   ["premortem", "Pre-Mortem", "alert"],
+  ["gate", "Pre-Trade Gate", "check"],
   ["insights", "Insights", "spark"],
   ["execution", "Execution", "target"],
   ["sizing", "Optimal Sizing", "calc"],
@@ -62,7 +64,7 @@ const TABS = [
 const GROUPS: { label: string; ids: string[] }[] = [
   { label: "Daily", ids: ["brief", "today", "connect"] },
   { label: "Markets", ids: ["markets", "flow", "charts", "news"] },
-  { label: "Risk & Edge", ids: ["risk", "premortem", "insights", "execution", "sizing", "portfolio", "journal", "score"] },
+  { label: "Risk & Edge", ids: ["risk", "premortem", "gate", "insights", "execution", "sizing", "portfolio", "journal", "score"] },
   { label: "Pass & Plan", ids: ["challenge", "simulator", "payout", "plan", "tools"] },
   { label: "AI", ids: ["coach"] },
 ];
@@ -185,6 +187,7 @@ export default function Suite() {
           {tab === "brief" && <Brief profile={profile} go={setTab} setProfile={setProfile} />}
           {tab === "risk" && <RiskTab profile={profile} setProfile={setProfile} />}
           {tab === "premortem" && <PreMortemTab profile={profile} setProfile={setProfile} go={setTab} />}
+          {tab === "gate" && <GateTab profile={profile} />}
           {tab === "insights" && <InsightsTab profile={profile} />}
           {tab === "execution" && <ExecutionTab profile={profile} setProfile={setProfile} go={setTab} />}
           {tab === "sizing" && <SizingTab profile={profile} />}
