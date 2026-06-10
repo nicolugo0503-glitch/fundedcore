@@ -12,15 +12,15 @@ const LP_CSS = `
   content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
   background:
     radial-gradient(1000px 520px at 50% -120px, rgba(16,163,127,.12), transparent 70%),
-    linear-gradient(rgba(255,255,255,.022) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,.022) 1px, transparent 1px);
+    linear-gradient(rgba(0,0,0,.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,.04) 1px, transparent 1px);
   background-size: 100% 100%, 56px 56px, 56px 56px;
 }
 .lp .grad-text {
-  background: linear-gradient(94deg, #EAF0F7 28%, #2BE3B0);
+  background: linear-gradient(94deg, #0D0D0D 18%, #10A37F);
   -webkit-background-clip: text; background-clip: text; color: transparent;
 }
-.lp .ticker-wrap { background: rgba(8,10,14,.92); }
+.lp .ticker-wrap { background: rgba(255,255,255,.85); }
 .lp .icon-tile {
   display: inline-flex; align-items: center; justify-content: center;
   width: 40px; height: 40px; border-radius: 11px; color: var(--acc);
@@ -36,29 +36,29 @@ const LP_CSS = `
 .lp .rv-in { opacity: 1; transform: none; }
 @media (prefers-reduced-motion: reduce){ .lp .floaty{animation:none} .lp .rv{opacity:1;transform:none;transition:none} }
 /* live terminal */
-.lp .lt-browser { box-shadow: 0 50px 120px -50px rgba(0,0,0,.9), 0 0 0 1px rgba(255,255,255,.04); }
-.lp .lt-live { display:inline-flex; align-items:center; gap:.4rem; font-size:.6rem; font-weight:700; letter-spacing:.12em; color:#2BE3B0; margin-left:auto; }
-.lp .lt-live-dot { width:6px; height:6px; border-radius:50%; background:#2BE3B0; box-shadow:0 0 0 0 rgba(43,227,176,.6); animation: ltpulse 1.6s infinite; }
-@keyframes ltpulse { 0%{box-shadow:0 0 0 0 rgba(43,227,176,.5)} 70%{box-shadow:0 0 0 7px rgba(43,227,176,0)} 100%{box-shadow:0 0 0 0 rgba(43,227,176,0)} }
+.lp .lt-browser { box-shadow: 0 40px 90px -45px rgba(0,0,0,.28), 0 0 0 1px rgba(0,0,0,.04); }
+.lp .lt-live { display:inline-flex; align-items:center; gap:.4rem; font-size:.6rem; font-weight:700; letter-spacing:.12em; color:#0a8f6e; margin-left:auto; }
+.lp .lt-live-dot { width:6px; height:6px; border-radius:50%; background:#10A37F; box-shadow:0 0 0 0 rgba(16,163,127,.6); animation: ltpulse 1.6s infinite; }
+@keyframes ltpulse { 0%{box-shadow:0 0 0 0 rgba(16,163,127,.5)} 70%{box-shadow:0 0 0 7px rgba(16,163,127,0)} 100%{box-shadow:0 0 0 0 rgba(16,163,127,0)} }
 .lp .lt-body { display:grid; grid-template-columns: 0.82fr 1.18fr; gap:0; }
 .lp .lt-left { padding:20px 22px; border-right:1px solid var(--line); }
 .lp .lt-right { padding:18px 20px; }
 .lp .lt-dtb { font-size:2.5rem; font-weight:800; line-height:1; margin-top:4px; letter-spacing:-.02em; font-variant-numeric: tabular-nums; }
-.lp .lt-meter { height:7px; border-radius:6px; background:rgba(255,255,255,.07); overflow:hidden; margin-top:12px; }
+.lp .lt-meter { height:7px; border-radius:6px; background:rgba(0,0,0,.07); overflow:hidden; margin-top:12px; }
 .lp .lt-meter-fill { height:100%; border-radius:6px; transition: width .25s linear, background .4s; }
 .lp .lt-stat-row { display:flex; gap:26px; margin-top:18px; }
 .lp .lt-eq { font-size:1.05rem; font-weight:700; color:var(--t1); }
 .lp .lt-guard { margin-top:18px; font-size:.72rem; font-weight:600; padding:.5rem .7rem; border-radius:9px; border:1px solid; transition:.3s; }
-.lp .lt-guard-ok { color:#2BE3B0; border-color:rgba(43,227,176,.3); background:rgba(43,227,176,.07); }
-.lp .lt-guard-warn { color:#FBBF24; border-color:rgba(251,191,36,.32); background:rgba(251,191,36,.08); }
-.lp .lt-guard-block { color:#F87171; border-color:rgba(248,113,113,.4); background:rgba(248,113,113,.1); animation: ltflash .6s ease-in-out 2; }
+.lp .lt-guard-ok { color:#0a8f6e; border-color:rgba(16,163,127,.3); background:rgba(16,163,127,.08); }
+.lp .lt-guard-warn { color:#B45309; border-color:rgba(217,119,6,.32); background:rgba(217,119,6,.08); }
+.lp .lt-guard-block { color:#DC2626; border-color:rgba(220,38,38,.4); background:rgba(220,38,38,.09); animation: ltflash .6s ease-in-out 2; }
 @keyframes ltflash { 50%{ background:rgba(248,113,113,.22); } }
 .lp .lt-chart-head { display:flex; justify-content:space-between; font-size:.6rem; letter-spacing:.1em; color:var(--t3); text-transform:uppercase; font-weight:600; margin-bottom:6px; }
 .lp .lt-svg { width:100%; height:150px; display:block; }
 .lp .lt-accts { margin-top:14px; display:flex; flex-direction:column; gap:8px; }
 .lp .lt-acct { display:flex; align-items:center; gap:10px; font-size:.7rem; }
 .lp .lt-acct-name { color:var(--t2); width:84px; flex-shrink:0; }
-.lp .lt-acct-bar { flex:1; height:6px; border-radius:5px; background:rgba(255,255,255,.06); overflow:hidden; }
+.lp .lt-acct-bar { flex:1; height:6px; border-radius:5px; background:rgba(0,0,0,.07); overflow:hidden; }
 .lp .lt-acct-bar > span { display:block; height:100%; border-radius:5px; transition:width .6s; }
 @media (max-width:720px){ .lp .lt-body{ grid-template-columns:1fr; } .lp .lt-left{ border-right:0; border-bottom:1px solid var(--line);} }
 
@@ -140,7 +140,7 @@ function Hero() {
         <div className="card px-5 py-4 w-[200px] text-left">
           <div className="lbl">Distance to breach</div>
           <div className="mono text-2xl font-bold" style={{ color: "#34D399" }}>$1,820</div>
-          <div className="h-1.5 rounded-full bg-white/[.08] mt-2 overflow-hidden"><div className="h-full w-[68%] rounded-full" style={{ background: "linear-gradient(90deg,#34D399,#22D3EE)" }} /></div>
+          <div className="h-1.5 rounded-full bg-black/[.07] mt-2 overflow-hidden"><div className="h-full w-[68%] rounded-full" style={{ background: "linear-gradient(90deg,#34D399,#22D3EE)" }} /></div>
         </div>
       </div>
       <div className="hidden lg:block absolute right-[-26px] top-64 floaty" style={{ ["--tilt" as any]: "4deg", animationDelay: "1.2s" }}>
@@ -296,7 +296,7 @@ function Economics() {
               ["× 25%", "FundedCore's cut"],
               ["= $1.25B", "annual revenue"],
             ].map(([a, b], i) => (
-              <div key={i} className={`flex items-center justify-between rounded-xl px-4 py-3 border ${i >= 4 ? "border-acc/40 bg-acc/[.07]" : "border-white/[.07] bg-white/[.02]"}`}>
+              <div key={i} className={`flex items-center justify-between rounded-xl px-4 py-3 border ${i >= 4 ? "border-acc/40 bg-acc/[.07]" : "border-black/[.07] bg-black/[.02]"}`}>
                 <span className="mono text-lg font-semibold">{a}</span>
                 <span className="text-[.82rem] text-t2">{b}</span>
               </div>
@@ -327,9 +327,9 @@ function Compare() {
       <SectionHead eyebrow="The difference" title="We're not a better challenge. We removed the challenge." />
       <div className="card overflow-hidden mt-9">
         <div className="grid grid-cols-3 text-sm">
-          <div className="p-4 text-t3 font-medium border-b border-white/[.07]"></div>
-          <div className="p-4 font-semibold text-t2 border-b border-white/[.07] border-l border-white/[.06]">Traditional prop firm</div>
-          <div className="p-4 font-semibold border-b border-white/[.07] border-l border-white/[.06] text-acc">FundedCore</div>
+          <div className="p-4 text-t3 font-medium border-b border-black/[.07]"></div>
+          <div className="p-4 font-semibold text-t2 border-b border-black/[.07] border-l border-black/[.06]">Traditional prop firm</div>
+          <div className="p-4 font-semibold border-b border-black/[.07] border-l border-black/[.06] text-acc">FundedCore</div>
           {rows.map((r, i) => (
             <Row key={i} cells={r} last={i === rows.length - 1} />
           ))}
@@ -343,12 +343,12 @@ function Compare() {
   );
 }
 function Row({ cells, last }: { cells: string[]; last: boolean }) {
-  const b = last ? "" : "border-b border-white/[.06]";
+  const b = last ? "" : "border-b border-black/[.06]";
   return (
     <>
       <div className={`p-4 text-t2 ${b}`}>{cells[0]}</div>
-      <div className={`p-4 text-t3 border-l border-white/[.06] ${b}`}>{cells[1]}</div>
-      <div className={`p-4 text-t1 border-l border-white/[.06] bg-acc/[.06] ${b}`}>{cells[2]}</div>
+      <div className={`p-4 text-t3 border-l border-black/[.06] ${b}`}>{cells[1]}</div>
+      <div className={`p-4 text-t1 border-l border-black/[.06] bg-acc/[.06] ${b}`}>{cells[2]}</div>
     </>
   );
 }

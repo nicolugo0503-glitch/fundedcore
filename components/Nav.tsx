@@ -23,7 +23,7 @@ export function Logo({ size = 26 }: { size?: number }) {
 
 export function Nav({ cta = true }: { cta?: boolean }) {
   return (
-    <header className="sticky top-0 z-30 backdrop-blur-md bg-bg/70 border-b border-white/[.07]">
+    <header className="sticky top-0 z-30 backdrop-blur-md bg-bg/70 border-b border-black/[.07]">
       <div className="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between">
         <Link href="/"><Logo /></Link>
         <nav className="hidden md:flex items-center gap-7 text-sm text-t2">
@@ -48,7 +48,7 @@ export function Nav({ cta = true }: { cta?: boolean }) {
 
 export function Footer() {
   return (
-    <footer className="relative z-10 border-t border-white/[.07] mt-24">
+    <footer className="relative z-10 border-t border-black/[.07] mt-24">
       <div className="max-w-6xl mx-auto px-5 py-10 flex flex-col md:flex-row gap-6 md:items-center justify-between text-sm text-t3">
         <div className="flex items-center gap-3"><Logo size={22} /></div>
         <p className="max-w-xl leading-relaxed">

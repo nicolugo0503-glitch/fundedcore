@@ -53,7 +53,7 @@ export function LiveTerminal() {
   const path = pts.map((p, i) => `${i === 0 ? "M" : "L"}${(i / (N - 1) * W).toFixed(1)},${(H - (p / max) * H).toFixed(1)}`).join(" ");
   const area = `${path} L${W},${H} L0,${H} Z`;
   const lastX = W, lastY = H - (pts[pts.length - 1] / max) * H;
-  const col = guard === "block" ? "#F87171" : guard === "warn" ? "#FBBF24" : "#2BE3B0";
+  const col = guard === "block" ? "#DC2626" : guard === "warn" ? "#D97706" : "#10A37F";
 
   return (
     <div className="lt-wrap mt-16 max-w-4xl mx-auto px-2">
@@ -72,7 +72,7 @@ export function LiveTerminal() {
             <div className="lt-meter"><div className="lt-meter-fill" style={{ width: `${Math.min(100, dtb / 11)}%`, background: col }} /></div>
             <div className="lt-stat-row">
               <div><div className="lbl">Equity</div><div className="mono lt-eq">+${equity.toLocaleString()}</div></div>
-              <div><div className="lbl">Trader score</div><div className="mono lt-eq" style={{ color: "#2BE3B0" }}>87 A</div></div>
+              <div><div className="lbl">Trader score</div><div className="mono lt-eq" style={{ color: "#10A37F" }}>87 A</div></div>
             </div>
             <div className={`lt-guard lt-guard-${guard}`}>
               {guard === "block" ? "⛔ GUARDRAIL — REDUCE OR STOP" : guard === "warn" ? "⚠ Buffer thin — size down" : "✓ Cleared — within limits"}
@@ -98,7 +98,7 @@ export function LiveTerminal() {
               </circle>
             </svg>
             <div className="lt-accts">
-              {[["Apex #1", 0.34, "#FBBF24"], ["TopStep XFA", 0.82, "#2BE3B0"], ["Apex Eval", 0.58, "#2BE3B0"]].map(([n, w, c]) => (
+              {[["Apex #1", 0.34, "#D97706"], ["TopStep XFA", 0.82, "#10A37F"], ["Apex Eval", 0.58, "#10A37F"]].map(([n, w, c]) => (
                 <div key={n as string} className="lt-acct">
                   <span className="lt-acct-name">{n}</span>
                   <span className="lt-acct-bar"><span style={{ width: `${(w as number) * 100}%`, background: c as string }} /></span>
