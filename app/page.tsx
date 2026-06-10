@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { Nav, Footer } from "../components/Nav";
 import { Ticker } from "../components/Ticker";
-import { HeroShot } from "../components/HeroShot";
+import { LiveTerminal } from "../components/LiveTerminal";
 import { ForceDark } from "../components/ForceDark";
+import { RevealOnScroll } from "../components/RevealOnScroll";
 import { Icon } from "../components/Icon";
 
 const LP_CSS = `
@@ -25,12 +26,49 @@ const LP_CSS = `
   width: 40px; height: 40px; border-radius: 11px; color: var(--acc);
   background: var(--acc-weak); border: 1px solid var(--line2);
 }
+
+/* floating cards actually float */
+@keyframes lpfloat { 0%,100%{ transform: translateY(0) rotate(var(--tilt,0deg)); } 50%{ transform: translateY(-12px) rotate(var(--tilt,0deg)); } }
+.lp .floaty { animation: lpfloat 7s ease-in-out infinite; }
+.lp .floaty:nth-of-type(2) { animation-duration: 8.5s; }
+/* scroll choreography */
+.lp .rv { opacity: 0; transform: translateY(22px); transition: opacity .8s cubic-bezier(.2,.7,.2,1), transform .8s cubic-bezier(.2,.7,.2,1); }
+.lp .rv-in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce){ .lp .floaty{animation:none} .lp .rv{opacity:1;transform:none;transition:none} }
+/* live terminal */
+.lp .lt-browser { box-shadow: 0 50px 120px -50px rgba(0,0,0,.9), 0 0 0 1px rgba(255,255,255,.04); }
+.lp .lt-live { display:inline-flex; align-items:center; gap:.4rem; font-size:.6rem; font-weight:700; letter-spacing:.12em; color:#2BE3B0; margin-left:auto; }
+.lp .lt-live-dot { width:6px; height:6px; border-radius:50%; background:#2BE3B0; box-shadow:0 0 0 0 rgba(43,227,176,.6); animation: ltpulse 1.6s infinite; }
+@keyframes ltpulse { 0%{box-shadow:0 0 0 0 rgba(43,227,176,.5)} 70%{box-shadow:0 0 0 7px rgba(43,227,176,0)} 100%{box-shadow:0 0 0 0 rgba(43,227,176,0)} }
+.lp .lt-body { display:grid; grid-template-columns: 0.82fr 1.18fr; gap:0; }
+.lp .lt-left { padding:20px 22px; border-right:1px solid var(--line); }
+.lp .lt-right { padding:18px 20px; }
+.lp .lt-dtb { font-size:2.5rem; font-weight:800; line-height:1; margin-top:4px; letter-spacing:-.02em; font-variant-numeric: tabular-nums; }
+.lp .lt-meter { height:7px; border-radius:6px; background:rgba(255,255,255,.07); overflow:hidden; margin-top:12px; }
+.lp .lt-meter-fill { height:100%; border-radius:6px; transition: width .25s linear, background .4s; }
+.lp .lt-stat-row { display:flex; gap:26px; margin-top:18px; }
+.lp .lt-eq { font-size:1.05rem; font-weight:700; color:var(--t1); }
+.lp .lt-guard { margin-top:18px; font-size:.72rem; font-weight:600; padding:.5rem .7rem; border-radius:9px; border:1px solid; transition:.3s; }
+.lp .lt-guard-ok { color:#2BE3B0; border-color:rgba(43,227,176,.3); background:rgba(43,227,176,.07); }
+.lp .lt-guard-warn { color:#FBBF24; border-color:rgba(251,191,36,.32); background:rgba(251,191,36,.08); }
+.lp .lt-guard-block { color:#F87171; border-color:rgba(248,113,113,.4); background:rgba(248,113,113,.1); animation: ltflash .6s ease-in-out 2; }
+@keyframes ltflash { 50%{ background:rgba(248,113,113,.22); } }
+.lp .lt-chart-head { display:flex; justify-content:space-between; font-size:.6rem; letter-spacing:.1em; color:var(--t3); text-transform:uppercase; font-weight:600; margin-bottom:6px; }
+.lp .lt-svg { width:100%; height:150px; display:block; }
+.lp .lt-accts { margin-top:14px; display:flex; flex-direction:column; gap:8px; }
+.lp .lt-acct { display:flex; align-items:center; gap:10px; font-size:.7rem; }
+.lp .lt-acct-name { color:var(--t2); width:84px; flex-shrink:0; }
+.lp .lt-acct-bar { flex:1; height:6px; border-radius:5px; background:rgba(255,255,255,.06); overflow:hidden; }
+.lp .lt-acct-bar > span { display:block; height:100%; border-radius:5px; transition:width .6s; }
+@media (max-width:720px){ .lp .lt-body{ grid-template-columns:1fr; } .lp .lt-left{ border-right:0; border-bottom:1px solid var(--line);} }
+
 `;
 
 export default function Home() {
   return (
     <div className="lp">
       <ForceDark />
+      <RevealOnScroll />
       <style dangerouslySetInnerHTML={{ __html: LP_CSS }} />
       <Nav />
       <Ticker />
@@ -96,7 +134,7 @@ function Hero() {
       </div>
       <div className="mt-5 text-xs text-t3">Free · no card · upload your CSV and see your edge in a minute.</div>
 
-      <HeroShot />
+      <LiveTerminal />
 
       <div className="hidden lg:block absolute left-[-30px] top-44 floaty" style={{ ["--tilt" as any]: "-5deg" }}>
         <div className="card px-5 py-4 w-[200px] text-left">
