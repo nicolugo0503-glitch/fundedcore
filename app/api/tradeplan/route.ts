@@ -1,4 +1,4 @@
-// Today's news-driven trade read. Claude when a key exists, else a deterministic
+// Today's news-driven trade read. OpenAI when available, else a deterministic
 // read composed from the real market move + headlines + event risk.
 import { NextResponse } from "next/server";
 import { openaiChat, aiEnabled, rateAllow, clientIp } from "../../../lib/openai";

@@ -68,7 +68,6 @@ export function CoachTab({ profile }: { profile: Profile }) {
           <button className="btn btn-primary" onClick={() => send(input)} disabled={busy}>Send</button>
         </div>
       </div>
-      {!profile.settings.anthropicKey && <p className="text-[.72rem] text-t3">Tip: add your Anthropic API key in Settings for fully AI-personalized coaching. Without it you get solid rule-based guidance.</p>}
     </div>
   );
 }

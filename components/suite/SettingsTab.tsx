@@ -54,11 +54,9 @@ export function SettingsTab({ profile, setProfile }: { profile: Profile; setProf
         </div>
       </section>
 
-      <section className="card p-5 space-y-3">
+      <section className="card p-5 space-y-2">
         <h3 className="font-semibold">AI Coach</h3>
-        <label className="block"><span className="lbl">Anthropic API key (optional, stored only in your browser)</span>
-          <input className="inp" type="password" value={profile.settings.anthropicKey || ""} onChange={(e) => set("anthropicKey", e.target.value)} placeholder="sk-ant-…" /></label>
-        <p className="text-[.74rem] text-t3">Without a key, the coach uses built-in rule-based guidance. With one, it answers with Claude, grounded in your stats.</p>
+        <p className="text-[.78rem] text-t2">AI coaching is built in — no setup or API key needed. The coach, briefing and reads are grounded in your real stats.</p>
       </section>
 
       <section className="card p-5">

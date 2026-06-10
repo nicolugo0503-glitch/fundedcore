@@ -1,4 +1,4 @@
-// Daily AI briefing. Uses Anthropic when a key exists (env or header), else
+// Daily AI briefing. Uses OpenAI (operator key) when available, else
 // composes a personalized briefing from the structured context (never generic).
 import { NextResponse } from "next/server";
 import { openaiChat, aiEnabled, rateAllow, clientIp } from "../../../lib/openai";
