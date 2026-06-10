@@ -173,7 +173,7 @@ export function computeFundedScore(
 
   // ── Breach probability via bootstrap of daily P&L vs the firm floor ──
   let breach: BreachEstimate | null = null;
-  if (account && nets.length >= 5) {
+  if (account && nets.length >= 3) {
     const firm = firmFor(account);
     const paths = 5000;
     let breached = 0;

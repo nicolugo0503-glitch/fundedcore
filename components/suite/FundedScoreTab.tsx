@@ -88,7 +88,9 @@ export function FundedScoreTab({ profile }: { profile: Profile }) {
           ) : (
             <div className="text-center text-t3 py-8">
               <div className="lbl mb-2">Breach probability</div>
-              Add a funded account to simulate breach odds against its real drawdown rules.
+              {acc
+                ? `Need at least 3 trading days to simulate breach odds — you have ${fs.sampleDays}. Keep logging and this fills in.`
+                : "Add a funded account to simulate breach odds against its real drawdown rules."}
               <div className="mt-3">
                 {profile.accounts.length > 0 && (
                   <select className="inp !w-auto" value={acc?.id || ""} onChange={(e) => setAccId(e.target.value)}>
