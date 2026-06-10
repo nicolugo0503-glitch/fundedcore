@@ -53,22 +53,22 @@ function Hero() {
   return (
     <section className="pt-20 pb-16 text-center relative">
       <div className="inline-flex items-center gap-2 chip mb-6">
-        <span className="w-1.5 h-1.5 rounded-full bg-grn pulse" /> Free private beta · founding traders wanted
+        <span className="w-1.5 h-1.5 rounded-full bg-grn pulse" /> The complete command center for funded traders
       </div>
       <h1 className="text-[2.7rem] md:text-[4rem] font-bold leading-[1.04] tracking-tight max-w-4xl mx-auto">
         Every tool a funded trader needs.<br className="hidden md:block" />
-        <span className="grad-text">One app. Free while we build it with you.</span>
+        <span className="grad-text">One app. Completely free.</span>
       </h1>
       <p className="mt-6 text-lg text-t2 max-w-2xl mx-auto leading-relaxed">
         Risk cockpit, pre-trade guardrail, live news, leak-finder, AI coach, challenge tracker, and your Trader Score —
         personalized to you, in one place. Before every trade, you see <strong className="text-t1">everything</strong>.
-        It's <strong className="text-t1">free right now</strong> — we're onboarding our first funded traders to use it on real trades and tell us what's broken. Come shape it.
+        It's <strong className="text-t1">free</strong> — upload your trades and see your real edge and your Distance to Breach before you risk another dollar.
       </p>
       <div className="mt-9 flex items-center justify-center gap-3 flex-wrap">
         <Link href="/suite" className="btn btn-primary text-base !px-7 !py-3.5">Start free →</Link>
         <Link href="/live" className="btn btn-ghost text-base !px-6 !py-3.5">Watch it live</Link>
       </div>
-      <div className="mt-5 text-xs text-t3">Free · no card · early access — upload your CSV and see your edge in a minute.</div>
+      <div className="mt-5 text-xs text-t3">Free · no card · upload your CSV and see your edge in a minute.</div>
 
       <HeroShot />
 
@@ -96,7 +96,7 @@ function Hero() {
       <div className="mt-14 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
         {[
           ["8", "tools in one app"],
-          ["Free", "while in beta"],
+          ["Free", "full access"],
           ["13+", "firm rule-sets built in"],
           ["0", "tabs you'll miss"],
         ].map(([n, l]) => (
@@ -293,12 +293,12 @@ function Pricing() {
     <section className="py-16">
       <div className="max-w-xl mx-auto card p-8 text-center" style={{ borderColor: "rgba(59,130,246,.35)" }}>
         <div className="eyebrow">The deal</div>
-        <h2 className="text-3xl font-bold mt-2">Free<span className="text-lg text-t2"> · private beta</span></h2>
-        <p className="text-t2 text-sm mt-1">Every tool, free while we're in beta. Founding testers shape the product — and get looked after when paid plans land.</p>
+        <h2 className="text-3xl font-bold mt-2">Free<span className="text-lg text-t2"> · every tool</span></h2>
+        <p className="text-t2 text-sm mt-1">Every tool, completely free — risk cockpit, pre-trade guardrail, AI coach, your Trader Score and Distance to Breach. No card required.</p>
         <ul className="text-left mt-6 grid sm:grid-cols-2 gap-y-2 gap-x-4">
           {inc.map((x) => <li key={x} className="text-[.86rem] text-t2 flex gap-2"><span className="text-grn">✓</span>{x}</li>)}
         </ul>
-        <Link href="/suite" className="btn btn-primary w-full mt-7">Join the free beta →</Link>
+        <Link href="/suite" className="btn btn-primary w-full mt-7">Start free →</Link>
       </div>
     </section>
   );
@@ -306,7 +306,7 @@ function Pricing() {
 
 function Faq() {
   const qs = [
-    ["Is it really free?", "Yes — it's completely free during our private beta. No card, no fee. We're onboarding our first funded traders to use it for real; in exchange we want your honest feedback on what works and what's rough. It's early, so expect a few sharp edges — tell us and we'll fix them fast."],
+    ["Is it really free?", "Yes — completely free. No card, no fee, full access to every tool. Upload your trade history, add your funded account, and see your edge and your Distance to Breach in under a minute."],
     ["How do you make money if there's no challenge fee?", "We take a cut (25%, less for top scores) of the profits traders make on our capital. We win only when our traders win — which is why our incentive is to fund people who can actually trade, not to sell failures."],
     ["What data do I need to upload?", "A trade-history CSV with, at minimum, a profit/loss column and ideally dates and position sizes. Most broker and journal exports work as-is — our parser maps the columns automatically. You can also try a sample trader first."],
     ["What if I get declined?", "You see exactly why — every flag, every metric. Fix it, log more trades, and re-submit. There's no limit and no fee. A decline is feedback, not a paywall."],
@@ -338,8 +338,8 @@ function CtaBand() {
           <h2 className="text-3xl md:text-[2.6rem] font-bold leading-tight max-w-2xl mx-auto">
             Stop trading one bad click away from a blown account.
           </h2>
-          <p className="text-t2 mt-4 max-w-xl mx-auto">Free private beta. Upload your trade history, add your funded account, and see your edge and your Distance to Breach in under a minute. We just want your honest feedback.</p>
-          <Link href="/suite" className="btn btn-primary text-base !px-8 !py-4 mt-8">Join the free beta →</Link>
+          <p className="text-t2 mt-4 max-w-xl mx-auto">Free. Upload your trade history, add your funded account, and see your edge and your Distance to Breach in under a minute.</p>
+          <Link href="/suite" className="btn btn-primary text-base !px-8 !py-4 mt-8">Start free →</Link>
         </div>
       </div>
     </section>
