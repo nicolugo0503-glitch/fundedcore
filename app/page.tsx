@@ -2,10 +2,36 @@ import Link from "next/link";
 import { Nav, Footer } from "../components/Nav";
 import { Ticker } from "../components/Ticker";
 import { HeroShot } from "../components/HeroShot";
+import { ForceDark } from "../components/ForceDark";
+import { Icon } from "../components/Icon";
+
+const LP_CSS = `
+.lp { position: relative; }
+.lp::before {
+  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(1000px 520px at 50% -120px, rgba(16,163,127,.12), transparent 70%),
+    linear-gradient(rgba(255,255,255,.022) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.022) 1px, transparent 1px);
+  background-size: 100% 100%, 56px 56px, 56px 56px;
+}
+.lp .grad-text {
+  background: linear-gradient(94deg, #EAF0F7 28%, #2BE3B0);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.lp .ticker-wrap { background: rgba(8,10,14,.92); }
+.lp .icon-tile {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 40px; height: 40px; border-radius: 11px; color: var(--acc);
+  background: var(--acc-weak); border: 1px solid var(--line2);
+}
+`;
 
 export default function Home() {
   return (
-    <>
+    <div className="lp">
+      <ForceDark />
+      <style dangerouslySetInnerHTML={{ __html: LP_CSS }} />
       <Nav />
       <Ticker />
       <main className="max-w-6xl mx-auto px-5">
@@ -21,26 +47,26 @@ export default function Home() {
         <CtaBand />
       </main>
       <Footer />
-    </>
+    </div>
   );
 }
 
 function GuardianBand() {
-  const cards = [
-    ["Risk Cockpit", "Every funded account on one screen, with live Distance to Breach and status across all your firms.", "/cockpit", "Open cockpit →"],
-    ["Pre-trade guardrail", "Before you click buy: the largest size you can take right now without breaching. APPROVE, REDUCE, or BLOCK.", "/cockpit", "Try the guardrail →"],
-    ["Live demo", "Watch the Guardian track a simulated account tick by tick — and scream before it breaches.", "/live", "Watch it live →"],
+  const cards: [string, string, string, string, string][] = [
+    ["grid", "Risk Cockpit", "Every funded account on one screen, with live Distance to Breach and status across all your firms.", "/cockpit", "Open cockpit"],
+    ["shield", "Pre-trade guardrail", "Before you click buy: the largest size you can take right now without breaching. APPROVE, REDUCE, or BLOCK.", "/cockpit", "Try the guardrail"],
+    ["bolt", "Live demo", "Watch the Guardian track a simulated account tick by tick — and scream before it breaches.", "/live", "Watch it live"],
   ];
   return (
     <section className="py-12">
       <div className="grid md:grid-cols-3 gap-5">
-        {cards.map(([t, d, href, cta], i) => (
+        {cards.map(([ic, t, d, href, cta]) => (
           <Link key={t} href={href} className="card card-hover p-6 block group">
-            <div className="ring-num mb-4">{String(i + 1).padStart(2, "0")}</div>
+            <span className="icon-tile mb-4"><Icon name={ic} size={19} /></span>
             <h3 className="font-semibold text-lg">{t}</h3>
             <p className="text-[.88rem] text-t2 mt-2 leading-relaxed">{d}</p>
             <div className="text-acc text-sm font-medium mt-4 inline-flex items-center gap-1.5">
-              {cta.replace(" →", "")}<span className="transition-transform group-hover:translate-x-1.5">→</span>
+              {cta}<span className="transition-transform group-hover:translate-x-1.5">→</span>
             </div>
           </Link>
         ))}
@@ -53,16 +79,16 @@ function Hero() {
   return (
     <section className="pt-20 pb-16 text-center relative">
       <div className="inline-flex items-center gap-2 chip mb-6">
-        <span className="w-1.5 h-1.5 rounded-full bg-grn pulse" /> The complete command center for funded traders
+        <span className="w-1.5 h-1.5 rounded-full bg-grn pulse" /> The command center for funded futures traders
       </div>
       <h1 className="text-[2.7rem] md:text-[4rem] font-bold leading-[1.04] tracking-tight max-w-4xl mx-auto">
         Every tool a funded trader needs.<br className="hidden md:block" />
-        <span className="grad-text">One app. Completely free.</span>
+        <span className="grad-text">One terminal. Completely free.</span>
       </h1>
       <p className="mt-6 text-lg text-t2 max-w-2xl mx-auto leading-relaxed">
-        Risk cockpit, pre-trade guardrail, live news, leak-finder, AI coach, challenge tracker, and your Trader Score —
+        Risk cockpit, pre-trade guardrail, live news, leak-finder, AI coach, and your Trader Score —
         personalized to you, in one place. Before every trade, you see <strong className="text-t1">everything</strong>.
-        It's <strong className="text-t1">free</strong> — upload your trades and see your real edge and your Distance to Breach before you risk another dollar.
+        It&apos;s <strong className="text-t1">free</strong> — upload your trades and see your real edge and your Distance to Breach before you risk another dollar.
       </p>
       <div className="mt-9 flex items-center justify-center gap-3 flex-wrap">
         <Link href="/suite" className="btn btn-primary text-base !px-7 !py-3.5">Start free →</Link>
@@ -72,12 +98,11 @@ function Hero() {
 
       <HeroShot />
 
-      {/* floating cockpit panels */}
       <div className="hidden lg:block absolute left-[-30px] top-44 floaty" style={{ ["--tilt" as any]: "-5deg" }}>
         <div className="card px-5 py-4 w-[200px] text-left">
           <div className="lbl">Distance to breach</div>
           <div className="mono text-2xl font-bold" style={{ color: "#34D399" }}>$1,820</div>
-          <div className="h-1.5 rounded-full bg-black/[.07] mt-2 overflow-hidden"><div className="h-full w-[68%] rounded-full" style={{ background: "linear-gradient(90deg,#34D399,#22D3EE)" }} /></div>
+          <div className="h-1.5 rounded-full bg-white/[.08] mt-2 overflow-hidden"><div className="h-full w-[68%] rounded-full" style={{ background: "linear-gradient(90deg,#34D399,#22D3EE)" }} /></div>
         </div>
       </div>
       <div className="hidden lg:block absolute right-[-26px] top-64 floaty" style={{ ["--tilt" as any]: "4deg", animationDelay: "1.2s" }}>
@@ -95,7 +120,7 @@ function Hero() {
 
       <div className="mt-14 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
         {[
-          ["8", "tools in one app"],
+          ["8", "tools in one terminal"],
           ["Free", "full access"],
           ["13+", "firm rule-sets built in"],
           ["0", "tabs you'll miss"],
@@ -120,7 +145,7 @@ function Problem() {
         </h2>
         <div className="mt-6 grid md:grid-cols-3 gap-5 text-[.92rem] text-t2 leading-relaxed">
           <p>
-            Traditional firms charge <strong className="text-t1">$200–$1,000</strong> for an
+            Traditional firms charge <strong className="text-t1">$200&ndash;$1,000</strong> for an
             evaluation, then layer on profit targets, trailing drawdowns, and consistency rules that
             the overwhelming majority of accounts never clear.
           </p>
@@ -141,19 +166,22 @@ function Problem() {
 }
 
 function How() {
-  const steps = [
-    ["01", "Connect your accounts", "Add every funded account across every firm. The cockpit knows each firm's exact drawdown and daily-loss rules out of the box."],
-    ["02", "See your Distance to Breach", "Live, per account: how much room you have left before the account dies — and the largest size you can safely take right now."],
-    ["03", "Know your edge", "Every trade builds your Trader Score — a transparent read on whether your edge is real, consistent, and worth scaling."],
+  const steps: [string, string, string, string][] = [
+    ["repeat", "01", "Connect your accounts", "Add every funded account across every firm. The cockpit knows each firm's exact drawdown and daily-loss rules out of the box."],
+    ["shield", "02", "See your Distance to Breach", "Live, per account: how much room you have left before the account dies — and the largest size you can safely take right now."],
+    ["spark", "03", "Know your edge", "Every trade builds your Trader Score — a transparent read on whether your edge is real, consistent, and worth scaling."],
   ];
   return (
     <section id="how" className="py-16">
       <SectionHead eyebrow="How it works" title="Three things, one job: keep your account alive." />
       <div className="grid md:grid-cols-3 gap-5 mt-9">
-        {steps.map(([n, t, d]) => (
+        {steps.map(([ic, n, t, d]) => (
           <div key={n} className="card card-hover p-6">
-            <div className="mono text-acc text-sm font-semibold">{n}</div>
-            <h3 className="text-lg font-semibold mt-3">{t}</h3>
+            <div className="flex items-center justify-between">
+              <span className="icon-tile"><Icon name={ic} size={18} /></span>
+              <span className="mono text-t3 text-sm font-semibold">{n}</span>
+            </div>
+            <h3 className="text-lg font-semibold mt-4">{t}</h3>
             <p className="text-[.88rem] text-t2 mt-2 leading-relaxed">{d}</p>
           </div>
         ))}
@@ -163,11 +191,11 @@ function How() {
 }
 
 function ScoreSection() {
-  const dims = [
-    ["Edge Quality", "Is the edge real and statistically credible? Profit factor, expectancy, and the t-stat that says it isn't just luck.", "#3B82F6"],
-    ["Consistency", "Broad-based returns vs. one lucky day. Best-day concentration, winning-day rate, equity-curve smoothness.", "#8B5CF6"],
-    ["Discipline", "Behavioral control. Stable bet sizing, no revenge sizing after losses, no escalation inside losing streaks.", "#10B981"],
-    ["Drawdown Control", "How you handle pain. Max drawdown depth, recovery factor, and how long you stay underwater.", "#F59E0B"],
+  const dims: [string, string, string][] = [
+    ["spark", "Edge Quality", "Is the edge real and statistically credible? Profit factor, expectancy, and the t-stat that says it isn't just luck."],
+    ["chart", "Consistency", "Broad-based returns vs. one lucky day. Best-day concentration, winning-day rate, equity-curve smoothness."],
+    ["shield", "Discipline", "Behavioral control. Stable bet sizing, no revenge sizing after losses, no escalation inside losing streaks."],
+    ["gauge", "Drawdown Control", "How you handle pain. Max drawdown depth, recovery factor, and how long you stay underwater."],
   ];
   return (
     <section id="score" className="py-16">
@@ -177,9 +205,9 @@ function ScoreSection() {
         sub="Not win rate. Not risk-reward. A behavioral + statistical fingerprint of your edge — the foundation every funding decision is built on. Fully transparent: you see every metric that moved your number."
       />
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 mt-9">
-        {dims.map(([t, d, c]) => (
+        {dims.map(([ic, t, d]) => (
           <div key={t} className="card card-hover p-6">
-            <span className="inline-block w-9 h-9 rounded-lg mb-4" style={{ background: "var(--acc-weak)", border: "1px solid var(--line2)" }} />
+            <span className="icon-tile mb-4"><Icon name={ic} size={19} /></span>
             <h3 className="font-semibold">{t}</h3>
             <p className="text-[.85rem] text-t2 mt-2 leading-relaxed">{d}</p>
           </div>
@@ -204,7 +232,7 @@ function Economics() {
             </h2>
             <p className="text-[.92rem] text-t2 mt-4 leading-relaxed">
               Each trader who connects their history trains the model that decides who gets funded.
-              Better data → sharper underwriting → better traders funded → more institutional capital →
+              Better data &rarr; sharper underwriting &rarr; better traders funded &rarr; more institutional capital &rarr;
               more traders. The data asset compounds — and it&apos;s the moat.
             </p>
             <ol className="mt-6 space-y-3">
@@ -230,7 +258,7 @@ function Economics() {
               ["× 25%", "FundedCore's cut"],
               ["= $1.25B", "annual revenue"],
             ].map(([a, b], i) => (
-              <div key={i} className={`flex items-center justify-between rounded-xl px-4 py-3 border ${i >= 4 ? "border-acc/40 bg-acc/[.07]" : "border-black/[.06] bg-black/[.02]"}`}>
+              <div key={i} className={`flex items-center justify-between rounded-xl px-4 py-3 border ${i >= 4 ? "border-acc/40 bg-acc/[.07]" : "border-white/[.07] bg-white/[.02]"}`}>
                 <span className="mono text-lg font-semibold">{a}</span>
                 <span className="text-[.82rem] text-t2">{b}</span>
               </div>
@@ -261,9 +289,9 @@ function Compare() {
       <SectionHead eyebrow="The difference" title="We're not a better challenge. We removed the challenge." />
       <div className="card overflow-hidden mt-9">
         <div className="grid grid-cols-3 text-sm">
-          <div className="p-4 text-t3 font-medium border-b border-black/[.07]"></div>
-          <div className="p-4 font-semibold text-t2 border-b border-black/[.07] border-l border-black/[.05]">Traditional prop firm</div>
-          <div className="p-4 font-semibold border-b border-black/[.07] border-l border-black/[.05] text-acc">FundedCore</div>
+          <div className="p-4 text-t3 font-medium border-b border-white/[.07]"></div>
+          <div className="p-4 font-semibold text-t2 border-b border-white/[.07] border-l border-white/[.06]">Traditional prop firm</div>
+          <div className="p-4 font-semibold border-b border-white/[.07] border-l border-white/[.06] text-acc">FundedCore</div>
           {rows.map((r, i) => (
             <Row key={i} cells={r} last={i === rows.length - 1} />
           ))}
@@ -277,12 +305,12 @@ function Compare() {
   );
 }
 function Row({ cells, last }: { cells: string[]; last: boolean }) {
-  const b = last ? "" : "border-b border-black/[.05]";
+  const b = last ? "" : "border-b border-white/[.06]";
   return (
     <>
       <div className={`p-4 text-t2 ${b}`}>{cells[0]}</div>
-      <div className={`p-4 text-t3 border-l border-black/[.05] ${b}`}>{cells[1]}</div>
-      <div className={`p-4 text-t1 border-l border-black/[.05] bg-acc/[.04] ${b}`}>{cells[2]}</div>
+      <div className={`p-4 text-t3 border-l border-white/[.06] ${b}`}>{cells[1]}</div>
+      <div className={`p-4 text-t1 border-l border-white/[.06] bg-acc/[.06] ${b}`}>{cells[2]}</div>
     </>
   );
 }
@@ -291,7 +319,7 @@ function Pricing() {
   const inc = ["Risk cockpit + Distance to Breach", "Pre-trade guardrail (max safe size)", "Live high-impact news + no-trade windows", "Leak-finder (what's costing you)", "AI coach grounded in your data", "Challenge / pass tracker", "Trader Score + journal", "Personalized daily brief"];
   return (
     <section className="py-16">
-      <div className="max-w-xl mx-auto card p-8 text-center" style={{ borderColor: "rgba(59,130,246,.35)" }}>
+      <div className="max-w-xl mx-auto card p-8 text-center" style={{ borderColor: "rgba(16,163,127,.4)" }}>
         <div className="eyebrow">The deal</div>
         <h2 className="text-3xl font-bold mt-2">Free<span className="text-lg text-t2"> · every tool</span></h2>
         <p className="text-t2 text-sm mt-1">Every tool, completely free — risk cockpit, pre-trade guardrail, AI coach, your Trader Score and Distance to Breach. No card required.</p>
@@ -333,7 +361,7 @@ function CtaBand() {
   return (
     <section className="py-16">
       <div className="card p-10 md:p-14 text-center relative overflow-hidden">
-        <div className="glow" style={{ width: 500, height: 500, background: "radial-gradient(circle,rgba(59,130,246,.25),transparent 70%)", top: -200, left: "50%", transform: "translateX(-50%)", position: "absolute" }} />
+        <div style={{ width: 560, height: 560, background: "radial-gradient(circle,rgba(16,163,127,.22),transparent 70%)", top: -220, left: "50%", transform: "translateX(-50%)", position: "absolute", pointerEvents: "none" }} />
         <div className="relative">
           <h2 className="text-3xl md:text-[2.6rem] font-bold leading-tight max-w-2xl mx-auto">
             Stop trading one bad click away from a blown account.

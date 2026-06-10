@@ -17,7 +17,7 @@ export function HeroShot() {
           {/* app body */}
           <div className="grid grid-cols-[52px_1fr] md:grid-cols-[160px_1fr] text-left">
             {/* rail */}
-            <div className="border-r border-black/[.07] p-2 space-y-1">
+            <div className="border-r border-white/[.07] p-2 space-y-1">
               {["◎ Brief", "● Today", "◫ Charts", "🛡 Risk", "✦ Insights", "◷ News"].map((x, i) => (
                 <div key={x} className={`text-[.68rem] px-2 py-1.5 rounded-lg truncate ${i === 0 ? "text-white bg-gradient-to-r from-[#5B8CFF26] to-[#8B5CF61a] border border-[#5B8CFF45]" : "text-[#8B9AB8]"}`}>
                   <span className="hidden md:inline">{x}</span><span className="md:hidden">{x.slice(0, 1)}</span>
@@ -39,7 +39,7 @@ export function HeroShot() {
               {/* gauges row */}
               <div className="grid grid-cols-3 gap-3">
                 {/* DTB gauge */}
-                <div className="rounded-xl border border-black/[.08] bg-black/[.03] p-3 flex flex-col items-center">
+                <div className="rounded-xl border border-white/[.08] bg-white/[.03] p-3 flex flex-col items-center">
                   <svg width="86" height="60" viewBox="0 0 100 64">
                     <path d="M10 58 A 42 42 0 1 1 90 58" fill="none" stroke="rgba(148,163,184,.15)" strokeWidth="9" strokeLinecap="round" />
                     <path d="M10 58 A 42 42 0 1 1 90 58" fill="none" stroke="url(#hg)" strokeWidth="9" strokeLinecap="round" strokeDasharray="132 200" />
@@ -49,7 +49,7 @@ export function HeroShot() {
                   <div className="text-[.58rem] uppercase tracking-wider text-[#7C8BA8]">distance to breach</div>
                 </div>
                 {/* equity spark */}
-                <div className="rounded-xl border border-black/[.08] bg-black/[.03] p-3 col-span-2">
+                <div className="rounded-xl border border-white/[.08] bg-white/[.03] p-3 col-span-2">
                   <div className="flex justify-between text-[.6rem] text-[#7C8BA8] uppercase tracking-wider"><span>equity</span><span style={{ color: "#34D399" }}>+$2,640</span></div>
                   <svg width="100%" height="46" viewBox="0 0 300 46" preserveAspectRatio="none">
                     <defs><linearGradient id="he" x1="0" y1="0" x2="0" y2="1"><stop stopColor="#34D399" stopOpacity=".3" /><stop offset="1" stopColor="#34D399" stopOpacity="0" /></linearGradient></defs>
@@ -62,10 +62,10 @@ export function HeroShot() {
               {/* accounts row */}
               <div className="grid grid-cols-3 gap-3">
                 {[["Apex #1", "$820", "#FBBF24", 41], ["TopStep XFA", "$2,600", "#34D399", 86], ["Apex Eval", "$1,410", "#34D399", 64]].map(([n, d, c, w]) => (
-                  <div key={n as string} className="rounded-xl border border-black/[.08] bg-black/[.03] p-2.5">
+                  <div key={n as string} className="rounded-xl border border-white/[.08] bg-white/[.03] p-2.5">
                     <div className="flex justify-between items-center text-[.62rem]"><span className="text-white font-medium">{n}</span><span style={{ color: c as string }}>●</span></div>
                     <div className="mono text-[.8rem] font-bold mt-0.5" style={{ color: c as string }}>{d}</div>
-                    <div className="h-1 rounded-full bg-black/[.08] mt-1.5"><div className="h-full rounded-full" style={{ width: `${w}%`, background: c as string }} /></div>
+                    <div className="h-1 rounded-full bg-white/[.08] mt-1.5"><div className="h-full rounded-full" style={{ width: `${w}%`, background: c as string }} /></div>
                   </div>
                 ))}
               </div>
