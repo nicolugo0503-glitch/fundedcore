@@ -5,11 +5,32 @@ import { FIRMS, INSTRUMENTS } from "../../lib/firms";
 import { type Account } from "../../lib/risk";
 import { usd } from "../../lib/format";
 import { SuiteHeader } from "./ui";
+import { supabase } from "../../lib/cloud";
 
 const INSTR = Object.keys(INSTRUMENTS);
 let _id = 1; const nid = () => "acc" + _id++ + Date.now().toString(36);
 
 export function SettingsTab({ profile, setProfile }: { profile: Profile; setProfile: (p: Profile) => void }) {
+  const [deleting, setDeleting] = useState(false);
+  const [delMsg, setDelMsg] = useState<string | null>(null);
+
+  async function deleteAccount() {
+    if (!supabase) { setDelMsg("Cloud sync isn't enabled, so there's no account to delete."); return; }
+    if (!confirm("Permanently delete your FundedCore account and ALL synced data?\n\nYou'll be able to sign up again with this email. This cannot be undone.")) return;
+    setDeleting(true); setDelMsg(null);
+    try {
+      const { data } = await supabase.auth.getSession();
+      const token = data.session?.access_token;
+      if (!token) { setDelMsg("You're not signed in."); setDeleting(false); return; }
+      const res = await fetch("/api/account/delete", { method: "POST", headers: { Authorization: "Bearer " + token } });
+      const j = await res.json().catch(() => ({}));
+      if (!res.ok) { setDelMsg(j.error || "Couldn't delete the account."); setDeleting(false); return; }
+      clearProfile();
+      await supabase.auth.signOut();
+      window.location.reload();
+    } catch (e: any) { setDelMsg(e?.message || "Something went wrong."); setDeleting(false); }
+  }
+
   const firmKeys = Object.keys(FIRMS);
   const [firmKey, setFirmKey] = useState(firmKeys[0]);
   const [bal, setBal] = useState(FIRMS[firmKeys[0]].start);
@@ -68,6 +89,13 @@ export function SettingsTab({ profile, setProfile }: { profile: Profile; setProf
       <section className="card p-5">
         <h3 className="font-semibold mb-2">Reset</h3>
         <button className="btn btn-ghost text-red border-red/30" onClick={() => { if (confirm("Erase your profile, accounts, and trades from this browser?")) { clearProfile(); setProfile({ ...DEFAULT_PROFILE }); } }}>Erase my data</button>
+      </section>
+
+      <section className="card p-5" style={{ borderColor: "color-mix(in srgb, var(--red) 32%, transparent)" }}>
+        <h3 className="font-semibold mb-1" style={{ color: "var(--red)" }}>Delete account</h3>
+        <p className="text-[.8rem] text-t2 mb-3">Permanently delete your FundedCore account and everything synced to it. This frees up your email so you can sign up again. This can&apos;t be undone.</p>
+        <button className="btn btn-ghost text-red border-red/30" disabled={deleting} onClick={deleteAccount}>{deleting ? "Deleting\u2026" : "Delete my account permanently"}</button>
+        {delMsg && <p className="text-[.8rem] mt-2" style={{ color: "var(--red)" }}>{delMsg}</p>}
       </section>
     </div>
   );
