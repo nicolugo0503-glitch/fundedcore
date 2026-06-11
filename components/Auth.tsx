@@ -53,17 +53,29 @@ export function Auth() {
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ kind: "err" | "ok"; text: string } | null>(null);
 
+  function withTimeout<T>(p: Promise<T>, ms = 15000): Promise<T> {
+    return Promise.race([
+      p,
+      new Promise<T>((_, rej) => setTimeout(() => rej(new Error("Request timed out — the email service may be rate-limited. Wait a minute and try again.")), ms)),
+    ]);
+  }
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!supabase) return;
     setBusy(true); setMsg(null);
     try {
       if (mode === "up") {
-        const { data, error } = await supabase.auth.signUp({ email, password: pw });
+        const { data, error } = await withTimeout(supabase.auth.signUp({ email, password: pw }));
         if (error) throw error;
+        // Supabase obfuscates existing emails by returning a user with no identities.
+        if (data.user && (data.user.identities?.length ?? 0) === 0) {
+          setMsg({ kind: "err", text: "An account with this email already exists. Sign in instead, or delete it first." });
+          return;
+        }
         if (!data.session) setMsg({ kind: "ok", text: "Account created. Check your email to confirm, then sign in." });
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password: pw });
+        const { error } = await withTimeout(supabase.auth.signInWithPassword({ email, password: pw }));
         if (error) throw error;
       }
     } catch (err: any) {
