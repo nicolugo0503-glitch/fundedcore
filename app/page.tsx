@@ -12,15 +12,14 @@ const LP_CSS = `
   content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
   background:
     radial-gradient(1000px 520px at 50% -120px, rgba(16,163,127,.12), transparent 70%),
-    linear-gradient(rgba(0,0,0,.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,0,0,.04) 1px, transparent 1px);
+    linear-gradient(rgba(128,128,128,.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(128,128,128,.05) 1px, transparent 1px);
   background-size: 100% 100%, 56px 56px, 56px 56px;
 }
 .lp .grad-text {
-  background: linear-gradient(94deg, #0D0D0D 18%, #10A37F);
+  background: linear-gradient(94deg, var(--t1) 22%, var(--acc));
   -webkit-background-clip: text; background-clip: text; color: transparent;
 }
-.lp .ticker-wrap { background: rgba(255,255,255,.85); }
 .lp .icon-tile {
   display: inline-flex; align-items: center; justify-content: center;
   width: 40px; height: 40px; border-radius: 11px; color: var(--acc);
@@ -44,7 +43,7 @@ const LP_CSS = `
 .lp .lt-left { padding:20px 22px; border-right:1px solid var(--line); }
 .lp .lt-right { padding:18px 20px; }
 .lp .lt-dtb { font-size:2.5rem; font-weight:800; line-height:1; margin-top:4px; letter-spacing:-.02em; font-variant-numeric: tabular-nums; }
-.lp .lt-meter { height:7px; border-radius:6px; background:rgba(0,0,0,.07); overflow:hidden; margin-top:12px; }
+.lp .lt-meter { height:7px; border-radius:6px; background:rgba(128,128,128,.16); overflow:hidden; margin-top:12px; }
 .lp .lt-meter-fill { height:100%; border-radius:6px; transition: width .25s linear, background .4s; }
 .lp .lt-stat-row { display:flex; gap:26px; margin-top:18px; }
 .lp .lt-eq { font-size:1.05rem; font-weight:700; color:var(--t1); }
@@ -58,7 +57,7 @@ const LP_CSS = `
 .lp .lt-accts { margin-top:14px; display:flex; flex-direction:column; gap:8px; }
 .lp .lt-acct { display:flex; align-items:center; gap:10px; font-size:.7rem; }
 .lp .lt-acct-name { color:var(--t2); width:84px; flex-shrink:0; }
-.lp .lt-acct-bar { flex:1; height:6px; border-radius:5px; background:rgba(0,0,0,.07); overflow:hidden; }
+.lp .lt-acct-bar { flex:1; height:6px; border-radius:5px; background:rgba(128,128,128,.16); overflow:hidden; }
 .lp .lt-acct-bar > span { display:block; height:100%; border-radius:5px; transition:width .6s; }
 @media (max-width:720px){ .lp .lt-body{ grid-template-columns:1fr; } .lp .lt-left{ border-right:0; border-bottom:1px solid var(--line);} }
 
