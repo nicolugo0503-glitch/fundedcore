@@ -252,3 +252,9 @@ table.tbl tr:hover td { background: rgba(0,0,0,.025); }
 .grid-bg::before { content: ""; position: absolute; inset: -50%; background-image: linear-gradient(color-mix(in srgb, var(--acc) 7%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, var(--acc) 7%, transparent) 1px, transparent 1px); background-size: 46px 46px; mask-image: radial-gradient(60% 50% at 50% 40%, #000, transparent 75%); -webkit-mask-image: radial-gradient(60% 50% at 50% 40%, #000, transparent 75%); animation: pan 40s linear infinite; opacity: .5; }
 @keyframes pan { from { transform: translate(0,0); } to { transform: translate(46px,46px); } }
 @media (prefers-reduced-motion: reduce){ .grid-bg::before { animation: none; } }
+
+/* ── mobile: force-hide the desktop sidebar (overrides base .sidebar display) ── */
+@media (max-width: 767px){
+  .appframe { grid-template-columns: 1fr !important; }
+  .appframe > .sidebar { display: none !important; }
+}
