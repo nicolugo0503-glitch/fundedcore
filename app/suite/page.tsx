@@ -166,12 +166,12 @@ export default function Suite() {
       {/* MAIN */}
       <div className="min-w-0">
         <header className="topbar">
-          <div className="flex items-center gap-2.5">
-            <span className="md:hidden"><Logo size={20} /></span>
-            <h2 className="display text-[1.02rem] text-t1">{title}</h2>
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="hidden sm:inline-flex md:hidden shrink-0"><Logo size={20} /></span>
+            <h2 className="display text-[1.02rem] text-t1 truncate">{title}</h2>
           </div>
-          <div className="flex items-center gap-2.5">
-            <SessionClock />
+          <div className="flex items-center gap-2.5 shrink-0">
+            <span className="hidden md:flex items-center"><SessionClock /></span>
             <button onClick={() => { const e = new KeyboardEvent("keydown", { key: "k", metaKey: true }); window.dispatchEvent(e); }} className="hidden md:inline-flex items-center gap-1.5 chip hover:text-t1 transition" title="Command palette"><Icon name="spark" size={13} /> <span className="cmdk-kbd">⌘K</span></button>
             <ThemeToggle />
             {cloudEnabled && session && <button onClick={signOut} className="text-t3 hover:text-t1 transition text-sm hidden sm:block">Sign out</button>}
