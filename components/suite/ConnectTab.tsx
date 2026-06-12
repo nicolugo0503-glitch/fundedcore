@@ -140,7 +140,7 @@ export function ConnectTab({ profile }: { profile: Profile }) {
               ) : <div className="text-t3 text-sm">—</div>}
             </Panel>
             <Panel title="Open positions" icon={<Icon name="grid" />} className="lg:col-span-2">
-              {positions.length ? <table className="tbl"><thead><tr><th>Symbol</th><th>Net</th><th>Avg</th><th className="text-right">Open P&L</th></tr></thead><tbody>{positions.map((p, i) => <tr key={i}><td className="mono">{p.symbol}</td><td className="mono" style={{ color: p.net >= 0 ? "var(--grn)" : "var(--red)" }}>{p.net > 0 ? "+" : ""}{p.net}</td><td className="mono">{p.avgPrice.toFixed(2)}</td><td className="text-right mono" style={{ color: p.openPnl >= 0 ? "var(--grn)" : "var(--red)" }}>{usd(p.openPnl)}</td></tr>)}</tbody></table> : <div className="text-t3 text-sm py-3">Flat — no open positions.</div>}
+              {positions.length ? <div className="overflow-x-auto"><table className="tbl"><thead><tr><th>Symbol</th><th>Net</th><th>Avg</th><th className="text-right">Open P&L</th></tr></thead><tbody>{positions.map((p, i) => <tr key={i}><td className="mono">{p.symbol}</td><td className="mono" style={{ color: p.net >= 0 ? "var(--grn)" : "var(--red)" }}>{p.net > 0 ? "+" : ""}{p.net}</td><td className="mono">{p.avgPrice.toFixed(2)}</td><td className="text-right mono" style={{ color: p.openPnl >= 0 ? "var(--grn)" : "var(--red)" }}>{usd(p.openPnl)}</td></tr>)}</tbody></table></div> : <div className="text-t3 text-sm py-3">Flat — no open positions.</div>}
             </Panel>
           </div>
 

@@ -26,6 +26,7 @@ import { ConnectTab } from "../../components/suite/ConnectTab";
 import { PreMortemTab } from "../../components/suite/PreMortemTab";
 import { GateTab } from "../../components/suite/GateTab";
 import { GuardTab } from "../../components/suite/GuardTab";
+import { MobileNav } from "../../components/suite/MobileNav";
 import { FundedScoreTab } from "../../components/suite/FundedScoreTab";
 import { ExecutionTab } from "../../components/suite/ExecutionTab";
 import { SizingTab } from "../../components/suite/SizingTab";
@@ -139,6 +140,7 @@ export default function Suite() {
   return (
     <div className="appframe">
       <CommandPalette commands={commands} />
+      <MobileNav tab={tab} setTab={setTab} tabMap={TAB_MAP} groups={GROUPS} onExit={() => { window.location.href = "/"; }} onSignOut={signOut} canSignOut={!!(cloudEnabled && session)} userName={profile.name} />
       {/* SIDEBAR */}
       <aside className="sidebar">
         <div className="px-1.5 mb-3 hidden md:block"><Link href="/"><Logo size={22} /></Link></div>

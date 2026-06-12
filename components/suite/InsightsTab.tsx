@@ -78,6 +78,7 @@ function BucketTable({ title, buckets }: { title: string; buckets: Bucket[] }) {
   return (
     <div className="card p-5">
       <h3 className="font-semibold mb-3">{title}</h3>
+      <div className="overflow-x-auto">
       <table className="tbl">
         <thead><tr><th>Symbol</th><th>Trades</th><th>Win rate</th><th className="text-right">Net</th></tr></thead>
         <tbody>
@@ -89,6 +90,7 @@ function BucketTable({ title, buckets }: { title: string; buckets: Bucket[] }) {
           ))}
         </tbody>
       </table>
+      </div>
     </div>
   );
 }
