@@ -19,6 +19,7 @@ export type Profile = {
   checklist: string[];          // pre-session checklist items
   checklistDone: { date: string; done: number[] }; // today's checked items
   onboarded: boolean;
+  pro?: boolean;            // FundedCore Pro access (The Mirror, Your Edge)
 };
 
 const KEY = "fundedcore.profile.v1";

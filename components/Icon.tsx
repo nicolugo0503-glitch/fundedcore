@@ -19,6 +19,7 @@ const P: Record<string, string> = {
   alert: "M12 9v4M12 17h.01M10.3 4l-8 14a2 2 0 0 0 1.7 3h16a2 2 0 0 0 1.7-3l-8-14a2 2 0 0 0-3.4 0z",
   down: "M12 5v14M19 12l-7 7-7-7",
   up: "M12 19V5M5 12l7-7 7 7",
+  lock: "M6 11h12v9H6zM9 11V8a3 3 0 0 1 6 0v3",
 };
 export function Icon({ name, size = 16, className = "", strokeWidth = 1.6 }: { name: string; size?: number; className?: string; strokeWidth?: number }) {
   return (

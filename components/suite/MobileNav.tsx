@@ -37,11 +37,12 @@ const CSS = `
 .msheet-foot button { flex:1; padding:12px; border-radius:12px; border:1px solid var(--line2); color:var(--t2); font-size:.84rem; font-weight:600; }
 `;
 
-export function MobileNav({ tab, setTab, tabMap, groups, onExit, onSignOut, canSignOut, userName }: {
+export function MobileNav({ tab, setTab, tabMap, groups, onExit, onSignOut, canSignOut, userName, pro }: {
   tab: string; setTab: (id: string) => void; tabMap: TabMap; groups: Group[];
-  onExit: () => void; onSignOut?: () => void; canSignOut?: boolean; userName: string;
+  onExit: () => void; onSignOut?: () => void; canSignOut?: boolean; userName: string; pro?: boolean;
 }) {
   const [open, setOpen] = useState(false);
+  const PROSET = new Set(["mirror", "edge"]);
   const primaryIds = PRIMARY.map((p) => p[0]);
   const moreActive = !primaryIds.includes(tab);
 
@@ -80,7 +81,7 @@ export function MobileNav({ tab, setTab, tabMap, groups, onExit, onSignOut, canS
                   <div className="msheet-grid">
                     {ids.map((id) => (
                       <button key={id} className={`msheet-item ${tab === id ? "on" : ""}`} onClick={() => go(id)}>
-                        <Icon name={tabMap[id].icon} size={17} />{tabMap[id].label}
+                        <Icon name={tabMap[id].icon} size={17} />{tabMap[id].label}{PROSET.has(id) && !pro && <Icon name="lock" size={13} className="ml-auto opacity-70" />}
                       </button>
                     ))}
                   </div>

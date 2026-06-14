@@ -29,6 +29,7 @@ import { GuardTab } from "../../components/suite/GuardTab";
 import { MobileNav } from "../../components/suite/MobileNav";
 import { MirrorTab } from "../../components/suite/MirrorTab";
 import { EdgeTab } from "../../components/suite/EdgeTab";
+import { ProLock } from "../../components/suite/ProLock";
 import { FundedScoreTab } from "../../components/suite/FundedScoreTab";
 import { ExecutionTab } from "../../components/suite/ExecutionTab";
 import { SizingTab } from "../../components/suite/SizingTab";
@@ -69,11 +70,13 @@ const TABS = [
   ["tools", "Calculators", "calc"],
   ["settings", "Settings", "settings"],
 ] as const;
+const PRO_TABS = new Set(["mirror", "edge"]);
 
 const GROUPS: { label: string; ids: string[] }[] = [
   { label: "Daily", ids: ["brief", "today", "guard", "connect"] },
   { label: "Markets", ids: ["markets", "flow", "charts", "news"] },
-  { label: "Risk & Edge", ids: ["risk", "premortem", "gate", "fundedscore", "mirror", "edge", "insights", "execution", "sizing", "portfolio", "journal", "score"] },
+  { label: "Risk & Edge", ids: ["risk", "premortem", "gate", "fundedscore", "insights", "execution", "sizing", "portfolio", "journal", "score"] },
+  { label: "FundedCore Pro", ids: ["mirror", "edge"] },
   { label: "Pass & Plan", ids: ["challenge", "simulator", "payout", "plan", "tools"] },
   { label: "AI", ids: ["coach"] },
 ];
@@ -144,7 +147,7 @@ export default function Suite() {
   return (
     <div className="appframe">
       <CommandPalette commands={commands} />
-      <MobileNav tab={tab} setTab={setTab} tabMap={TAB_MAP} groups={GROUPS} onExit={() => { window.location.href = "/"; }} onSignOut={signOut} canSignOut={!!(cloudEnabled && session)} userName={profile.name} />
+      <MobileNav tab={tab} setTab={setTab} tabMap={TAB_MAP} groups={GROUPS} onExit={() => { window.location.href = "/"; }} onSignOut={signOut} canSignOut={!!(cloudEnabled && session)} userName={profile.name} pro={profile.pro} />
       {/* SIDEBAR */}
       <aside className="sidebar">
         <div className="px-1.5 mb-3 hidden md:block"><Link href="/"><Logo size={22} /></Link></div>
@@ -156,6 +159,7 @@ export default function Suite() {
                 <button key={id} onClick={() => setTab(id)} className={`side-link ${tab === id ? "on" : ""}`}>
                   <Icon name={TAB_MAP[id].icon} size={16} className="opacity-90" />
                   <span className="hidden md:inline">{TAB_MAP[id].label}</span>
+                  {PRO_TABS.has(id) && !profile.pro && <Icon name="lock" size={12} className="ml-auto opacity-70 hidden md:inline" />}
                 </button>
               ))}
             </div>
@@ -200,8 +204,8 @@ export default function Suite() {
           {tab === "gate" && <GateTab profile={profile} />}
           {tab === "guard" && <GuardTab profile={profile} setProfile={setProfile} />}
           {tab === "fundedscore" && <FundedScoreTab profile={profile} />}
-          {tab === "mirror" && <MirrorTab profile={profile} />}
-          {tab === "edge" && <EdgeTab profile={profile} />}
+          {tab === "mirror" && (profile.pro ? <MirrorTab profile={profile} /> : <ProLock profile={profile} setProfile={setProfile} go={setTab} />)}
+          {tab === "edge" && (profile.pro ? <EdgeTab profile={profile} /> : <ProLock profile={profile} setProfile={setProfile} go={setTab} />)}
           {tab === "insights" && <InsightsTab profile={profile} />}
           {tab === "execution" && <ExecutionTab profile={profile} setProfile={setProfile} go={setTab} />}
           {tab === "sizing" && <SizingTab profile={profile} />}
