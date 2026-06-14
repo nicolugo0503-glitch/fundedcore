@@ -14,6 +14,71 @@ function breachColor(p: number) {
   return p < 0.05 ? "var(--grn)" : p < 0.15 ? "var(--amb,#f5a623)" : "var(--red)";
 }
 
+function hexScore(n: number) { return n >= 80 ? "#10B981" : n >= 65 ? "#2BE3B0" : n >= 50 ? "#F5A623" : "#EF4444"; }
+function hexBreach(p: number) { return p < 0.05 ? "#2BE3B0" : p < 0.15 ? "#F5A623" : "#EF4444"; }
+
+async function shareScoreCard(fs: any, name: string) {
+  const W = 1080, H = 1350;
+  const c = document.createElement("canvas"); c.width = W; c.height = H;
+  const x = c.getContext("2d"); if (!x) return;
+  // bg
+  const g = x.createLinearGradient(0, 0, 0, H); g.addColorStop(0, "#0A0D11"); g.addColorStop(1, "#06080B");
+  x.fillStyle = g; x.fillRect(0, 0, W, H);
+  const rg = x.createRadialGradient(W / 2, 120, 40, W / 2, 120, 760);
+  rg.addColorStop(0, "rgba(16,163,127,0.18)"); rg.addColorStop(1, "rgba(16,163,127,0)");
+  x.fillStyle = rg; x.fillRect(0, 0, W, H);
+  x.textAlign = "center";
+  // wordmark
+  x.font = "800 56px system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
+  const fw = x.measureText("Funded").width, cw = x.measureText("Core").width;
+  const sx = W / 2 - (fw + cw) / 2;
+  x.textAlign = "left"; x.fillStyle = "#EAF0F7"; x.fillText("Funded", sx, 130);
+  x.fillStyle = "#2BE3B0"; x.fillText("Core", sx + fw, 130);
+  x.textAlign = "center";
+  // eyebrow
+  x.fillStyle = "#2BE3B0"; x.font = "700 26px system-ui, sans-serif";
+  x.fillText("F U N D E D S C O R E   ·   C O M P O S U R E", W / 2, 250);
+  // big score
+  const col = hexScore(fs.composure);
+  x.fillStyle = col; x.font = "800 300px ui-monospace, 'JetBrains Mono', monospace";
+  x.fillText(String(fs.composure), W / 2, 560);
+  x.fillStyle = "#8A94A3"; x.font = "600 40px system-ui, sans-serif";
+  x.fillText("/ 100   ·   GRADE " + fs.grade, W / 2, 630);
+  // divider
+  x.strokeStyle = "rgba(255,255,255,0.08)"; x.lineWidth = 2;
+  x.beginPath(); x.moveTo(120, 720); x.lineTo(W - 120, 720); x.stroke();
+  // breach
+  if (fs.breach) {
+    x.fillStyle = hexBreach(fs.breach.probability); x.font = "800 92px ui-monospace, monospace";
+    x.fillText(Math.round(fs.breach.probability * 100) + "%", W / 2, 850);
+    x.fillStyle = "#8A94A3"; x.font = "500 34px system-ui, sans-serif";
+    x.fillText("chance to breach in " + fs.breach.horizonDays + " days", W / 2, 905);
+  } else {
+    x.fillStyle = "#EAF0F7"; x.font = "700 46px system-ui, sans-serif";
+    x.fillText(fs.headline, W / 2, 850);
+  }
+  // top driver
+  const hurt = fs.drivers.filter((d: any) => d.impact === "hurts").sort((a: any, b: any) => b.weight - a.weight)[0];
+  if (hurt) { x.fillStyle = "#EF4444"; x.font = "600 32px system-ui, sans-serif"; x.fillText("Biggest leak: " + hurt.label, W / 2, 1010); }
+  // CTA
+  x.fillStyle = "#EAF0F7"; x.font = "700 40px system-ui, sans-serif";
+  x.fillText("What's your score?", W / 2, 1210);
+  x.fillStyle = "#2BE3B0"; x.font = "800 46px system-ui, sans-serif";
+  x.fillText("funded-core.com", W / 2, 1270);
+
+  const blob: Blob | null = await new Promise((r) => c.toBlob(r, "image/png"));
+  if (!blob) return;
+  const file = new File([blob], "fundedscore.png", { type: "image/png" });
+  const text = `My FundedCore composure score: ${fs.composure}/100 \u{1F6E1} What's yours? funded-core.com`;
+  try {
+    if ((navigator as any).canShare && (navigator as any).canShare({ files: [file] })) {
+      await (navigator as any).share({ files: [file], text });
+      return;
+    }
+  } catch {}
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "fundedscore.png"; a.click();
+}
+
 export function FundedScoreTab({ profile }: { profile: Profile }) {
   const [accId, setAccId] = useState(profile.accounts[0]?.id || "");
   const [horizon, setHorizon] = useState(5);
@@ -39,7 +104,10 @@ export function FundedScoreTab({ profile }: { profile: Profile }) {
     <div className="fade space-y-5">
       <SuiteHeader eyebrow="FundedScore" title="Your composure score + breach odds"
         sub="The predictive core: a behavioral discipline score and a breach probability simulated forward from YOUR own daily P&L against your firm's real floor. It sharpens as you log more — and as the network grows."
-        right={<span className="chip" style={{ color: fs.confidence === "high" ? "var(--grn)" : fs.confidence === "medium" ? "var(--amb,#f5a623)" : "var(--red)" }}>{fs.confidence} confidence</span>} />
+        right={<div className="flex items-center gap-2">
+          <span className="chip" style={{ color: fs.confidence === "high" ? "var(--grn)" : fs.confidence === "medium" ? "var(--amb,#f5a623)" : "var(--red)" }}>{fs.confidence} confidence</span>
+          <button onClick={() => shareScoreCard(fs, profile.name)} className="btn btn-primary !py-1.5 !px-3.5 text-[.8rem] inline-flex items-center gap-1.5"><Icon name="up" size={14} /> Share my score</button>
+        </div>} />
 
       <div className="grid lg:grid-cols-2 gap-5">
         {/* Composure */}
