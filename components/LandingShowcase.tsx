@@ -15,6 +15,10 @@ const FX = `
 .sv .seam { opacity:.5; } .sv.in .seam { animation: svseam 2.6s ease-in-out .6s infinite; }
 @keyframes svseam { 0%,100%{opacity:.45} 50%{opacity:.95} }
 @media (prefers-reduced-motion: reduce){ .sv .draw,.sv .pop{ animation:none!important; opacity:1; stroke-dashoffset:0; transform:none; } .tilt{ transition:none; } }
+.imir-range{ -webkit-appearance:none; appearance:none; width:100%; height:6px; border-radius:6px; background:rgba(255,255,255,.13); outline:none; }
+.imir-range::-webkit-slider-thumb{ -webkit-appearance:none; appearance:none; width:24px; height:24px; border-radius:50%; background:#34D399; cursor:grab; box-shadow:0 0 0 5px rgba(52,211,153,.22); transition:box-shadow .15s; }
+.imir-range:active::-webkit-slider-thumb{ cursor:grabbing; box-shadow:0 0 0 8px rgba(52,211,153,.28); }
+.imir-range::-moz-range-thumb{ width:24px; height:24px; border:none; border-radius:50%; background:#34D399; cursor:grab; box-shadow:0 0 0 5px rgba(52,211,153,.22); }
 `;
 
 function useCountUp(target: number, active: boolean, ms = 1500) {
@@ -133,11 +137,52 @@ function EdgeViz(active: boolean) {
 }
 
 export function MirrorShowcase() {
-  return <Showcase eyebrow="The Mirror · Pro"
-    title={<>Meet the trader you'd be if you <span className="grad-text">never tilted.</span></>}
-    body="We replay every one of your real trades and remove only the ones that broke your own rules. What's left is the disciplined you — and the gap between you two is the money your behavior, not the market, quietly took."
-    foot={<div className="text-[.82rem] text-t3">The average funded trader leaks thousands a month to tilt. The Mirror puts a number on yours.</div>}
-    viz={MirrorViz} />;
+  const { ref, inv } = useInView<HTMLDivElement>();
+  const [tilt, setTilt] = useState(0.6);
+  const disc = 8692, actual = Math.round(8000 - tilt * 14000), tax = Math.max(0, disc - actual);
+  const seamY = 150, yEnd = 100 + tilt * 185;
+  const xs = [280, 235, 195, 150, 110, 65], fr = [0, 0.3, 0.45, 0.65, 0.82, 1], wob = [0, 8, -6, 12, -4, 0];
+  const actualPath = xs.map((x, i) => `${i ? "L" : "M"}${x},${(seamY + (yEnd - seamY) * fr[i] + wob[i]).toFixed(1)}`).join(" ");
+  const endY = (seamY + (yEnd - seamY) * 1 + 0).toFixed(1);
+  return (
+    <section className="py-16 md:py-24">
+      <style dangerouslySetInnerHTML={{ __html: FX }} />
+      <div ref={ref} className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
+        <div>
+          <div className="eyebrow" style={{ color: "var(--acc)" }}>The Mirror · Pro</div>
+          <h2 className="text-3xl md:text-[2.7rem] font-bold mt-3 leading-[1.07] tracking-tight">Meet the trader you'd be if you <span className="grad-text">never tilted.</span></h2>
+          <p className="text-t2 text-[1.04rem] mt-5 leading-relaxed max-w-md">We replay every one of your real trades and remove only the ones that broke your own rules. The gap between you and the disciplined you is the money your behavior — not the market — quietly took.</p>
+          <div className="mt-6 inline-flex items-center gap-2 text-[.85rem] font-semibold" style={{ color: "var(--acc)" }}><span style={{ fontSize: "1.1rem" }}>↓</span> Drag the slider — watch what tilt actually costs.</div>
+        </div>
+        <div>
+          <div className="tilt sframe" style={{ background: "#080A0E" }}>
+            <svg viewBox="0 0 560 360" className={`sv w-full ${inv ? "in" : ""}`} style={{ display: "block" }}>
+              <defs>
+                <radialGradient id="imvl" cx="0.26" cy="0.5" r="0.6"><stop offset="0" stopColor="#EF4444" stopOpacity="0.18"/><stop offset="1" stopColor="#EF4444" stopOpacity="0"/></radialGradient>
+                <radialGradient id="imvr" cx="0.74" cy="0.5" r="0.6"><stop offset="0" stopColor="#34D399" stopOpacity="0.18"/><stop offset="1" stopColor="#34D399" stopOpacity="0"/></radialGradient>
+                <linearGradient id="imseam" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#EF4444"/><stop offset="0.5" stopColor="#EAF0F7"/><stop offset="1" stopColor="#34D399"/></linearGradient>
+              </defs>
+              <rect width="560" height="360" fill="#080A0E"/><rect width="280" height="360" fill="url(#imvl)"/><rect x="280" width="280" height="360" fill="url(#imvr)"/>
+              <g className="pop"><text x="28" y="50" fill="#EF4444" fontSize="13" fontWeight="700" letterSpacing="2">ACTUAL YOU</text><text x="28" y="86" fill="#EF4444" fontSize="32" fontWeight="800">${actual.toLocaleString()}</text></g>
+              <g className="pop" style={{ animationDelay: ".15s" }}><text x="532" y="50" fill="#34D399" fontSize="13" fontWeight="700" letterSpacing="2" textAnchor="end">DISCIPLINED YOU</text><text x="532" y="86" fill="#34D399" fontSize="32" fontWeight="800" textAnchor="end">+$8,692</text></g>
+              <path d={actualPath} fill="none" stroke="#EF4444" strokeWidth="2.6" strokeLinejoin="round" style={{ transition: "d .15s" }}/>
+              <path pathLength={1} className="draw d2" d="M280,150 L325,140 L365,158 L410,128 L455,140 L495,108" fill="none" stroke="#34D399" strokeWidth="3" strokeLinejoin="round"/>
+              <circle cx="65" cy={endY} r="4.5" fill="#EF4444"/><circle cx="495" cy="108" r="4.5" fill="#34D399"/>
+              <rect className="seam" x="278" y="34" width="4" height="216" fill="url(#imseam)"/>
+              <rect x="170" y="276" width="220" height="64" rx="14" fill="#0E1216" stroke="rgba(255,255,255,.08)"/>
+              <text x="280" y="302" fill="#97A1B0" fontSize="11" fontWeight="700" letterSpacing="2" textAnchor="middle">THE GAP IS COSTING YOU</text>
+              <text x="280" y="332" fill="#EF4444" fontSize="28" fontWeight="800" textAnchor="middle">${tax.toLocaleString()}</text>
+            </svg>
+            <div style={{ padding: "0 22px 22px" }}>
+              <div className="flex items-center justify-between text-[.7rem] font-semibold mb-2" style={{ color: "#7B8694" }}><span>HOW OFTEN YOU TILT</span><span>{Math.round(tilt * 100)}%</span></div>
+              <input className="imir-range" type="range" min={0} max={100} value={Math.round(tilt * 100)} onChange={(e) => setTilt(+e.target.value / 100)} aria-label="How often you tilt" />
+              <div className="flex justify-between text-[.66rem] mt-1.5" style={{ color: "#5C6675" }}><span>never</span><span>every day</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
 }
 export function ScoreShowcase() {
   return <Showcase flip eyebrow="FundedScore"
