@@ -76,7 +76,7 @@ function Showcase({ eyebrow, title, body, foot, viz, flip }: { eyebrow: string; 
 function MirrorViz(active: boolean) {
   const tax = useCountUp(8866, active);
   return (
-    <svg viewBox="0 0 560 380" className={`sv w-full ${active ? "in" : ""}`} style={{ display: "block" }}>
+    <svg viewBox="0 0 560 380" className={`sv w-full ${active ? "in" : ""}`} style={{ display: "block", width: "100%", aspectRatio: "560 / 380" }}>
       <defs>
         <radialGradient id="mvl" cx="0.26" cy="0.5" r="0.6"><stop offset="0" stopColor="#EF4444" stopOpacity="0.18"/><stop offset="1" stopColor="#EF4444" stopOpacity="0"/></radialGradient>
         <radialGradient id="mvr" cx="0.74" cy="0.5" r="0.6"><stop offset="0" stopColor="#34D399" stopOpacity="0.18"/><stop offset="1" stopColor="#34D399" stopOpacity="0"/></radialGradient>
@@ -98,7 +98,7 @@ function ScoreViz(active: boolean) {
   const score = useCountUp(75, active); const breach = useCountUp(8, active);
   const r = 70, c = 2 * Math.PI * r, off = c * (1 - score / 100);
   return (
-    <svg viewBox="0 0 560 380" className={`sv w-full ${active ? "in" : ""}`} style={{ display: "block" }}>
+    <svg viewBox="0 0 560 380" className={`sv w-full ${active ? "in" : ""}`} style={{ display: "block", width: "100%", aspectRatio: "560 / 380" }}>
       <defs><radialGradient id="sgglow" cx="0.32" cy="0.3" r="0.6"><stop offset="0" stopColor="#10A37F" stopOpacity="0.16"/><stop offset="1" stopColor="#10A37F" stopOpacity="0"/></radialGradient></defs>
       <rect width="560" height="380" fill="#080A0E"/><rect width="560" height="380" fill="url(#sgglow)"/>
       <g transform="translate(150,190)">
@@ -121,7 +121,7 @@ function EdgeViz(active: boolean) {
   const win = useCountUp(68, active);
   const dots = [[-0.9,"#EF4444",6],[-0.5,"#EF4444",8],[-0.2,"#EF4444",5],[0.25,"#34D399",7],[0.5,"#34D399",9],[0.7,"#34D399",6],[0.92,"#34D399",11]];
   return (
-    <svg viewBox="0 0 560 380" className={`sv w-full ${active ? "in" : ""}`} style={{ display: "block" }}>
+    <svg viewBox="0 0 560 380" className={`sv w-full ${active ? "in" : ""}`} style={{ display: "block", width: "100%", aspectRatio: "560 / 380" }}>
       <rect width="560" height="380" fill="#080A0E"/>
       <defs><linearGradient id="espec2" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="#EF4444" stopOpacity="0.5"/><stop offset="0.5" stopColor="#5C6675" stopOpacity="0.4"/><stop offset="1" stopColor="#34D399" stopOpacity="0.5"/></linearGradient></defs>
       <g className="pop"><text x="40" y="56" fill="#34D399" fontSize="13" fontWeight="700" letterSpacing="2">YOUR SHARPEST EDGE</text>
@@ -156,7 +156,7 @@ export function MirrorShowcase() {
         </div>
         <div>
           <div className="tilt sframe" style={{ background: "#080A0E" }}>
-            <svg viewBox="0 0 560 360" className={`sv w-full ${inv ? "in" : ""}`} style={{ display: "block" }}>
+            <svg viewBox="0 0 560 360" className={`sv w-full ${inv ? "in" : ""}`} style={{ display: "block", width: "100%", aspectRatio: "560 / 360" }}>
               <defs>
                 <radialGradient id="imvl" cx="0.26" cy="0.5" r="0.6"><stop offset="0" stopColor="#EF4444" stopOpacity="0.18"/><stop offset="1" stopColor="#EF4444" stopOpacity="0"/></radialGradient>
                 <radialGradient id="imvr" cx="0.74" cy="0.5" r="0.6"><stop offset="0" stopColor="#34D399" stopOpacity="0.18"/><stop offset="1" stopColor="#34D399" stopOpacity="0"/></radialGradient>
