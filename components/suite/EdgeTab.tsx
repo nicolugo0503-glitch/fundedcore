@@ -17,7 +17,7 @@ const CSS = `
 function Row({ c, good }: { c: EdgeCond; good: boolean }) {
   const col = good ? "var(--grn)" : "var(--red)";
   return (
-    <div className="flex items-center gap-3 rounded-lg p-3" style={{ background: "color-mix(in srgb, var(--bg2,#111) 55%, transparent)" }}>
+    <div className="flex items-center gap-3 rounded-lg p-3" style={{ background: "rgba(127,127,127,0.09)" }}>
       <span className="text-[.58rem] font-bold uppercase tracking-wide text-t3 w-[66px] shrink-0">{c.kind}</span>
       <div className="flex-1 min-w-0">
         <div className="text-[.9rem] font-semibold truncate">{c.label}</div>

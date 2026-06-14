@@ -111,7 +111,7 @@ export function MirrorTab({ profile }: { profile: Profile }) {
       <Panel title="Where the disciplined you said no" icon="alert">
         <div className="space-y-2.5">
           {m.breaks.map((b) => (
-            <div key={b.reason} className="flex items-start gap-3 rounded-lg p-3" style={{ background: "color-mix(in srgb, var(--bg2,#111) 55%, transparent)" }}>
+            <div key={b.reason} className="flex items-start gap-3 rounded-lg p-3" style={{ background: "rgba(127,127,127,0.09)" }}>
               <span className="shrink-0 mt-0.5" style={{ color: b.saved >= 0 ? "var(--red)" : "var(--grn)" }}><Icon name="alert" size={15} /></span>
               <div className="flex-1">
                 <div className="flex items-center justify-between gap-2">

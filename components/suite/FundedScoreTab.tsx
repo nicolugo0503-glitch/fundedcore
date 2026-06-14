@@ -184,7 +184,7 @@ export function FundedScoreTab({ profile }: { profile: Profile }) {
           {fs.drivers.sort((a, b) => b.weight - a.weight).map((d, i) => {
             const c = d.impact === "helps" ? "var(--grn)" : "var(--red)";
             return (
-              <div key={i} className="flex items-start gap-3 rounded-lg p-3" style={{ background: "color-mix(in srgb, var(--bg2,#111) 55%, transparent)" }}>
+              <div key={i} className="flex items-start gap-3 rounded-lg p-3" style={{ background: "rgba(127,127,127,0.09)" }}>
                 <span className="shrink-0 mt-0.5" style={{ color: c }}><Icon name={d.impact === "helps" ? "check" : "alert"} size={15} /></span>
                 <div className="flex-1">
                   <div className="flex items-center justify-between">

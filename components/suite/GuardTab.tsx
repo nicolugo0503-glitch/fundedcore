@@ -130,7 +130,7 @@ export function GuardTab({ profile, setProfile }: { profile: Profile; setProfile
         <div className="grid sm:grid-cols-2 gap-2.5">
           {g.signals.map((s) => (
             <div key={s.key} className="flex gap-2.5 items-start rounded-lg p-2.5"
-              style={{ background: "color-mix(in srgb, var(--bg2,#111) 55%, transparent)", opacity: s.active ? 1 : 0.5 }}>
+              style={{ background: "rgba(127,127,127,0.09)", opacity: s.active ? 1 : 0.5 }}>
               <span className="mt-0.5 shrink-0" style={{ color: s.active ? "var(--red)" : "var(--grn)" }}>
                 <Icon name={s.active ? "alert" : "check"} size={14} />
               </span>

@@ -128,7 +128,7 @@ export function GateTab({ profile }: { profile: Profile }) {
             {v.reasons.map((r, i) => {
               const c = r.kind==="block"?"var(--red)":r.kind==="warn"?"var(--amb,#f5a623)":"var(--grn)";
               return (
-                <div key={i} className="flex gap-2.5 items-start rounded-lg p-2.5" style={{ background: "color-mix(in srgb, var(--bg2,#111) 60%, transparent)" }}>
+                <div key={i} className="flex gap-2.5 items-start rounded-lg p-2.5" style={{ background: "rgba(127,127,127,0.09)" }}>
                   <span style={{ color: c }} className="mt-0.5 shrink-0"><Icon name={r.kind==="ok"?"check":"alert"} size={14} /></span>
                   <div>
                     <div className="text-[.84rem] font-semibold" style={{ color: c }}>{r.title}{r.cost?<span className="text-t3 font-normal"> · {usd(r.cost)} historically</span>:null}</div>
