@@ -73,10 +73,10 @@ export default function Home() {
       <Ticker />
       <main className="max-w-6xl mx-auto px-5">
         <Hero />
-        <GuardianBand />
+        <MirrorShowcase />
+        <ScoreShowcase />
+        <EdgeShowcase />
         <Problem />
-        <How />
-        <ScoreSection />
         <Economics />
         <Compare />
         <Pricing />
@@ -86,6 +86,115 @@ export default function Home() {
       <Footer />
     </div>
   );
+}
+
+
+function ShowFrame({ children }: { children: any }) {
+  return <div style={{ borderRadius: 20, overflow: "hidden", border: "1px solid rgba(255,255,255,.07)", boxShadow: "0 50px 110px -45px rgba(0,0,0,.55), 0 0 0 1px rgba(0,0,0,.04)" }}>{children}</div>;
+}
+function Showcase({ eyebrow, title, body, foot, visual, flip }: { eyebrow: string; title: any; body: string; foot?: any; visual: any; flip?: boolean }) {
+  return (
+    <section className="py-16 md:py-24">
+      <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
+        <div className={flip ? "md:order-2" : ""}>
+          <div className="eyebrow" style={{ color: "var(--acc)" }}>{eyebrow}</div>
+          <h2 className="text-3xl md:text-[2.7rem] font-bold mt-3 leading-[1.07] tracking-tight">{title}</h2>
+          <p className="text-t2 text-[1.04rem] mt-5 leading-relaxed max-w-md">{body}</p>
+          {foot && <div className="mt-6">{foot}</div>}
+        </div>
+        <div className={flip ? "md:order-1" : ""}><ShowFrame>{visual}</ShowFrame></div>
+      </div>
+    </section>
+  );
+}
+
+function MirrorViz() {
+  return (
+    <svg viewBox="0 0 560 380" className="w-full" style={{ display: "block" }}>
+      <defs>
+        <radialGradient id="mvl" cx="0.26" cy="0.5" r="0.6"><stop offset="0" stopColor="#EF4444" stopOpacity="0.18"/><stop offset="1" stopColor="#EF4444" stopOpacity="0"/></radialGradient>
+        <radialGradient id="mvr" cx="0.74" cy="0.5" r="0.6"><stop offset="0" stopColor="#34D399" stopOpacity="0.18"/><stop offset="1" stopColor="#34D399" stopOpacity="0"/></radialGradient>
+        <linearGradient id="mvseam" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#EF4444"/><stop offset="0.5" stopColor="#EAF0F7"/><stop offset="1" stopColor="#34D399"/></linearGradient>
+      </defs>
+      <rect width="560" height="380" fill="#080A0E"/>
+      <rect width="280" height="380" fill="url(#mvl)"/><rect x="280" width="280" height="380" fill="url(#mvr)"/>
+      <text x="28" y="56" fill="#EF4444" fontSize="13" fontWeight="700" letterSpacing="2">ACTUAL YOU</text>
+      <text x="28" y="92" fill="#EF4444" fontSize="34" fontWeight="800">-$174</text>
+      <text x="532" y="56" fill="#34D399" fontSize="13" fontWeight="700" letterSpacing="2" textAnchor="end">DISCIPLINED YOU</text>
+      <text x="532" y="92" fill="#34D399" fontSize="34" fontWeight="800" textAnchor="end">+$8,692</text>
+      <path d="M280,150 L235,165 L195,150 L150,185 L110,200 L65,245" fill="none" stroke="#EF4444" strokeWidth="2.6" strokeLinejoin="round"/>
+      <path d="M280,150 L325,140 L365,158 L410,128 L455,140 L495,108" fill="none" stroke="#34D399" strokeWidth="3" strokeLinejoin="round"/>
+      <circle cx="65" cy="245" r="4.5" fill="#EF4444"/><circle cx="495" cy="108" r="4.5" fill="#34D399"/>
+      <rect x="278" y="40" width="4" height="230" fill="url(#mvseam)" opacity="0.5"/>
+      <rect x="180" y="290" width="200" height="64" rx="14" fill="#0E1216" stroke="rgba(255,255,255,.08)"/>
+      <text x="280" y="316" fill="#97A1B0" fontSize="11" fontWeight="700" letterSpacing="2" textAnchor="middle">THE GAP IS COSTING YOU</text>
+      <text x="280" y="346" fill="#EF4444" fontSize="28" fontWeight="800" textAnchor="middle">$8,866</text>
+    </svg>
+  );
+}
+
+function ScoreViz() {
+  const r = 70, c = 2 * Math.PI * r, p = 0.75;
+  return (
+    <svg viewBox="0 0 560 380" className="w-full" style={{ display: "block" }}>
+      <rect width="560" height="380" fill="#080A0E"/>
+      <rect width="560" height="380" fill="url(#sgglow)"/>
+      <defs><radialGradient id="sgglow" cx="0.32" cy="0.3" r="0.6"><stop offset="0" stopColor="#10A37F" stopOpacity="0.16"/><stop offset="1" stopColor="#10A37F" stopOpacity="0"/></radialGradient></defs>
+      <g transform="translate(150,190)">
+        <circle r={r} fill="none" stroke="rgba(255,255,255,.08)" strokeWidth="14"/>
+        <circle r={r} fill="none" stroke="#2BE3B0" strokeWidth="14" strokeLinecap="round" strokeDasharray={`${c*p} ${c}`} transform="rotate(-90)"/>
+        <text x="0" y="6" fill="#2BE3B0" fontSize="48" fontWeight="800" textAnchor="middle">75</text>
+        <text x="0" y="34" fill="#7B8694" fontSize="13" fontWeight="600" textAnchor="middle">COMPOSURE · B</text>
+      </g>
+      <g transform="translate(300,120)">
+        <text x="0" y="0" fill="#7B8694" fontSize="13" fontWeight="700" letterSpacing="2">BREACH PROBABILITY</text>
+        <text x="0" y="60" fill="#F5A623" fontSize="58" fontWeight="800">8%</text>
+        <text x="0" y="92" fill="#97A1B0" fontSize="16">in the next 5 days</text>
+        <rect x="0" y="120" width="210" height="58" rx="12" fill="#0E1216" stroke="rgba(255,255,255,.08)"/>
+        <text x="16" y="146" fill="#7B8694" fontSize="12" fontWeight="600">TO BREACH</text>
+        <text x="16" y="170" fill="#EAF0F7" fontSize="22" fontWeight="700">$1,000</text>
+      </g>
+    </svg>
+  );
+}
+
+function EdgeViz() {
+  const dots = [[-0.9,"#EF4444",6],[-0.5,"#EF4444",8],[-0.2,"#EF4444",5],[0.25,"#34D399",7],[0.5,"#34D399",9],[0.7,"#34D399",6],[0.92,"#34D399",11]];
+  return (
+    <svg viewBox="0 0 560 380" className="w-full" style={{ display: "block" }}>
+      <rect width="560" height="380" fill="#080A0E"/>
+      <defs><linearGradient id="espec2" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="#EF4444" stopOpacity="0.5"/><stop offset="0.5" stopColor="#5C6675" stopOpacity="0.4"/><stop offset="1" stopColor="#34D399" stopOpacity="0.5"/></linearGradient></defs>
+      <text x="40" y="56" fill="#34D399" fontSize="13" fontWeight="700" letterSpacing="2">YOUR SHARPEST EDGE</text>
+      <text x="40" y="100" fill="#EAF0F7" fontSize="30" fontWeight="800">MNQ · Longs · 14:00</text>
+      <rect x="40" y="120" width="120" height="34" rx="9" fill="rgba(52,211,153,.1)" stroke="rgba(52,211,153,.3)"/><text x="100" y="143" fill="#34D399" fontSize="15" fontWeight="700" textAnchor="middle">68% win</text>
+      <rect x="172" y="120" width="120" height="34" rx="9" fill="#0E1216" stroke="rgba(255,255,255,.08)"/><text x="232" y="143" fill="#EAF0F7" fontSize="15" fontWeight="700" textAnchor="middle">+$79 / trade</text>
+      <line x1="50" y1="250" x2="510" y2="250" stroke="url(#espec2)" strokeWidth="3" strokeLinecap="round"/>
+      <line x1="280" y1="234" x2="280" y2="266" stroke="rgba(255,255,255,.18)" strokeWidth="1" strokeDasharray="2 3"/>
+      {dots.map((d:any,i:number)=>(<circle key={i} cx={280 + (d[0]as number)*230} cy="250" r={d[2]} fill={d[1]} fillOpacity="0.9" stroke={d[1]} strokeOpacity="0.28" strokeWidth="6"/>))}
+      <text x="50" y="290" fill="#7B8694" fontSize="12" fontWeight="600">LOSING</text>
+      <text x="510" y="290" fill="#7B8694" fontSize="12" fontWeight="600" textAnchor="end">WINNING</text>
+    </svg>
+  );
+}
+
+function MirrorShowcase() {
+  return <Showcase eyebrow="The Mirror · Pro"
+    title={<>Meet the trader you'd be if you <span className="grad-text">never tilted.</span></>}
+    body="We replay every one of your real trades and remove only the ones that broke your own rules. What's left is the disciplined you — and the gap between you two is the money your behavior, not the market, quietly took."
+    foot={<div className="text-[.82rem] text-t3">The average funded trader leaks thousands a month to tilt. The Mirror puts a number on yours.</div>}
+    visual={<MirrorViz />} />;
+}
+function ScoreShowcase() {
+  return <Showcase flip eyebrow="FundedScore"
+    title={<>Your odds of blowing up — <span className="grad-text">before you do.</span></>}
+    body="A composure score and a breach probability, simulated from your own daily P&L against your firm's exact drawdown rules. The first honest read on whether your behavior keeps the account — not whether the market cooperates."
+    visual={<ScoreViz />} />;
+}
+function EdgeShowcase() {
+  return <Showcase eyebrow="Your Edge · Pro"
+    title={<>Trade only where you <span className="grad-text">actually win.</span></>}
+    body="Not signals. Not market predictions. We mine your history for the exact conditions your own data proves you make money in — instrument, time, day, direction, setup — and the ones quietly bleeding you. Concentrate on your edge; cut the rest."
+    visual={<EdgeViz />} />;
 }
 
 function GuardianBand() {
