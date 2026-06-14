@@ -107,13 +107,13 @@ function ScoreViz(active: boolean) {
         <text x="0" y="6" fill="#2BE3B0" fontSize="48" fontWeight="800" textAnchor="middle">{score}</text>
         <text x="0" y="34" fill="#7B8694" fontSize="13" fontWeight="600" textAnchor="middle">COMPOSURE · B</text>
       </g>
-      <g transform="translate(300,120)" className="pop" style={{ animationDelay: ".4s" }}>
+      <g transform="translate(300,120)"><g className="pop" style={{ animationDelay: ".4s" }}>
         <text x="0" y="0" fill="#7B8694" fontSize="13" fontWeight="700" letterSpacing="2">BREACH PROBABILITY</text>
         <text x="0" y="60" fill="#F5A623" fontSize="58" fontWeight="800">{breach}%</text>
         <text x="0" y="92" fill="#97A1B0" fontSize="16">in the next 5 days</text>
         <rect x="0" y="120" width="210" height="58" rx="12" fill="#0E1216" stroke="rgba(255,255,255,.08)"/>
         <text x="16" y="146" fill="#7B8694" fontSize="12" fontWeight="600">TO BREACH</text><text x="16" y="170" fill="#EAF0F7" fontSize="22" fontWeight="700">$1,000</text>
-      </g>
+      </g></g>
     </svg>
   );
 }
