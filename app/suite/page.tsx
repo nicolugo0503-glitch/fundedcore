@@ -23,6 +23,7 @@ import { ChartsTab } from "../../components/suite/ChartsTab";
 import { MarketsTab } from "../../components/suite/MarketsTab";
 import { LiveFlowTab } from "../../components/suite/LiveFlowTab";
 import { ConnectTab } from "../../components/suite/ConnectTab";
+import { StandardTab } from "../../components/suite/StandardTab";
 import { PreMortemTab } from "../../components/suite/PreMortemTab";
 import { GateTab } from "../../components/suite/GateTab";
 import { GuardTab } from "../../components/suite/GuardTab";
@@ -54,6 +55,7 @@ const TABS = [
   ["premortem", "Pre-Mortem", "alert"],
   ["gate", "Pre-Trade Gate", "check"],
   ["fundedscore", "FundedScore", "gauge"],
+  ["standard", "The Standard", "up"],
   ["mirror", "The Mirror", "repeat"],
   ["edge", "Your Edge", "up"],
   ["insights", "Insights", "spark"],
@@ -75,7 +77,7 @@ const PRO_TABS = new Set(["mirror", "edge"]);
 const GROUPS: { label: string; ids: string[] }[] = [
   { label: "Daily", ids: ["brief", "today", "guard", "connect"] },
   { label: "Markets", ids: ["markets", "flow", "charts", "news"] },
-  { label: "Risk & Edge", ids: ["risk", "premortem", "gate", "fundedscore", "insights", "execution", "sizing", "portfolio", "journal", "score"] },
+  { label: "Risk & Edge", ids: ["risk", "premortem", "gate", "fundedscore", "standard", "insights", "execution", "sizing", "portfolio", "journal", "score"] },
   { label: "FundedCore Pro", ids: ["mirror", "edge"] },
   { label: "Pass & Plan", ids: ["challenge", "simulator", "payout", "plan", "tools"] },
   { label: "AI", ids: ["coach"] },
@@ -204,6 +206,7 @@ export default function Suite() {
           {tab === "gate" && <GateTab profile={profile} />}
           {tab === "guard" && <GuardTab profile={profile} setProfile={setProfile} />}
           {tab === "fundedscore" && <FundedScoreTab profile={profile} />}
+          {tab === "standard" && <StandardTab profile={profile} />}
           {tab === "mirror" && (profile.pro ? <MirrorTab profile={profile} /> : <ProLock profile={profile} setProfile={setProfile} go={setTab} />)}
           {tab === "edge" && (profile.pro ? <EdgeTab profile={profile} /> : <ProLock profile={profile} setProfile={setProfile} go={setTab} />)}
           {tab === "insights" && <InsightsTab profile={profile} />}
