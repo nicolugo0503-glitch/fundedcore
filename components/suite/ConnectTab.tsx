@@ -6,7 +6,7 @@ import { assessAccount, STATUS_META, type Account } from "../../lib/risk";
 import { usd } from "../../lib/format";
 import { SuiteHeader, Panel, StatTile } from "./ui";
 import { Icon } from "../Icon";
-import type { BrokerConnector, LiveAccount, LivePosition, LiveFill, ConnStatus } from "../../lib/connectors/types";
+import type { BrokerConnector, LiveAccount, LiveAccountInfo, LivePosition, LiveFill, ConnStatus } from "../../lib/connectors/types";
 import { MockConnector } from "../../lib/connectors/mock";
 import { TradovateConnector } from "../../lib/connectors/tradovate";
 import { RithmicConnector } from "../../lib/connectors/rithmic";
@@ -20,6 +20,8 @@ export function ConnectTab({ profile }: { profile: Profile }) {
   const [status, setStatus] = useState<ConnStatus>("idle");
   const [statusMsg, setStatusMsg] = useState("");
   const [acct, setAcct] = useState<LiveAccount | null>(null);
+  const [accounts, setAccounts] = useState<LiveAccountInfo[]>([]);
+  const [selId, setSelId] = useState<string>("");
   const [positions, setPositions] = useState<LivePosition[]>([]);
   const [fills, setFills] = useState<LiveFill[]>([]);
   const [firmKey, setFirmKey] = useState(profile.accounts[0]?.firmKey || FIRM_KEYS[0]);
@@ -38,17 +40,19 @@ export function ConnectTab({ profile }: { profile: Profile }) {
   }
   function connect() {
     conn.current?.disconnect();
-    setAcct(null); setPositions([]); setFills([]); setStatusMsg("");
+    setAcct(null); setAccounts([]); setSelId(""); setPositions([]); setFills([]); setStatusMsg("");
     const c: BrokerConnector = provider === "sim" ? new MockConnector() : provider === "projectx" ? new ProjectXConnector(px) : provider === "rithmic" ? new RithmicConnector(rith) : provider === "webhook" ? new WebhookConnector(hookKey) : new TradovateConnector(creds);
     conn.current = c;
     c.connect({
       onStatus: (s, m) => { setStatus(s); if (m) setStatusMsg(m); },
       onAccount: (a) => setAcct(a),
+      onAccounts: (list) => { setAccounts(list); setSelId((prev) => prev || String((list.find((x) => x.canTrade) || list[0])?.id ?? "")); },
       onPositions: (p) => setPositions(p),
       onFill: (f) => setFills((prev) => [f, ...prev].slice(0, 20)),
     });
   }
-  function disconnect() { conn.current?.disconnect(); conn.current = null; setStatus("closed"); }
+  function disconnect() { conn.current?.disconnect(); conn.current = null; setStatus("closed"); setAccounts([]); setSelId(""); }
+  function pickAccount(id: string) { setSelId(id); conn.current?.selectAccount?.(id); }
 
   // live Distance to Breach from the connected balance + chosen firm
   const firm = FIRMS[firmKey];
@@ -123,6 +127,25 @@ export function ConnectTab({ profile }: { profile: Profile }) {
 
       {acct && (
         <>
+          {accounts.length > 1 && (
+            <div className="card p-4">
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="lbl !mb-0">Account ({accounts.length} found)</span>
+                <select className="inp !py-1.5 text-sm !w-auto min-w-[260px]" value={selId} onChange={(e) => pickAccount(e.target.value)}>
+                  {accounts.map((a) => (
+                    <option key={String(a.id)} value={String(a.id)}>{a.name} — {usd(a.balance)}{a.canTrade ? "" : " · blown/locked"}</option>
+                  ))}
+                </select>
+                {(() => { const cur = accounts.find((a) => String(a.id) === selId); return cur ? (
+                  <span className="chip" style={{ color: cur.canTrade ? "var(--grn)" : "var(--red)" }}>
+                    <span className="w-1.5 h-1.5 rounded-full" style={{ background: cur.canTrade ? "var(--grn)" : "var(--red)" }} />
+                    {cur.canTrade ? "active" : "blown / locked"}
+                  </span>
+                ) : null; })()}
+                <span className="text-[.74rem] text-t3 ml-auto">Switch which funded account FundedCore monitors.</span>
+              </div>
+            </div>
+          )}
           <div className="grid sm:grid-cols-3 gap-4">
             <StatTile icon={<Icon name="calc" size={15} />} label="Live balance" value={usd(acct.balance)} />
             <StatTile icon={<Icon name="up" size={15} />} label="Day P&L" value={usd(acct.dayPnl)} accent={acct.dayPnl >= 0 ? "var(--grn)" : "var(--red)"} />

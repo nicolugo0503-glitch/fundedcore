@@ -1,7 +1,8 @@
 // TopStep / ProjectX (TopstepX) bridge. The browser sends the user's API key
 // once to authenticate; we return a session token. Then it polls "snapshot"
-// (token only) which we proxy server-side to ProjectX (avoids CORS, keeps the
-// key off the client). Built to ProjectX Gateway API docs; pending live validation.
+// (token + optional accountId) which we proxy server-side to ProjectX (avoids
+// CORS, keeps the key off the client). Returns ALL the trader's accounts so the
+// UI can let them choose which to monitor (a login often has several).
 import { NextResponse } from "next/server";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -34,16 +35,23 @@ export async function POST(req: Request) {
     if (action === "snapshot") {
       const { token } = body;
       if (!token) return NextResponse.json({ error: "Missing token." }, { status: 400 });
-      const acc = await px("/api/Account/search", { onlyActiveAccounts: true }, token);
+      // Fetch ALL accounts (active + blown/locked) so the trader can pick; ProjectX
+      // marks tradeable accounts with canTrade — blown accounts come back with canTrade:false.
+      const acc = await px("/api/Account/search", { onlyActiveAccounts: false }, token);
       if (!acc.ok) return NextResponse.json({ error: "Session expired — reconnect." }, { status: 401 });
-      const accounts = (acc.j?.accounts || []).map((a: any) => ({ id: a.id, name: a.name, balance: a.balance, canTrade: a.canTrade, simulated: a.simulated }));
-      const primary = accounts[0];
+      let accounts = (acc.j?.accounts || []).map((a: any) => ({ id: a.id, name: a.name, balance: a.balance, canTrade: a.canTrade, simulated: a.simulated }));
+      // sort tradeable first, then by balance desc — so the picker leads with the live account.
+      accounts.sort((x: any, y: any) => (Number(!!y.canTrade) - Number(!!x.canTrade)) || ((y.balance || 0) - (x.balance || 0)));
+
+      const wantId = body.accountId;
+      const primary = accounts.find((a: any) => String(a.id) === String(wantId)) || accounts.find((a: any) => a.canTrade) || accounts[0];
+
       let positions: any[] = [];
       if (primary) {
         const pos = await px("/api/Position/searchOpen", { accountId: primary.id }, token);
         positions = (pos.j?.positions || []).map((p: any) => ({ symbol: String(p.contractId ?? "—"), net: (p.type === 2 ? -1 : 1) * (p.size ?? 0), avgPrice: p.averagePrice ?? 0, openPnl: p.profitAndLoss ?? p.openPnl ?? 0 }));
       }
-      return NextResponse.json({ accounts, positions });
+      return NextResponse.json({ accounts, positions, primaryId: primary?.id ?? null });
     }
 
     return NextResponse.json({ error: "Unknown action." }, { status: 400 });
