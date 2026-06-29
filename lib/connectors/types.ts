@@ -21,4 +21,6 @@ export interface BrokerConnector {
   connect(events: ConnectorEvents): Promise<void> | void;
   disconnect(): void;
   selectAccount?(id: string | number): void;
+  // Pull the selected account's real trade history (for syncing into the profile).
+  fetchTrades?(accountId: string | number): Promise<any[]>;
 }

@@ -56,5 +56,12 @@ export class ProjectXConnector implements BrokerConnector {
     } catch { ev.onStatus("error", "Connection error."); }
   };
 
+  async fetchTrades(accountId: string | number): Promise<any[]> {
+    const r = await fetch("/api/connect/projectx", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "trades", token: this.token, accountId, days: 90 }) });
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.error || "Could not fetch trade history.");
+    return (j.trades || []) as any[];
+  }
+
   disconnect() { clearInterval(this.timer); this.timer = null; this.ev = null; this.selectedId = null; this.accounts = []; }
 }

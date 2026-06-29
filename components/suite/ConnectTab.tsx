@@ -3,6 +3,7 @@ import { useRef, useState } from "react";
 import { type Profile } from "../../lib/profile";
 import { FIRMS } from "../../lib/firms";
 import { assessAccount, STATUS_META, type Account } from "../../lib/risk";
+import { saveProfile } from "../../lib/profile";
 import { usd } from "../../lib/format";
 import { SuiteHeader, Panel, StatTile } from "./ui";
 import { Icon } from "../Icon";
@@ -15,13 +16,15 @@ import { ProjectXConnector } from "../../lib/connectors/projectx";
 
 const FIRM_KEYS = Object.keys(FIRMS);
 
-export function ConnectTab({ profile }: { profile: Profile }) {
+export function ConnectTab({ profile, setProfile }: { profile: Profile; setProfile?: (p: Profile) => void }) {
   const [provider, setProvider] = useState<"sim" | "tradovate" | "rithmic" | "webhook" | "projectx">("sim");
   const [status, setStatus] = useState<ConnStatus>("idle");
   const [statusMsg, setStatusMsg] = useState("");
   const [acct, setAcct] = useState<LiveAccount | null>(null);
   const [accounts, setAccounts] = useState<LiveAccountInfo[]>([]);
   const [selId, setSelId] = useState<string>("");
+  const [syncMsg, setSyncMsg] = useState<string>("");
+  const [syncing, setSyncing] = useState(false);
   const [positions, setPositions] = useState<LivePosition[]>([]);
   const [fills, setFills] = useState<LiveFill[]>([]);
   const [firmKey, setFirmKey] = useState(profile.accounts[0]?.firmKey || FIRM_KEYS[0]);
@@ -53,6 +56,22 @@ export function ConnectTab({ profile }: { profile: Profile }) {
   }
   function disconnect() { conn.current?.disconnect(); conn.current = null; setStatus("closed"); setAccounts([]); setSelId(""); }
   function pickAccount(id: string) { setSelId(id); conn.current?.selectAccount?.(id); }
+  async function syncAccount() {
+    if (!setProfile || !conn.current?.fetchTrades || !acct) return;
+    setSyncing(true); setSyncMsg("");
+    try {
+      const idForTrades = selId || (accounts.find((a) => a.canTrade) || accounts[0])?.id;
+      const trades = await conn.current.fetchTrades(idForTrades as any);
+      const liveBal = acct.balance + (acct.openPnl || 0);
+      const f = FIRMS[firmKey];
+      const days = new Set(trades.map((t: any) => t.date)).size || 1;
+      const account: Account = { id: "live-" + String(idForTrades), label: acct.name, firmKey, startBalance: f?.start ?? liveBal, balance: liveBal, peakEquity: Math.max(liveBal, f?.start ?? liveBal), todayPnL: acct.dayPnl + (acct.openPnl || 0), daysTraded: days };
+      const next = { ...profile, trades: trades as any, accounts: [account], demo: false };
+      setProfile(next); saveProfile(next);
+      setSyncMsg(`Synced ${trades.length} trades from ${acct.name}. Every module now reads this account.`);
+    } catch (e: any) { setSyncMsg(e?.message || "Sync failed — reconnect and try again."); }
+    finally { setSyncing(false); }
+  }
 
   // live Distance to Breach from the connected balance + chosen firm
   const firm = FIRMS[firmKey];
@@ -144,6 +163,16 @@ export function ConnectTab({ profile }: { profile: Profile }) {
                 ) : null; })()}
                 <span className="text-[.74rem] text-t3 ml-auto">Switch which funded account FundedCore monitors.</span>
               </div>
+            </div>
+          )}
+          {provider === "projectx" && setProfile && (
+            <div className="card p-4 flex flex-wrap items-center gap-3">
+              <div>
+                <div className="font-semibold text-t1 text-[.95rem]">Make the whole app read this account</div>
+                <div className="text-[.78rem] text-t3">Pulls your real trade history into FundedCore so Score, Mirror, Edge, Gate, Insights & Risk all read your account — not demo data.</div>
+              </div>
+              <button onClick={syncAccount} disabled={syncing} className="btn btn-primary text-sm ml-auto shrink-0">{syncing ? "Syncing…" : "Sync my account →"}</button>
+              {syncMsg && <div className="w-full text-[.82rem]" style={{ color: syncMsg.startsWith("Synced") ? "var(--grn)" : "var(--red)" }}>{syncMsg}</div>}
             </div>
           )}
           <div className="grid sm:grid-cols-3 gap-4">

@@ -217,7 +217,7 @@ export default function Suite() {
           {tab === "challenge" && <ChallengeTab profile={profile} />}
           {tab === "simulator" && <SimulatorTab profile={profile} />}
           {tab === "today" && <TodayTab profile={profile} setProfile={setProfile} />}
-          {tab === "connect" && <ConnectTab profile={profile} />}
+          {tab === "connect" && <ConnectTab profile={profile} setProfile={setProfile} />}
           {tab === "plan" && <PlanTab profile={profile} setProfile={setProfile} />}
           {tab === "tools" && <ToolsTab profile={profile} />}
           {tab === "charts" && <ChartsTab profile={profile} />}

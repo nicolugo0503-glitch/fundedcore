@@ -54,6 +54,32 @@ export async function POST(req: Request) {
       return NextResponse.json({ accounts, positions, primaryId: primary?.id ?? null });
     }
 
+    if (action === "trades") {
+      // Pull the account's real trade history so every FundedCore module reads it.
+      const { token, accountId } = body;
+      if (!token || accountId == null) return NextResponse.json({ error: "Missing token or accountId." }, { status: 400 });
+      const days = Math.min(365, Math.max(1, Number(body.days) || 90));
+      const end = new Date();
+      const start = new Date(end.getTime() - days * 86400000);
+      const tr = await px("/api/Trade/search", { accountId, startTimestamp: start.toISOString(), endTimestamp: end.toISOString() }, token);
+      if (!tr.ok) return NextResponse.json({ error: "Could not fetch trades (session may have expired — reconnect)." }, { status: 401 });
+      const raw = tr.j?.trades || tr.j?.data || [];
+      // ProjectX returns half-turn executions; the closing half carries realized P&L.
+      // Keep those (non-null P&L, not voided) as one realized trade each.
+      const trades = raw
+        .filter((t: any) => !t.voided && t.profitAndLoss != null)
+        .map((t: any, i: number) => {
+          const ts = Date.parse(t.creationTimestamp || t.timestamp || t.createdAt) || Date.now();
+          const d = new Date(ts);
+          const date = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`;
+          const side = (t.side === 1 || t.side === "Sell" || t.type === 1) ? "short" : "long";
+          const pnl = Number(t.profitAndLoss || 0) - Number(t.fees || 0);
+          return { id: Number(t.id) || ts * 100 + i, date, timestamp: ts, symbol: String(t.contractId ?? t.symbol ?? "—"), side, size: Number(t.size ?? 1), pnl, entry: t.price ?? undefined };
+        })
+        .sort((a: any, b: any) => a.timestamp - b.timestamp);
+      return NextResponse.json({ trades, count: trades.length });
+    }
+
     return NextResponse.json({ error: "Unknown action." }, { status: 400 });
   } catch (e: any) {
     return NextResponse.json({ error: "Could not reach ProjectX: " + (e?.message || "network error") }, { status: 502 });
