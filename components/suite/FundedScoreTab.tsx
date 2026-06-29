@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { type Profile } from "../../lib/profile";
 import { computeFundedScore } from "../../lib/fundedscore";
+import { benchmark } from "../../lib/benchmark";
 import { usd } from "../../lib/format";
 import { SuiteHeader, Ring, Panel, StatTile, EmptyState } from "./ui";
 import { AIRead } from "./AIRead";
@@ -84,6 +85,19 @@ export function FundedScoreTab({ profile }: { profile: Profile }) {
   const [horizon, setHorizon] = useState(5);
   const acc = profile.accounts.find((a) => a.id === accId) || profile.accounts[0] || null;
   const fs = computeFundedScore(profile.trades, acc, { horizonDays: horizon });
+  const [vMsg, setVMsg] = useState(""); const [vUrl, setVUrl] = useState(""); const [vBusy, setVBusy] = useState(false);
+  async function mintBadge() {
+    setVBusy(true); setVMsg("");
+    try {
+      const b = benchmark(profile.trades, acc);
+      const r = await fetch("/api/verify", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "mint", payload: { handle: profile.name, composure: fs.composure, grade: fs.grade, rankPercentile: b.composite, sampleTrades: fs.sampleTrades } }) });
+      const j = await r.json();
+      if (!r.ok || !j.id) { setVMsg(j.error || "Could not create badge."); return; }
+      const url = (typeof window !== "undefined" ? window.location.origin : "") + "/v/" + j.id;
+      setVUrl(url); try { await navigator.clipboard.writeText(url); setVMsg("Verified badge created & link copied."); } catch { setVMsg("Verified badge created."); }
+    } catch (e: any) { setVMsg(e?.message || "Could not create badge."); }
+    finally { setVBusy(false); }
+  }
 
   if (!fs.ready) {
     return (
@@ -107,7 +121,15 @@ export function FundedScoreTab({ profile }: { profile: Profile }) {
         right={<div className="flex items-center gap-2">
           <span className="chip" style={{ color: fs.confidence === "high" ? "var(--grn)" : fs.confidence === "medium" ? "var(--amb,#f5a623)" : "var(--red)" }}>{fs.confidence} confidence</span>
           <button onClick={() => shareScoreCard(fs, profile.name)} className="btn btn-primary !py-1.5 !px-3.5 text-[.8rem] inline-flex items-center gap-1.5"><Icon name="up" size={14} /> Share my score</button>
+          <button onClick={mintBadge} disabled={vBusy} className="btn btn-ghost !py-1.5 !px-3.5 text-[.8rem] inline-flex items-center gap-1.5"><Icon name="shield" size={14} /> {vBusy ? "Creating…" : "Get verified badge"}</button>
         </div>} />
+      {vMsg && (
+        <div className="card p-3 flex flex-wrap items-center gap-3 text-[.84rem]">
+          <span style={{ color: vUrl ? "var(--grn)" : "var(--red)" }}>{vMsg}</span>
+          {vUrl && <a href={vUrl} target="_blank" rel="noreferrer" className="mono text-[.8rem]" style={{ color: "var(--acc)" }}>{vUrl}</a>}
+          {vUrl && <a href={vUrl} target="_blank" rel="noreferrer" className="btn btn-ghost !py-1 !px-3 text-xs ml-auto">Open</a>}
+        </div>
+      )}
 
       <div className="grid lg:grid-cols-2 gap-5">
         {/* Composure */}
