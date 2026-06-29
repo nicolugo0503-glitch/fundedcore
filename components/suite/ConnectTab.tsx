@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { type Profile } from "../../lib/profile";
 import { FIRMS } from "../../lib/firms";
 import { assessAccount, STATUS_META, type Account } from "../../lib/risk";
@@ -25,6 +25,13 @@ export function ConnectTab({ profile, setProfile }: { profile: Profile; setProfi
   const [selId, setSelId] = useState<string>("");
   const [syncMsg, setSyncMsg] = useState<string>("");
   const [syncing, setSyncing] = useState(false);
+  const [armed, setArmed] = useState(false);
+  const [autoFlat, setAutoFlat] = useState(false);
+  const [gMsg, setGMsg] = useState("");
+  const [flattening, setFlattening] = useState(false);
+  const [countdown, setCountdown] = useState<number | null>(null);
+  const firedRef = useRef(false);
+  const canceledRef = useRef(false);
   const [positions, setPositions] = useState<LivePosition[]>([]);
   const [fills, setFills] = useState<LiveFill[]>([]);
   const [firmKey, setFirmKey] = useState(profile.accounts[0]?.firmKey || FIRM_KEYS[0]);
@@ -72,6 +79,13 @@ export function ConnectTab({ profile, setProfile }: { profile: Profile; setProfi
     } catch (e: any) { setSyncMsg(e?.message || "Sync failed — reconnect and try again."); }
     finally { setSyncing(false); }
   }
+  async function flattenNow() {
+    if (!conn.current?.flatten || !acct) return;
+    setFlattening(true); setCountdown(null);
+    try { const r = await conn.current.flatten((selId || accounts[0]?.id) as any); setGMsg(`Auto-Guardian flattened ${r.flattened}/${r.attempted} position(s).` + (r.errors?.length ? ` Couldn't close: ${r.errors.join(", ")} — check your platform.` : "")); }
+    catch (e: any) { setGMsg(e?.message || "Flatten failed — close your positions manually in your platform NOW."); }
+    finally { setFlattening(false); }
+  }
 
   // live Distance to Breach from the connected balance + chosen firm
   const firm = FIRMS[firmKey];
@@ -83,6 +97,31 @@ export function ConnectTab({ profile, setProfile }: { profile: Profile; setProfi
   }
   const sm = liveRisk ? STATUS_META[liveRisk.status] : null;
   const live = status === "live";
+
+  // ── Auto-Guardian: derive whether we are at the breach/daily-stop line ──
+  const liveEquity = acct ? acct.balance + (acct.openPnl || 0) : 0;
+  const dailyNet = acct ? acct.dayPnl + (acct.openPnl || 0) : 0;
+  const dailyStopHit = !!acct && profile.settings.dailyLossStop > 0 && dailyNet <= -profile.settings.dailyLossStop;
+  const breachDanger = !!liveRisk && (liveRisk.status === "danger" || liveRisk.status === "breached" || liveRisk.pctBuffer <= 0.15);
+  const guardianDanger = !!acct && live && (dailyStopHit || breachDanger);
+  const guardianReason = dailyStopHit
+    ? `Daily loss stop hit — ${usd(dailyNet)} on the day.`
+    : (liveRisk ? `Distance to breach critical — ${usd(Math.max(0, liveRisk.distanceToBreach))} of buffer left.` : "Risk line crossed.");
+
+  useEffect(() => { if (!guardianDanger) { firedRef.current = false; canceledRef.current = false; setCountdown(null); } }, [guardianDanger]);
+  useEffect(() => {
+    if (!(armed && autoFlat && guardianDanger && positions.length)) return;
+    if (firedRef.current) return;
+    firedRef.current = true; canceledRef.current = false;
+    let n = 8; setCountdown(n);
+    const iv = setInterval(() => {
+      if (canceledRef.current) { clearInterval(iv); setCountdown(null); return; }
+      n -= 1; setCountdown(n);
+      if (n <= 0) { clearInterval(iv); if (!canceledRef.current) flattenNow(); }
+    }, 1000);
+    return () => clearInterval(iv);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [armed, autoFlat, guardianDanger, positions.length]);
 
   return (
     <div className="fade space-y-5">
@@ -173,6 +212,38 @@ export function ConnectTab({ profile, setProfile }: { profile: Profile; setProfi
               </div>
               <button onClick={syncAccount} disabled={syncing} className="btn btn-primary text-sm ml-auto shrink-0">{syncing ? "Syncing…" : "Sync my account →"}</button>
               {syncMsg && <div className="w-full text-[.82rem]" style={{ color: syncMsg.startsWith("Synced") ? "var(--grn)" : "var(--red)" }}>{syncMsg}</div>}
+            </div>
+          )}
+          {provider === "projectx" && (
+            <div className="card p-5" style={{ borderColor: armed ? (guardianDanger ? "rgba(239,68,68,.5)" : "rgba(52,211,153,.4)") : undefined }}>
+              <div className="flex flex-wrap items-center gap-3">
+                <Icon name="shield" size={18} />
+                <div>
+                  <div className="font-semibold text-t1">Auto-Guardian <span className="text-[.7rem] font-bold ml-1" style={{ color: "var(--acc)" }}>KILL-SWITCH</span></div>
+                  <div className="text-[.78rem] text-t3">Watches your live breach line + daily stop. When you cross it, it flattens you out — before the account does.</div>
+                </div>
+                <label className="ml-auto flex items-center gap-2 text-[.82rem] text-t2 cursor-pointer">
+                  <input type="checkbox" checked={armed} onChange={(e) => { setArmed(e.target.checked); setGMsg(""); }} /> {armed ? "Armed" : "Arm"}
+                </label>
+              </div>
+              {armed && (
+                <div className="mt-3 flex flex-wrap items-center gap-4">
+                  <label className="flex items-center gap-2 text-[.8rem] text-t2 cursor-pointer"><input type="checkbox" checked={autoFlat} onChange={(e) => setAutoFlat(e.target.checked)} /> Auto-flatten when I cross the line (8s countdown to cancel)</label>
+                  {!guardianDanger && <span className="chip" style={{ color: "var(--grn)" }}><span className="w-1.5 h-1.5 rounded-full" style={{ background: "var(--grn)" }} /> watching · you're clear</span>}
+                </div>
+              )}
+              {armed && guardianDanger && (
+                <div className="mt-4 rounded-xl p-4" style={{ background: "rgba(239,68,68,.10)", border: "1px solid rgba(239,68,68,.4)" }}>
+                  <div className="font-bold text-[1.05rem]" style={{ color: "var(--red)" }}>⛔ LOCKDOWN — {guardianReason}</div>
+                  <div className="text-[.82rem] text-t2 mt-1">{positions.length ? `${positions.length} open position(s).` : "No open positions."} Stop trading now.</div>
+                  <div className="flex items-center gap-2 mt-3">
+                    {positions.length > 0 && <button onClick={flattenNow} disabled={flattening} className="btn text-sm" style={{ background: "var(--red)", color: "#fff" }}>{flattening ? "Flattening…" : countdown != null ? `Flatten in ${countdown}s` : "Flatten all now"}</button>}
+                    {countdown != null && <button onClick={() => { canceledRef.current = true; setCountdown(null); }} className="btn btn-ghost text-sm">Cancel</button>}
+                  </div>
+                </div>
+              )}
+              {gMsg && <div className="mt-3 text-[.82rem]" style={{ color: gMsg.includes("flattened") ? "var(--grn)" : "var(--red)" }}>{gMsg}</div>}
+              <div className="text-[.68rem] text-t3 mt-3">Flatten places real closing orders through your broker. Pending live validation — always confirm in your platform. FundedCore never opens trades, only closes to protect the account.</div>
             </div>
           )}
           <div className="grid sm:grid-cols-3 gap-4">

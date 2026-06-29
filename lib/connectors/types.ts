@@ -23,4 +23,6 @@ export interface BrokerConnector {
   selectAccount?(id: string | number): void;
   // Pull the selected account's real trade history (for syncing into the profile).
   fetchTrades?(accountId: string | number): Promise<any[]>;
+  // Auto-Guardian kill-switch: flatten all open positions for the account.
+  flatten?(accountId: string | number): Promise<{ flattened: number; attempted: number; errors: string[] }>;
 }

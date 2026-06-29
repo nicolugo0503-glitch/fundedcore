@@ -63,5 +63,12 @@ export class ProjectXConnector implements BrokerConnector {
     return (j.trades || []) as any[];
   }
 
+  async flatten(accountId: string | number) {
+    const r = await fetch("/api/connect/projectx", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "flatten", token: this.token, accountId }) });
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.error || "Flatten failed.");
+    return j as { flattened: number; attempted: number; errors: string[] };
+  }
+
   disconnect() { clearInterval(this.timer); this.timer = null; this.ev = null; this.selectedId = null; this.accounts = []; }
 }

@@ -80,6 +80,21 @@ export async function POST(req: Request) {
       return NextResponse.json({ trades, count: trades.length });
     }
 
+    if (action === "flatten") {
+      // Auto-Guardian: close every open position for the account (user-armed safety kill-switch).
+      const { token, accountId } = body;
+      if (!token || accountId == null) return NextResponse.json({ error: "Missing token or accountId." }, { status: 400 });
+      const pos = await px("/api/Position/searchOpen", { accountId }, token);
+      if (!pos.ok) return NextResponse.json({ error: "Could not read positions (reconnect)." }, { status: 401 });
+      const open = (pos.j?.positions || []).filter((p: any) => (p.size ?? 0) !== 0);
+      let flattened = 0; const errors: string[] = [];
+      for (const p of open) {
+        const r = await px("/api/Position/closeContract", { accountId, contractId: p.contractId }, token);
+        if (r.ok && (r.j?.success !== false)) flattened++; else errors.push(String(p.contractId));
+      }
+      return NextResponse.json({ flattened, attempted: open.length, errors });
+    }
+
     return NextResponse.json({ error: "Unknown action." }, { status: 400 });
   } catch (e: any) {
     return NextResponse.json({ error: "Could not reach ProjectX: " + (e?.message || "network error") }, { status: 502 });
