@@ -195,7 +195,10 @@ export default function Suite() {
           {profile.demo && (
             <div className="card p-3 mb-3 flex items-center justify-between gap-3 flex-wrap" style={{ borderColor: "color-mix(in srgb, var(--amb) 45%, var(--line2))", background: "color-mix(in srgb, var(--amb) 7%, transparent)" }}>
               <span className="text-[.84rem] text-t1"><b style={{ color: "var(--amb)" }}>You're viewing demo data.</b> These are sample trades and accounts — not yours. Upload your own to make the whole app yours.</span>
-              <button onClick={() => setTab("journal")} className="btn btn-primary !py-1.5 !px-3.5 text-[.78rem] shrink-0">Upload my trades →</button>
+              <div className="flex items-center gap-2 shrink-0">
+                <a href="/how-to" target="_blank" rel="noreferrer" className="text-[.78rem] font-semibold" style={{ color: "var(--acc)" }}>How?</a>
+                <button onClick={() => setTab("journal")} className="btn btn-primary !py-1.5 !px-3.5 text-[.78rem]">Upload my trades →</button>
+              </div>
             </div>
           )}
           <AlertsBar profile={profile} />

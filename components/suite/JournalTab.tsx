@@ -36,8 +36,25 @@ export function JournalTab({ profile, setProfile }: { profile: Profile; setProfi
         </div>
       </div>
 
+      <details className="card p-4">
+        <summary className="cursor-pointer text-[.9rem] font-semibold text-t1">How do I get my trades in? (TopStep &amp; Tradovate) →</summary>
+        <div className="mt-3 grid sm:grid-cols-2 gap-4 text-[.84rem] text-t2 leading-relaxed">
+          <div>
+            <div className="font-semibold text-t1 mb-1">TopStep (TopstepX)</div>
+            <div><b>Fastest:</b> Broker Link → TopStep → paste your TopstepX username + API key (Settings → API → Link Account) → Sync my account.</div>
+            <div className="mt-1.5"><b>Or CSV:</b> TopstepX → <b>Trades</b> tab → <b>Export</b> (bottom-right) → pick dates → save .csv → Upload CSV here.</div>
+          </div>
+          <div>
+            <div className="font-semibold text-t1 mb-1">Tradovate (Apex, Tradeify, TPT…)</div>
+            <div><b>Live feed:</b> Broker Link → Tradovate → username + password → Connect.</div>
+            <div className="mt-1.5"><b>Full history:</b> Tradovate → <b>Reports → Orders</b> tab → Download Report → <b>CSV</b> → Upload CSV here.</div>
+          </div>
+        </div>
+        <a href="/how-to" target="_blank" rel="noreferrer" className="inline-block mt-3 text-[.82rem] font-semibold" style={{ color: "var(--acc)" }}>Full step-by-step guide →</a>
+      </details>
+
       {score ? <ScoreReport r={score} name={profile.name} /> : (
-        <div className="card p-8 text-center text-t3">Upload your trade history (or use a sample) to compute your Trader Score and unlock Insights + the Daily Brief.</div>
+        <div className="card p-8 text-center text-t3">Upload your trade history (or use a sample) to compute your Trader Score and unlock Insights + the Daily Brief. <a href="/how-to" target="_blank" rel="noreferrer" style={{ color: "var(--acc)" }}>See how →</a></div>
       )}
 
       {recent.length > 0 && (
