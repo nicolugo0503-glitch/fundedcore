@@ -20,6 +20,7 @@ export type Profile = {
   checklistDone: { date: string; done: number[] }; // today's checked items
   onboarded: boolean;
   pro?: boolean;            // FundedCore Pro access (The Mirror, Your Edge)
+  stripeCustomerId?: string; // set by the Stripe webhook after first payment
 };
 
 const KEY = "fundedcore.profile.v1";

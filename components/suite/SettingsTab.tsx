@@ -31,6 +31,23 @@ export function SettingsTab({ profile, setProfile }: { profile: Profile; setProf
     } catch (e: any) { setDelMsg(e?.message || "Something went wrong."); setDeleting(false); }
   }
 
+  const [subMsg, setSubMsg] = useState<string | null>(null);
+  const [subBusy, setSubBusy] = useState(false);
+  async function proAction(kind: "checkout" | "portal") {
+    if (!supabase) { setSubMsg("Sign in (cloud sync) is required."); return; }
+    setSubBusy(true); setSubMsg(null);
+    try {
+      const { data } = await supabase.auth.getSession();
+      const token = data.session?.access_token;
+      if (!token) { setSubMsg("Sign in first."); setSubBusy(false); return; }
+      const r = await fetch("/api/stripe/" + kind, { method: "POST", headers: { Authorization: "Bearer " + token } });
+      const j = await r.json();
+      if (j.url) { window.location.href = j.url; return; }
+      setSubMsg(j.error || "Something went wrong.");
+    } catch (e: any) { setSubMsg(e?.message || "Something went wrong."); }
+    setSubBusy(false);
+  }
+
   const firmKeys = Object.keys(FIRMS);
   const [firmKey, setFirmKey] = useState(firmKeys[0]);
   const [bal, setBal] = useState(FIRMS[firmKeys[0]].start);
@@ -48,6 +65,19 @@ export function SettingsTab({ profile, setProfile }: { profile: Profile; setProf
   return (
     <div className="space-y-5 fade max-w-2xl">
       <SuiteHeader eyebrow="Settings" title="Personalize your suite" />
+
+      <section className="card p-5">
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <div>
+            <div className="font-semibold">FundedCore Pro</div>
+            <div className="text-[.82rem] text-t2">{profile.pro ? "Active — The Mirror & Your Edge are unlocked." : "$29/mo — unlock The Mirror & Your Edge."}</div>
+          </div>
+          {profile.pro
+            ? <button onClick={() => proAction("portal")} disabled={subBusy} className="btn btn-ghost text-sm shrink-0">{subBusy ? "Opening…" : "Manage subscription"}</button>
+            : <button onClick={() => proAction("checkout")} disabled={subBusy} className="btn btn-primary text-sm shrink-0">{subBusy ? "…" : "Upgrade — $29/mo"}</button>}
+        </div>
+        {subMsg && <p className="text-[.8rem] mt-2" style={{ color: "var(--red)" }}>{subMsg}</p>}
+      </section>
 
       <section className="card p-5 space-y-3">
         <h3 className="font-semibold">You</h3>

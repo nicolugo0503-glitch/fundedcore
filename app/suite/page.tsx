@@ -122,6 +122,11 @@ export default function Suite() {
     setProfileState(p); saveProfile(p);
     if (cloudEnabled && session?.user) upsertProfile(session.user.id, p);
   }
+
+  // After Stripe checkout success, optimistically unlock Pro (webhook is source of truth).
+  const proFlag = useRef(false);
+  useEffect(() => { if (typeof window !== "undefined" && new URLSearchParams(window.location.search).get("pro") === "success") { proFlag.current = true; window.history.replaceState({}, "", "/suite"); } }, []);
+  useEffect(() => { if (proFlag.current && profile && !profile.pro) { proFlag.current = false; setProfile({ ...profile, pro: true }); } }, [profile]);
   async function signOut() { if (supabase) await supabase.auth.signOut(); }
 
   if (cloudEnabled && !authReady) {

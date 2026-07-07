@@ -1,12 +1,34 @@
 "use client";
+import { useState } from "react";
 import { type Profile } from "../../lib/profile";
+import { supabase } from "../../lib/cloud";
 import { Icon } from "../Icon";
 
+const HARD_PAYWALL = process.env.NEXT_PUBLIC_PAYWALL_HARD === "1";
+
 export function ProLock({ profile, setProfile, go }: { profile: Profile; setProfile: (p: Profile) => void; go: (id: string) => void }) {
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState("");
   const feats: [string, string, string][] = [
     ["repeat", "The Mirror", "See what your bad habits cost you — in real dollars — vs. the disciplined you."],
     ["up", "Your Edge", "The exact conditions where YOUR data proves you make money. Trade these."],
   ];
+
+  async function upgrade() {
+    setBusy(true); setMsg("");
+    try {
+      if (!supabase) { setMsg("Sign in (cloud sync) is required to subscribe."); setBusy(false); return; }
+      const { data } = await supabase.auth.getSession();
+      const token = data.session?.access_token;
+      if (!token) { setMsg("Please sign in first, then upgrade."); setBusy(false); return; }
+      const r = await fetch("/api/stripe/checkout", { method: "POST", headers: { Authorization: "Bearer " + token } });
+      const j = await r.json();
+      if (j.url) { window.location.href = j.url; return; }
+      setMsg(j.error || "Could not start checkout.");
+    } catch (e: any) { setMsg(e?.message || "Could not start checkout."); }
+    setBusy(false);
+  }
+
   return (
     <div className="fade max-w-2xl mx-auto">
       <div className="card p-7 md:p-9 text-center relative overflow-hidden" style={{ borderColor: "color-mix(in srgb, var(--acc) 35%, var(--line2))" }}>
@@ -27,8 +49,17 @@ export function ProLock({ profile, setProfile, go }: { profile: Profile; setProf
             ))}
           </div>
 
-          <button onClick={() => setProfile({ ...profile, pro: true })} className="btn btn-primary w-full mt-7 !py-3 text-[.95rem]">Unlock Pro — free during beta →</button>
-          <p className="text-[.72rem] text-t3 mt-3">Free while we build it with founding traders. Paid plans come later — you'll be grandfathered.</p>
+          <div className="mt-7 flex items-baseline justify-center gap-2">
+            <span className="text-3xl font-bold">$29</span><span className="text-t2 text-sm">/mo</span>
+            <span className="ml-2 text-[.72rem] font-semibold px-2 py-0.5 rounded-full" style={{ background: "var(--acc-weak)", color: "var(--acc)" }}>founding: $19/mo with code</span>
+          </div>
+          <button onClick={upgrade} disabled={busy} className="btn btn-primary w-full mt-3 !py-3 text-[.95rem]">{busy ? "Starting checkout…" : "Upgrade to Pro →"}</button>
+          {msg && <p className="text-[.8rem] mt-2" style={{ color: "var(--red)" }}>{msg}</p>}
+          <p className="text-[.72rem] text-t3 mt-3">Cancel anytime. Secure checkout by Stripe.</p>
+
+          {!HARD_PAYWALL && (
+            <button onClick={() => setProfile({ ...profile, pro: true })} className="mt-4 text-[.78rem] underline" style={{ color: "var(--t3)" }}>Founding tester? Unlock free during beta</button>
+          )}
         </div>
       </div>
     </div>
