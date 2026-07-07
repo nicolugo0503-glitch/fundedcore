@@ -172,9 +172,13 @@ export default function Suite() {
             </div>
           ))}
         </div>
-        <button onClick={() => setTab("settings")} className="side-link mt-2 hidden md:flex">
+        <button onClick={() => setTab("settings")} className={`side-link mt-2 hidden md:flex ${tab === "settings" ? "on" : ""}`}>
+          <Icon name="settings" size={16} className="opacity-90" />
+          <span className="hidden md:inline">Settings</span>
+        </button>
+        <button onClick={() => setTab("settings")} className="side-link hidden md:flex" title="Account & settings">
           <span className="w-6 h-6 rounded-full flex items-center justify-center text-[.7rem] font-semibold shrink-0" style={{ background: "var(--acc-weak)", color: "var(--acc)", border: "1px solid var(--line2)" }}>{profile.name.charAt(0).toUpperCase()}</span>
-          <span className="truncate">{profile.name} · Pro</span>
+          <span className="truncate">{profile.name}{profile.pro ? " · Pro" : ""}</span>
         </button>
       </aside>
 
