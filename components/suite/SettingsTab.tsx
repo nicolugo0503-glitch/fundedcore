@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { type Profile, clearProfile, DEFAULT_PROFILE, demoProfile } from "../../lib/profile";
 import { FIRMS, INSTRUMENTS } from "../../lib/firms";
 import { type Account } from "../../lib/risk";
@@ -32,6 +32,10 @@ export function SettingsTab({ profile, setProfile }: { profile: Profile; setProf
   }
 
   const [subMsg, setSubMsg] = useState<string | null>(null);
+  const [ownerEmail, setOwnerEmail] = useState("");
+  useEffect(() => { supabase?.auth.getUser().then(({ data }) => setOwnerEmail((data.user?.email || "").toLowerCase())).catch(() => {}); }, []);
+  const OWNER = (process.env.NEXT_PUBLIC_OWNER_EMAIL || "nicolugo0503@gmail.com").toLowerCase();
+  const isOwner = !!ownerEmail && ownerEmail === OWNER;
   const [subBusy, setSubBusy] = useState(false);
   async function proAction(kind: "checkout" | "portal") {
     if (!supabase) { setSubMsg("Sign in (cloud sync) is required."); return; }
@@ -72,12 +76,17 @@ export function SettingsTab({ profile, setProfile }: { profile: Profile; setProf
             <div className="font-semibold">FundedCore Pro</div>
             <div className="text-[.82rem] text-t2">{profile.pro ? "Active — The Mirror & Your Edge are unlocked." : "$29/mo — unlock The Mirror & Your Edge."}</div>
           </div>
-          {profile.pro
-            ? <div className="flex items-center gap-2 shrink-0">
-                <button onClick={() => { if (confirm("Reset your account to Free? This locks The Mirror + Your Edge again (use it to test the paywall).")) setProfile({ ...profile, pro: false }); }} className="btn btn-ghost text-sm">Reset to Free (testing)</button>
-                <button onClick={() => proAction("portal")} disabled={subBusy} className="btn btn-ghost text-sm">{subBusy ? "Opening…" : "Manage subscription"}</button>
-              </div>
-            : <button onClick={() => proAction("checkout")} disabled={subBusy} className="btn btn-primary text-sm shrink-0">{subBusy ? "…" : "Upgrade — $29/mo"}</button>}
+          <div className="flex items-center gap-2 shrink-0 flex-wrap">
+            {profile.pro
+              ? <>
+                  {isOwner && <button onClick={() => { if (confirm("Reset your account to Free? Locks The Mirror + Your Edge (test the paywall).")) setProfile({ ...profile, pro: false }); }} className="btn btn-ghost text-sm">Reset to Free (owner)</button>}
+                  <button onClick={() => proAction("portal")} disabled={subBusy} className="btn btn-ghost text-sm">{subBusy ? "Opening…" : "Manage subscription"}</button>
+                </>
+              : <>
+                  {isOwner && <button onClick={() => setProfile({ ...profile, pro: true })} className="btn btn-ghost text-sm">Grant Pro (owner)</button>}
+                  <button onClick={() => proAction("checkout")} disabled={subBusy} className="btn btn-primary text-sm">{subBusy ? "…" : "Upgrade — $29/mo"}</button>
+                </>}
+          </div>
         </div>
         {subMsg && <p className="text-[.8rem] mt-2" style={{ color: "var(--red)" }}>{subMsg}</p>}
       </section>
