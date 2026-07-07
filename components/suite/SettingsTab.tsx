@@ -73,7 +73,10 @@ export function SettingsTab({ profile, setProfile }: { profile: Profile; setProf
             <div className="text-[.82rem] text-t2">{profile.pro ? "Active — The Mirror & Your Edge are unlocked." : "$29/mo — unlock The Mirror & Your Edge."}</div>
           </div>
           {profile.pro
-            ? <button onClick={() => proAction("portal")} disabled={subBusy} className="btn btn-ghost text-sm shrink-0">{subBusy ? "Opening…" : "Manage subscription"}</button>
+            ? <div className="flex items-center gap-2 shrink-0">
+                <button onClick={() => { if (confirm("Reset your account to Free? This locks The Mirror + Your Edge again (use it to test the paywall).")) setProfile({ ...profile, pro: false }); }} className="btn btn-ghost text-sm">Reset to Free (testing)</button>
+                <button onClick={() => proAction("portal")} disabled={subBusy} className="btn btn-ghost text-sm">{subBusy ? "Opening…" : "Manage subscription"}</button>
+              </div>
             : <button onClick={() => proAction("checkout")} disabled={subBusy} className="btn btn-primary text-sm shrink-0">{subBusy ? "…" : "Upgrade — $29/mo"}</button>}
         </div>
         {subMsg && <p className="text-[.8rem] mt-2" style={{ color: "var(--red)" }}>{subMsg}</p>}
