@@ -233,7 +233,7 @@ export default function Suite() {
           {tab === "portfolio" && <PortfolioTab profile={profile} />}
           {tab === "payout" && <PayoutTab profile={profile} />}
           {tab === "news" && <NewsTab />}
-          {tab === "coach" && <CoachTab profile={profile} />}
+          {tab === "coach" && <CoachTab profile={profile} setProfile={setProfile} />}
           {tab === "journal" && <JournalTab profile={profile} setProfile={setProfile} />}
           {tab === "challenge" && <ChallengeTab profile={profile} />}
           {tab === "simulator" && <SimulatorTab profile={profile} />}

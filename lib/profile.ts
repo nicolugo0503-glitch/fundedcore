@@ -22,6 +22,7 @@ export type Profile = {
   pro?: boolean;            // FundedCore Pro access (The Mirror, Your Edge)
   stripeCustomerId?: string; // set by the Stripe webhook after first payment
   lockin?: import("./lockin").Commitment; // active session Ulysses-pact commitment
+  coachGoals?: string[]; // trader goals the AI coach remembers
 };
 
 const KEY = "fundedcore.profile.v1";
