@@ -39,6 +39,7 @@ import { SizingTab } from "../../components/suite/SizingTab";
 import { PortfolioTab } from "../../components/suite/PortfolioTab";
 import { PayoutTab } from "../../components/suite/PayoutTab";
 import { SettingsTab } from "../../components/suite/SettingsTab";
+import { BackedTab } from "../../components/suite/BackedTab";
 import { AlertsBar } from "../../components/suite/AlertsBar";
 import { CommandPalette, type Command } from "../../components/suite/CommandPalette";
 import { LiveTicker } from "../../components/suite/LiveTicker";
@@ -67,6 +68,7 @@ const TABS = [
   ["sizing", "Optimal Sizing", "calc"],
   ["portfolio", "Multi-Account", "grid"],
   ["payout", "Payout Planner", "check"],
+  ["backed", "Get Backed", "up"],
   ["news", "News", "news"],
   ["coach", "AI Coach", "brain"],
   ["journal", "Journal & Score", "book"],
@@ -83,7 +85,7 @@ const GROUPS: { label: string; ids: string[] }[] = [
   { label: "Markets", ids: ["markets", "flow", "charts", "news"] },
   { label: "Risk & Edge", ids: ["survival", "risk", "premortem", "gate", "fundedscore", "standard", "insights", "execution", "sizing", "portfolio", "journal", "score"] },
   { label: "FundedCore Pro", ids: ["mirror", "edge"] },
-  { label: "Pass & Plan", ids: ["challenge", "simulator", "payout", "plan", "tools"] },
+  { label: "Pass & Plan", ids: ["challenge", "simulator", "payout", "backed", "plan", "tools"] },
   { label: "AI", ids: ["coach"] },
 ];
 const TAB_MAP = Object.fromEntries(TABS.map((t) => [t[0], { label: t[1], icon: t[2] }]));
@@ -232,6 +234,7 @@ export default function Suite() {
           {tab === "sizing" && <SizingTab profile={profile} />}
           {tab === "portfolio" && <PortfolioTab profile={profile} />}
           {tab === "payout" && <PayoutTab profile={profile} />}
+          {tab === "backed" && <BackedTab profile={profile} setProfile={setProfile} />}
           {tab === "news" && <NewsTab />}
           {tab === "coach" && <CoachTab profile={profile} setProfile={setProfile} />}
           {tab === "journal" && <JournalTab profile={profile} setProfile={setProfile} />}

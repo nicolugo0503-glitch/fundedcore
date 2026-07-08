@@ -23,6 +23,7 @@ export type Profile = {
   stripeCustomerId?: string; // set by the Stripe webhook after first payment
   lockin?: import("./lockin").Commitment; // active session Ulysses-pact commitment
   coachGoals?: string[]; // trader goals the AI coach remembers
+  backedWaitlist?: boolean; // applied to the Get Backed capital waitlist
 };
 
 const KEY = "fundedcore.profile.v1";
