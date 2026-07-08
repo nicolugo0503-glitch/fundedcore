@@ -33,6 +33,7 @@ import { EdgeTab } from "../../components/suite/EdgeTab";
 import { ProLock } from "../../components/suite/ProLock";
 import { FundedScoreTab } from "../../components/suite/FundedScoreTab";
 import { SurvivalTab } from "../../components/suite/SurvivalTab";
+import { SessionLockTab } from "../../components/suite/SessionLockTab";
 import { ExecutionTab } from "../../components/suite/ExecutionTab";
 import { SizingTab } from "../../components/suite/SizingTab";
 import { PortfolioTab } from "../../components/suite/PortfolioTab";
@@ -48,6 +49,7 @@ const TABS = [
   ["brief", "Daily Brief", "gauge"],
   ["today", "Today · Live", "bolt"],
   ["guard", "Live Guard", "shield"],
+  ["lockin", "Session Lock-In", "lock"],
   ["connect", "Broker Link", "repeat"],
   ["markets", "Markets", "grid"],
   ["flow", "Order Flow", "bolt"],
@@ -77,7 +79,7 @@ const TABS = [
 const PRO_TABS = new Set(["mirror", "edge"]);
 
 const GROUPS: { label: string; ids: string[] }[] = [
-  { label: "Daily", ids: ["brief", "today", "guard", "connect"] },
+  { label: "Daily", ids: ["brief", "today", "guard", "lockin", "connect"] },
   { label: "Markets", ids: ["markets", "flow", "charts", "news"] },
   { label: "Risk & Edge", ids: ["survival", "risk", "premortem", "gate", "fundedscore", "standard", "insights", "execution", "sizing", "portfolio", "journal", "score"] },
   { label: "FundedCore Pro", ids: ["mirror", "edge"] },
@@ -219,6 +221,7 @@ export default function Suite() {
           {tab === "premortem" && <PreMortemTab profile={profile} setProfile={setProfile} go={setTab} />}
           {tab === "gate" && <GateTab profile={profile} />}
           {tab === "guard" && <GuardTab profile={profile} setProfile={setProfile} />}
+          {tab === "lockin" && <SessionLockTab profile={profile} setProfile={setProfile} />}
           {tab === "fundedscore" && <FundedScoreTab profile={profile} />}
           {tab === "survival" && <SurvivalTab profile={profile} />}
           {tab === "standard" && <StandardTab profile={profile} />}
