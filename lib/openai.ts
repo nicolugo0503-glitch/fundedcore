@@ -48,3 +48,20 @@ export async function openaiChat(system: string, user: string, maxTokens = 420):
     return j?.choices?.[0]?.message?.content?.trim() || null;
   } catch { return null; }
 }
+
+export async function openaiVision(system: string, user: string, imageDataUrl: string, maxTokens = 1200): Promise<string | null> {
+  if (!KEY) return null;
+  try {
+    const r = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: { "content-type": "application/json", authorization: "Bearer " + KEY },
+      body: JSON.stringify({ model: MODEL, max_tokens: maxTokens, temperature: 0.1, messages: [
+        { role: "system", content: system },
+        { role: "user", content: [ { type: "text", text: user }, { type: "image_url", image_url: { url: imageDataUrl } } ] },
+      ] }),
+    });
+    if (!r.ok) return null;
+    const j = await r.json();
+    return j?.choices?.[0]?.message?.content?.trim() || null;
+  } catch { return null; }
+}

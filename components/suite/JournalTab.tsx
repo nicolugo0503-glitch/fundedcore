@@ -1,6 +1,7 @@
 "use client";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { type Profile } from "../../lib/profile";
+import type { Trade } from "../../lib/score";
 import { parseTradesCsv } from "../../lib/csv";
 import { scoreTrades } from "../../lib/score";
 import { sampleById } from "../../lib/sampleTraders";
@@ -10,6 +11,31 @@ import { SuiteHeader } from "./ui";
 
 export function JournalTab({ profile, setProfile }: { profile: Profile; setProfile: (p: Profile) => void }) {
   const fileRef = useRef<HTMLInputElement>(null);
+  const imgRef = useRef<HTMLInputElement>(null);
+  const [imgBusy, setImgBusy] = useState(false);
+  const [imgMsg, setImgMsg] = useState("");
+  const [preview, setPreview] = useState<Trade[] | null>(null);
+  function onImage(f: File) {
+    setImgBusy(true); setImgMsg(""); setPreview(null);
+    const r = new FileReader();
+    r.onload = async () => {
+      try {
+        const res = await fetch("/api/vision/trades", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ image: String(r.result || "") }) });
+        const j = await res.json();
+        if (!res.ok) { setImgMsg(j.error || "Couldn't read that screenshot."); setImgBusy(false); return; }
+        if (!j.trades?.length) { setImgMsg("No trades found — try a sharper crop of just the trades table, or upload a CSV."); setImgBusy(false); return; }
+        setPreview(j.trades as Trade[]);
+      } catch { setImgMsg("Something went wrong — try again or upload a CSV."); }
+      finally { setImgBusy(false); }
+    };
+    r.readAsDataURL(f);
+  }
+  function importPreview() {
+    if (!preview) return;
+    const realAccounts = profile.accounts.filter((a) => !["a1", "a2", "a3"].includes(a.id));
+    setProfile({ ...profile, trades: preview, accounts: profile.demo ? [] : realAccounts, demo: false });
+    setPreview(null); setImgMsg(`Imported ${preview.length} trades.`);
+  }
   function onFile(f: File) {
     const r = new FileReader();
     r.onload = () => {
@@ -30,11 +56,27 @@ export function JournalTab({ profile, setProfile }: { profile: Profile; setProfi
         <SuiteHeader eyebrow="Journal & Score" title="Your verified edge" />
         <div className="flex gap-2">
           <button className="btn btn-ghost text-sm" onClick={() => fileRef.current?.click()}>↑ Upload CSV</button>
+          <button className="btn btn-ghost text-sm" onClick={() => imgRef.current?.click()} disabled={imgBusy}>{imgBusy ? "Reading…" : "📷 From screenshot"}</button>
+          <input ref={imgRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) onImage(f); e.currentTarget.value = ""; }} />
           <button className="btn btn-ghost text-sm" onClick={() => { if (profile.trades.length && !confirm("Replace your loaded trades with the sample trader?")) return; const s = sampleById("maya")!; setProfile({ ...profile, trades: s.trades, demo: true }); }}>Use sample</button>
           {score && <button className="btn btn-primary text-sm" onClick={() => downloadCard(profile.name, score)}>⤓ Score card</button>}
           <input ref={fileRef} type="file" accept=".csv" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) onFile(f); }} />
         </div>
       </div>
+
+      {imgMsg && <div className="card p-3 text-[.84rem]" style={{ color: imgMsg.startsWith("Imported") ? "var(--grn)" : "var(--red)" }}>{imgMsg}</div>}
+      {preview && (
+        <div className="card p-4" style={{ borderColor: "color-mix(in srgb, var(--acc) 35%, var(--line2))" }}>
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div><div className="font-semibold">Found {preview.length} trades in your screenshot</div><div className="text-[.78rem] text-t3">AI-extracted — verify before importing. Vision can misread numbers.</div></div>
+            <div className="flex gap-2"><button className="btn btn-ghost text-sm" onClick={() => setPreview(null)}>Cancel</button><button className="btn btn-primary text-sm" onClick={importPreview}>Import {preview.length} trades →</button></div>
+          </div>
+          <div className="overflow-x-auto mt-3"><table className="tbl"><thead><tr><th>Date</th><th>Symbol</th><th>Side</th><th>Size</th><th className="text-right">P&amp;L</th></tr></thead><tbody>
+            {preview.slice(0, 8).map((t, i) => <tr key={i}><td className="mono">{t.date}</td><td className="mono">{t.symbol || "—"}</td><td>{t.side || "—"}</td><td className="mono">{t.size ?? "—"}</td><td className="text-right mono" style={{ color: t.pnl >= 0 ? "var(--grn)" : "var(--red)" }}>{usd(t.pnl)}</td></tr>)}
+          </tbody></table></div>
+          {preview.length > 8 && <div className="text-[.74rem] text-t3 mt-2">…and {preview.length - 8} more.</div>}
+        </div>
+      )}
 
       <details className="card p-4">
         <summary className="cursor-pointer text-[.9rem] font-semibold text-t1">How do I get my trades in? (TopStep &amp; Tradovate) →</summary>
