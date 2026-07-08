@@ -32,6 +32,7 @@ import { MirrorTab } from "../../components/suite/MirrorTab";
 import { EdgeTab } from "../../components/suite/EdgeTab";
 import { ProLock } from "../../components/suite/ProLock";
 import { FundedScoreTab } from "../../components/suite/FundedScoreTab";
+import { SurvivalTab } from "../../components/suite/SurvivalTab";
 import { ExecutionTab } from "../../components/suite/ExecutionTab";
 import { SizingTab } from "../../components/suite/SizingTab";
 import { PortfolioTab } from "../../components/suite/PortfolioTab";
@@ -55,6 +56,7 @@ const TABS = [
   ["premortem", "Pre-Mortem", "alert"],
   ["gate", "Pre-Trade Gate", "check"],
   ["fundedscore", "FundedScore", "gauge"],
+  ["survival", "Survival Score", "shield"],
   ["standard", "The Standard", "up"],
   ["mirror", "The Mirror", "repeat"],
   ["edge", "Your Edge", "up"],
@@ -77,7 +79,7 @@ const PRO_TABS = new Set(["mirror", "edge"]);
 const GROUPS: { label: string; ids: string[] }[] = [
   { label: "Daily", ids: ["brief", "today", "guard", "connect"] },
   { label: "Markets", ids: ["markets", "flow", "charts", "news"] },
-  { label: "Risk & Edge", ids: ["risk", "premortem", "gate", "fundedscore", "standard", "insights", "execution", "sizing", "portfolio", "journal", "score"] },
+  { label: "Risk & Edge", ids: ["survival", "risk", "premortem", "gate", "fundedscore", "standard", "insights", "execution", "sizing", "portfolio", "journal", "score"] },
   { label: "FundedCore Pro", ids: ["mirror", "edge"] },
   { label: "Pass & Plan", ids: ["challenge", "simulator", "payout", "plan", "tools"] },
   { label: "AI", ids: ["coach"] },
@@ -218,6 +220,7 @@ export default function Suite() {
           {tab === "gate" && <GateTab profile={profile} />}
           {tab === "guard" && <GuardTab profile={profile} setProfile={setProfile} />}
           {tab === "fundedscore" && <FundedScoreTab profile={profile} />}
+          {tab === "survival" && <SurvivalTab profile={profile} />}
           {tab === "standard" && <StandardTab profile={profile} />}
           {tab === "mirror" && (profile.pro ? <MirrorTab profile={profile} /> : <ProLock profile={profile} setProfile={setProfile} go={setTab} />)}
           {tab === "edge" && (profile.pro ? <EdgeTab profile={profile} /> : <ProLock profile={profile} setProfile={setProfile} go={setTab} />)}
