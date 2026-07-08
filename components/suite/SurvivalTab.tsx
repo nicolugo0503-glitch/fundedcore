@@ -2,6 +2,9 @@
 import { useMemo, useState } from "react";
 import { type Profile } from "../../lib/profile";
 import { survival } from "../../lib/survival";
+import { benchmark } from "../../lib/benchmark";
+import { archetype } from "../../lib/archetype";
+import { shareTraderCard } from "../../lib/tradercard";
 import { INSTRUMENTS } from "../../lib/firms";
 import { usd } from "../../lib/format";
 import { SuiteHeader, Ring, Panel, StatTile, EmptyState } from "./ui";
@@ -22,6 +25,13 @@ export function SurvivalTab({ profile }: { profile: Profile }) {
     dailyLossStop: profile.settings.dailyLossStop, maxTradesPerDay: profile.settings.maxTradesPerDay,
     proposed: { instrument: inst, contracts, stopPts },
   }), [profile.trades, acc, profile.settings, inst, contracts, stopPts]);
+  const bench = useMemo(() => benchmark(profile.trades, acc), [profile.trades, acc]);
+  const mv = (k: string) => bench.metrics.find((m) => m.key === k)?.value;
+  const arch = archetype({ composure: mv("composure") ?? s.score, breachOdds: s.breachOdds, winRate: mv("winRate") ?? 0, payoff: mv("payoff") ?? 1, tilt: s.tiltIndex, bufferPct: s.bufferPct });
+  const cardAccent = arch.accent === "green" ? "var(--grn)" : arch.accent === "amber" ? "var(--amb,#f5a623)" : "var(--red)";
+  function shareCard() {
+    shareTraderCard({ name: profile.name, archName: arch.name, tagline: arch.tagline, accent: arch.accent, survival: s.score, grade: s.grade, breachPct: Math.round(s.breachOdds * 100), composure: Math.round(mv("composure") ?? s.score), winRatePct: Math.round((mv("winRate") ?? 0) * 100), topPct: bench.composite, trades: profile.trades.length });
+  }
 
   if (!s.ready) {
     return (
@@ -43,6 +53,15 @@ export function SurvivalTab({ profile }: { profile: Profile }) {
       <SuiteHeader eyebrow="The Survival Score" title="Will your account survive?"
         sub="The one number that fuses your behavior, your buffer, and your firm's exact rules into a live read on whether you keep the account — before you take the next trade."
         right={<span className="chip" style={{ color: col }}><span className="w-1.5 h-1.5 rounded-full" style={{ background: col }} /> {(s.breachOdds * 100).toFixed(0)}% breach risk</span>} />
+
+      <div className="card p-4 flex flex-wrap items-center gap-3" style={{ borderColor: "color-mix(in srgb, var(--acc) 30%, var(--line2))" }}>
+        <div>
+          <div className="eyebrow" style={{ color: "var(--acc)" }}>Your trader type</div>
+          <div className="text-xl font-bold" style={{ color: cardAccent }}>{arch.name}</div>
+          <div className="text-[.85rem] text-t2">{arch.tagline}</div>
+        </div>
+        <button onClick={shareCard} className="btn btn-primary text-sm ml-auto shrink-0 inline-flex items-center gap-1.5"><Icon name="up" size={14} /> Share my Trader Card</button>
+      </div>
 
       <div className="grid lg:grid-cols-2 gap-5">
         <div className="card p-6">
